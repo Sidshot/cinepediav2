@@ -11,6 +11,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap" rel="stylesheet">
 
 <style>
+
+  /* Card pop on hover/focus (non-destructive) */
+.card{
+  transition: transform .2s ease, box-shadow .2s ease;
+  will-change: transform;
+}
+.card:hover,
+.card:focus-within{
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+  z-index: 2; /* rises above neighbors without layout shifts */
+}
+
 :root{
   --bg:#0b0f14; --fg:#eef1f6; --muted:#a7b0bd;
   --card:rgba(18,24,33,0.55); --border:rgba(255,255,255,0.10);
@@ -128,6 +141,63 @@ footer{color:var(--muted);text-align:center;padding:18px 0;border-top:1px solid 
 </style>
 
 <style>
+  /* Legal gate styles */
+.gate-backdrop{
+  position:fixed; inset:0;
+  background:rgba(10,14,20,.78);           /* darken */
+  backdrop-filter: blur(8px) saturate(140%);/* blur background */
+  display:grid; place-items:center;
+  z-index:2147483647;                       /* above everything */
+}
+.gate-dialog{
+  width:min(560px,92vw);
+  background:var(--bg, #0f141a);
+  color:var(--fg, #eef1f6);
+  border:1px solid var(--border, rgba(255,255,255,.16));
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 24px 80px rgba(0,0,0,.55);
+}
+.gate-title{ margin:0 0 8px; font-weight:800; font-size:1.25rem; }
+.gate-text{ color:var(--muted, #9fb0c4); line-height:1.5; margin:0; }
+.gate-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:16px; flex-wrap:wrap; }
+.gate-btn{
+  padding:10px 14px; border-radius:12px; cursor:pointer;
+  border:1px solid var(--border, rgba(255,255,255,.16));
+  background:rgba(255,255,255,.06); color:var(--fg, #eef1f6);
+}
+.gate-btn.danger{  background:rgba(231,76,60,.18);  border-color:rgba(231,76,60,.45); }
+.gate-btn.primary{ background:rgba(46,204,113,.18); border-color:rgba(46,204,113,.45); }
+<script>
+/* Show gate on every load; block page until user chooses */
+document.addEventListener('DOMContentLoaded', function(){
+  var gate  = document.getElementById('legal-gate');
+  var back  = document.getElementById('gate-back');
+  var enter = document.getElementById('gate-enter');
+
+  function showGate(){
+    gate.hidden = false;
+    // lock scroll
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    // focus the first action
+    setTimeout(function(){ try{ back.focus(); }catch(e){} }, 0);
+  }
+  function closeGate(){
+    gate.hidden = true;
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+
+  back.addEventListener('click', function(){
+    window.location.href = 'https://www.google.com/';
+  });
+  enter.addEventListener('click', closeGate);
+
+  showGate(); // always show on load
+});
+</script>
+
 /* Clamp excessive inline text in Notes to avoid overflowing layouts */
 .card .notes, .notes { 
   display: -webkit-box;
@@ -1946,6 +2016,19 @@ const rows = parseCSV(text);
     .catch(()=>{});
 })();
 </script>
+<!-- Legal gate -->
+<div id="legal-gate" class="gate-backdrop" hidden>
+  <div class="gate-dialog" role="dialog" aria-labelledby="gate-title" aria-describedby="gate-text">
+    <h2 id="gate-title" class="gate-title">Legal notice</h2>
+    <p id="gate-text" class="gate-text">
+      All the films are property of their respective owners. We are just guiding you.
+    </p>
+    <div class="gate-actions">
+      <button id="gate-back"  class="gate-btn danger">FBI! Go back</button>
+      <button id="gate-enter" class="gate-btn primary">I am the Law</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
