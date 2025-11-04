@@ -1813,6 +1813,74 @@ const rows = parseCSV(text);
 })();
 </script>
 <!-- END: CinePedia GitHub Import & Save panel -->
+<!-- CSV-first loader with JSON fallback + cache-busting -->
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+(function(){
+  function pick(row,names){
+    for(const want of names){
+      for(const k in row){
+        if(k && k.trim && k.trim().toLowerCase()===want.toLowerCase()){
+          const v=String(row[k]??'').trim(); if(v) return v;
+        }
+      }
+    }
+    return '';
+  }
+  function normalizeRow(row){
+    const title = pick(row,['Title','Título','Titulo','Movie','Film','Name']); if(!title) return null;
+    const y = pick(row,['Year','Ano','Release Year']); const year = y?parseInt(y,10):'';
+    return {
+      title,
+      original:   pick(row,['Original Title','Título Original','Original','Titulo Original']),
+      year:       Number.isFinite(year)?year:'',
+      director:   pick(row,['Director','Diretor']),
+      letterboxd: pick(row,['Letterboxd','Letterboxd Link','Link do Letterboxd','LB']),
+      drive:      pick(row,['Drive','Drive Link','Link do Drive']),
+      notes:      pick(row,['Notes','Observações','Obs','Note','Description'])
+    };
+  }
+  function dedupe(rows){
+    const m=new Map();
+    for(const r of rows){
+      if(!r||!r.title) continue;
+      const k=(r.title||'').trim().toLowerCase()+'|'+String(r.year||'').trim();
+      if(!m.has(k)) m.set(k,r);
+    }
+    return [...m.values()];
+  }
+  // REPLACE mode (CSV defines the catalogue). To MERGE instead, swap applyReplace(...) for applyMerge(...) below.
+  function applyReplace(rows){
+    rows = dedupe(rows);
+    if(Array.isArray(window.NORM)){ window.NORM.splice(0, window.NORM.length, ...rows); if(window.render) render(); return; }
+    if(typeof window.addFilms==='function'){ try{ addFilms(rows); }catch(e){} }
+  }
+  function applyMerge(rows){
+    const base = Array.isArray(window.NORM)?window.NORM.slice():[];
+    rows = dedupe(base.concat(rows));
+    if(Array.isArray(window.NORM)){ window.NORM.splice(0, window.NORM.length, ...rows); if(window.render) render(); }
+  }
+
+  const bust = 'v=' + Date.now();
+
+  fetch('data/cinepedia.csv?'+bust, {cache:'no-store'})
+    .then(r=>r.ok?r.text():'')
+    .then(text => new Promise(res=>{
+      if(!text){ res([]); return; }
+      Papa.parse(text,{header:true,skipEmptyLines:true,transformHeader:h=>String(h||'').trim(),
+        complete:o=>res((o.data||[]).map(normalizeRow).filter(Boolean)), error:()=>res([])});
+    }))
+    .then(rows => {
+      if(rows.length){ applyReplace(rows); return; }
+      return fetch('data/cinepedia.data.json?'+bust, {cache:'no-store'})
+        .then(r=>r.ok?r.json():[])
+        .then(js => Array.isArray(js)?js.map(normalizeRow).filter(Boolean):[])
+        .then(applyReplace)
+        .catch(()=>{});
+    })
+    .catch(()=>{});
+})();
+</script>
 
 </body>
 </html>
