@@ -2029,6 +2029,34 @@ const rows = parseCSV(text);
     </div>
   </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var gate  = document.getElementById('legal-gate');
+  if (!gate) return;
+
+  var back  = document.getElementById('gate-back');
+  var enter = document.getElementById('gate-enter');
+
+  function showGate() {
+    gate.hidden = false;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { try { back && back.focus(); } catch (e) {} }, 0);
+  }
+  function closeGate() {
+    gate.hidden = true;
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+
+  back  && back.addEventListener('click', function () {
+    window.location.href = 'https://www.google.com/';
+  });
+  enter && enter.addEventListener('click', closeGate);
+
+  showGate();
+});
+</script>
 
 </body>
 </html>
