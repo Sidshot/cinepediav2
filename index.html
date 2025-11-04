@@ -1542,6 +1542,277 @@ const rows = parseCSV(text);
   })();
 })();
 </script>
+<!-- BEGIN: CinePedia GitHub Import & Save panel -->
+<script>
+(function(){
+  // ===== UI (fixed corner) =====
+  const panel = document.createElement('div');
+  panel.innerHTML = `
+<style>
+#ghp { position:fixed; bottom:16px; left:16px; z-index:9999; display:flex; gap:8px; flex-wrap:wrap; }
+#ghp button { padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.35); color:#fff; cursor:pointer; }
+#ghp-dialog { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:10000; }
+#ghp-card { width:min(520px, 94vw); background:#0f141a; color:#e8eef5; border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:14px; }
+#ghp-card label { display:block; font: 12px/1.2 system-ui; color:#9fb0c4; margin-top:8px }
+#ghp-card input { width:100%; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:#0b1015; color:#e8eef5; }
+#ghp-card .row { display:flex; gap:8px }
+#ghp-card .row > div { flex:1 }
+#ghp-msg { font:12px/1.4 system-ui; color:#9fb0c4; margin-top:8px; min-height:1.4em }
+</style>
+<div id="ghp">
+  <input id="ghp-file" type="file" accept=".csv" style="display:none">
+  <button id="ghp-import">Import CSV (save to GitHub)</button>
+  <button id="ghp-settings">GitHub settings</button>
+</div>
+<div id="ghp-dialog"><div id="ghp-card">
+  <div style="font-weight:700; margin-bottom:6px">GitHub settings</div>
+  <div class="row">
+    <div><label>Owner</label><input id="ghp-owner" placeholder="sidshot"></div>
+    <div><label>Repo</label><input id="ghp-repo" placeholder="CinePedia"></div>
+  </div>
+  <div class="row">
+    <div><label>Branch</label><input id="ghp-branch" placeholder="main"></div>
+    <div><label>Path</label><input id="ghp-path" placeholder="data/cinepedia.csv"></div>
+  </div>
+  <label>Token (Personal Access Token with “contents: write”)</label>
+  <input id="ghp-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+  <div id="ghp-msg"></div>
+  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
+    <button id="ghp-cancel">Close</button>
+    <button id="ghp-save">Save</button>
+  </div>
+</div></div>`;
+  document.body.appendChild(panel);
+
+  const els = {
+    file: panel.querySelector('#ghp-file'),
+    btnImport: panel.querySelector('#ghp-import'),
+    btnSettings: panel.querySelector('#ghp-settings'),
+    dialog: panel.querySelector('#ghp-dialog'),
+    owner: panel.querySelector('#ghp-owner'),
+    repo: panel.querySelector('#ghp-repo'),
+    branch: panel.querySelector('#ghp-branch'),
+    path: panel.querySelector('#ghp-path'),
+    token: panel.querySelector('#ghp-token'),
+    msg: panel.querySelector('#ghp-msg'),
+    btnSave: panel.querySelector('#ghp-save'),
+    btnCancel: panel.querySelector('#ghp-cancel'),
+  };
+
+  // ===== Persist settings in session only (tab lifetime) =====
+  const SKEY='cinepedia_gh_cfg';
+  function loadCfg(){
+    try { return JSON.parse(sessionStorage.getItem(SKEY) || '{}'); } catch { return {}; }
+  }
+  function saveCfg(cfg){
+    sessionStorage.setItem(SKEY, JSON.stringify(cfg||{}));
+  }
+  function setMsg(s){ els.msg.textContent = s || ''; }
+
+  function openSettings(){
+    const cfg = loadCfg();
+    els.owner.value = cfg.owner || 'sidshot';
+    els.repo.value = cfg.repo || 'CinePedia';
+    els.branch.value = cfg.branch || 'main';
+    els.path.value = cfg.path || 'data/cinepedia.csv';
+    els.token.value = cfg.token || '';
+    setMsg('Token is stored in sessionStorage only (cleared on tab close).');
+    els.dialog.style.display = 'flex';
+  }
+  function closeSettings(){ els.dialog.style.display = 'none'; }
+
+  els.btnSettings.onclick = openSettings;
+  els.btnSave.onclick = () => {
+    const cfg = {
+      owner: els.owner.value.trim(),
+      repo: els.repo.value.trim(),
+      branch: els.branch.value.trim(),
+      path: els.path.value.trim(),
+      token: els.token.value.trim()
+    };
+    if(!cfg.owner || !cfg.repo || !cfg.branch || !cfg.path || !cfg.token){
+      setMsg('All fields required.'); return;
+    }
+    saveCfg(cfg);
+    setMsg('Saved.');
+  };
+  els.btnCancel.onclick = closeSettings;
+  els.dialog.addEventListener('click', e => { if(e.target === els.dialog) closeSettings(); });
+
+  // ===== GitHub API helpers =====
+  function toBase64(text){
+    // UTF-8 safe base64
+    return btoa(unescape(encodeURIComponent(text)));
+  }
+  async function ghGet(owner, repo, path, branch, token){
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`;
+    const r = await fetch(url, { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }});
+    if (r.status === 200) return r.json();
+    return null; // not found or no access
+  }
+  async function ghPut(owner, repo, path, branch, token, contentBase64, sha){
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
+    const body = {
+      message: `Update ${path} via in-site import`,
+      content: contentBase64,
+      branch
+    };
+    if (sha) body.sha = sha;
+    const r = await fetch(url, {
+      method:'PUT',
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`GitHub PUT failed ${r.status}`);
+    return r.json();
+  }
+
+  // ===== CSV normalize (same header logic you use) =====
+  function normalizeRow(row){
+    function pick(names){
+      for(const want of names){
+        for (const k in row){
+          if (k && k.trim && k.trim().toLowerCase() === want.toLowerCase()){
+            const v = String(row[k] ?? '').trim();
+            if (v) return v;
+          }
+        }
+      }
+      return '';
+    }
+    const title = pick(['Title','Título','Titulo','Movie','Film','Name']);
+    if (!title) return null;
+    const y = pick(['Year','Ano','Release Year']);
+    const year = y ? parseInt(y, 10) : '';
+    return {
+      title,
+      original:   pick(['Original Title','Título Original','Original','Titulo Original']),
+      year:       Number.isFinite(year) ? year : '',
+      director:   pick(['Director','Diretor']),
+      letterboxd: pick(['Letterboxd','Letterboxd Link','Link do Letterboxd','LB']),
+      drive:      pick(['Drive','Drive Link','Link do Drive']),
+      notes:      pick(['Notes','Observações','Obs','Note','Description'])
+    };
+  }
+  function toCSV(rows){
+    const header = ['Title','Original Title','Year','Director','Letterboxd','Drive','Notes'];
+    const esc = v => {
+      const s = String(v ?? '');
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+    };
+    return header.join(',') + '\n' + rows.map(d => [
+      d.title, d.original||'', d.year||'', d.director||'', d.letterboxd||'', d.drive||'', d.notes||''
+    ].map(esc).join(',')).join('\n');
+  }
+
+  // ===== Import & Save =====
+  els.btnImport.onclick = () => els.file.click();
+  els.file.onchange = async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const cfg = loadCfg();
+    if (!cfg.token){ openSettings(); setMsg('Provide token first.'); return; }
+
+    // Ensure PapaParse present (in case not in your head)
+    if (!window.Papa){
+      await new Promise(res => {
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/papaparse@5.4.1/papaparse.min.js';
+        s.onload = res; document.head.appendChild(s);
+      });
+    }
+
+    // Parse file as text; normalize minimally to avoid blowing up cards
+    const text = await f.text();
+    const parsed = await new Promise(res => {
+      Papa.parse(text, {
+        header:true, skipEmptyLines:true, transformHeader:h=>String(h||'').trim(),
+        complete: out => res(out), error: _ => res({data:[]})
+      });
+    });
+    const rows = (parsed.data || []).map(normalizeRow).filter(Boolean);
+    if (!rows.length){ alert('No usable rows found. Ensure CSV has a header row.'); return; }
+
+    // Commit to GitHub at cfg.path on cfg.branch
+    try{
+      const existing = await ghGet(cfg.owner, cfg.repo, cfg.path, cfg.branch, cfg.token);
+      const sha = existing && existing.sha ? existing.sha : null;
+      const content = toBase64(toCSV(rows));
+      await ghPut(cfg.owner, cfg.repo, cfg.path, cfg.branch, cfg.token, content, sha);
+      alert('Committed to GitHub. Hard-refresh the site to load the new CSV.');
+    }catch(err){
+      alert('GitHub commit failed. Check token/permissions/path.');
+      console.error(err);
+    }finally{
+      e.target.value = '';
+    }
+  };
+
+  // ===== Dual loader (CSV first, JSON fallback) — adds if not already present =====
+  if (!window.__cinepedia_loader_installed__){
+    window.__cinepedia_loader_installed__ = true;
+    const s = document.createElement('script');
+    s.type = 'module';
+    s.textContent = `
+      (function(){
+        function pick(row,names){
+          for(const want of names){
+            for(const k in row){
+              if(k && k.trim && k.trim().toLowerCase()===want.toLowerCase()){
+                const v=String(row[k]??'').trim(); if(v) return v;
+              }
+            }
+          } return '';
+        }
+        function normalizeRow(row){
+          const title=pick(row,['Title','Título','Titulo','Movie','Film','Name']); if(!title) return null;
+          const y=pick(row,['Year','Ano','Release Year']); const year=y?parseInt(y,10):'';
+          return {
+            title,
+            original: pick(row,['Original Title','Título Original','Original','Titulo Original']),
+            year: Number.isFinite(year)?year:'',
+            director: pick(row,['Director','Diretor']),
+            letterboxd: pick(row,['Letterboxd','Letterboxd Link','Link do Letterboxd','LB']),
+            drive: pick(row,['Drive','Drive Link','Link do Drive']),
+            notes: pick(row,['Notes','Observações','Obs','Note','Description'])
+          };
+        }
+        function dedupe(arr){
+          const m=new Map();
+          for(const r of arr){
+            if(!r||!r.title) continue;
+            const k=(r.title||'').trim().toLowerCase()+'|'+String(r.year||'').trim();
+            if(!m.has(k)) m.set(k,r);
+          }
+          return [...m.values()];
+        }
+        function apply(rows){
+          rows = Array.isArray(rows)?dedupe(rows.filter(Boolean)):[];
+          if(!rows.length) return false;
+          if(typeof window.addFilms==='function'){ try{ addFilms(rows); return true; } catch{} }
+          if(Array.isArray(window.NORM)){ try{ window.NORM.splice(0, window.NORM.length, ...rows); if(window.render) render(); return true; } catch{} }
+          return false;
+        }
+        function loadJSON(){ return fetch('data/cinepedia.data.json',{cache:'no-store'}).then(r=>r.ok?r.json():[]).catch(()=>[]); }
+        function loadCSV(){
+          return fetch('data/cinepedia.csv',{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>new Promise(res=>{
+            if(!t||!window.Papa) return res([]);
+            Papa.parse(t,{header:true,skipEmptyLines:true,transformHeader:h=>String(h||'').trim(),
+              complete:o=>res((o.data||[]).map(normalizeRow).filter(Boolean)), error:()=>res([])});
+          })).catch(()=>[]);
+        }
+        (async function(){
+          let rows = await loadCSV();
+          if(!rows.length) rows = await loadJSON();
+          apply(rows);
+        })();
+      })();
+    `;
+    document.body.appendChild(s);
+  }
+})();
+</script>
+<!-- END: CinePedia GitHub Import & Save panel -->
 
 </body>
 </html>
