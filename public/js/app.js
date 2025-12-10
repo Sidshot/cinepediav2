@@ -68,7 +68,11 @@ function toNormalized(obj) {
     const drive = g('drive', 'Drive', 'Drive Link', 'Link do Drive');
     const dl = g('dl', 'download', 'Download', 'Download Link', 'Link de Download');
     const year = yearStr ? (parseInt(yearStr, 10) || null) : null;
-    return { title, original, year, director, lb, drive, dl };
+
+    // Preserve ID from server if it exists
+    const __id = obj.__id || obj._id || null;
+
+    return { __id, title, original, year, director, lb, drive, dl };
 }
 
 // Data Fetching
@@ -82,16 +86,7 @@ async function fetchData() {
         NORM = rawData.map(toNormalized);
 
         // Client-side ID Generation for any missing IDs (legacy or safety)
-        // Ideally Server handles this, but we render using it.
-        // Server now assigns IDs on write, but what about existing data?
-        // We should ensure IDs exist.
-        ensureIdsAndEdits(); // Re-use this but remove the 'edits' part?
-        // Actually, ensureIdsAndEdits was designed to MIX edits.
-        // Now persistence is done. We just need to ensure IDs exist if missing.
-        // Let's rely on server IDs mostly, but if missing generate temp.
-
-        // Initial setup
-        init();
+        ensureIdsAndEdits();
 
         // Initial setup
         init();
