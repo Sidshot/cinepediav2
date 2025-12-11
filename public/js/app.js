@@ -25,9 +25,52 @@ const NA = '<span class="na">N/A</span>';
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
-    fetchData();
+    initLockScreen();
     setupListeners();
 });
+
+// 0. Lock Screen
+function initLockScreen() {
+    const lockScreen = document.getElementById('lockScreen');
+    const input = document.getElementById('lockInput');
+    const btn = document.getElementById('lockBtn');
+
+    if (!lockScreen || !input || !btn) return;
+
+    const tryUnlock = async () => {
+        const password = input.value;
+        if (!password) return;
+
+        try {
+            const res = await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // Unlock
+                lockScreen.style.opacity = '0';
+                setTimeout(() => {
+                    lockScreen.style.display = 'none';
+                    fetchData(); // Load data now
+                }, 500); // Fade out
+            } else {
+                // Fail
+                window.location.href = 'https://google.com';
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Auth Error');
+        }
+    };
+
+    btn.addEventListener('click', tryUnlock);
+    input.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') tryUnlock();
+    });
+}
 
 // 1. Fetch Data
 async function fetchData() {

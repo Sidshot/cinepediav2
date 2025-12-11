@@ -47,6 +47,16 @@ function generateId(film) {
 }
 
 // API Routes
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin'; // Default fallback
+
+// POST /api/auth - Password Check
+app.post('/api/auth', (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+        return res.json({ success: true });
+    }
+    return res.json({ success: false });
+});
 
 // GET /api/movies - Read all
 app.get('/api/movies', async (req, res) => {
@@ -93,7 +103,32 @@ app.put('/api/movies/:id', async (req, res) => {
 // POST /api/import - Bulk Import
 app.post('/api/import', async (req, res) => {
     try {
-        const imports = req.body;
+        let imports = req.body;
+
+        // Handle raw CSV string if sent
+        if (req.body.csv) {
+            const lines = req.body.csv.split('\n').filter(l => l.trim());
+            // Assume simple CSV: Title;Original;Year;Director;Letterboxd;Drive;Download
+            // Skipping header check for simplicity or assume no header? user pasted "content".
+            // Let's assume the user pastes WITH header if they copied from Excel? Or without?
+            // Safest to just map based on position.
+            // But wait, the previous code expected an object.
+            // Let's implement a quick parser
+            imports = lines.map(line => {
+                const cols = line.split(';'); // Semicolon separated based on previous prompt hints
+                if (cols.length < 1) return null;
+                return {
+                    title: cols[0]?.trim(),
+                    original: cols[1]?.trim(),
+                    year: cols[2]?.trim(),
+                    director: cols[3]?.trim(),
+                    letterboxd: cols[4]?.trim(),
+                    drive: cols[5]?.trim(),
+                    download: cols[6]?.trim()
+                };
+            }).filter(Boolean);
+        }
+
         if (!Array.isArray(imports)) return res.status(400).json({ error: 'Array required' });
 
         const results = {
