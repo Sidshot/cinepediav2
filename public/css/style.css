@@ -908,25 +908,31 @@ dialog.dialog-modal::backdrop {
 .glossy-logo {
   --leak-color: 255, 192, 67;
   /* Gold */
-  padding: 8px 16px;
-  /* Reduced from 10px 20px */
+  padding: 14px 32px;
+  /* Increased size (+20%ish) */
   margin-top: 12px;
-  /* User requested "bring it down a little" */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow:
-    0 5px 15px rgba(0, 0, 0, 0.3),
+    0 10px 30px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 2px 0px rgba(176, 95, 0, 0.5);
-  /* Reduced 3D hint */
-  border-radius: 12px;
+    0 3px 0px rgba(176, 95, 0, 0.5);
+  border-radius: 16px;
+
+  /* Text Styles */
+  font-family: 'Dancing Script', cursive;
+  font-size: 2.2rem;
+  /* Larger cursive text */
+  color: #fff;
+  /* White Text */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1;
 }
 
+/* Ensure no img hacks remain */
 .glossy-logo img {
-  height: 24px;
-  /* Force smaller size */
-  width: auto;
+  display: none;
 }
 
 .glossy-logo:active {
