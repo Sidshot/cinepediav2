@@ -185,31 +185,41 @@ function getPosterUrl(title, year) {
 
 // --- NEW AUTOMATED FETCH FUNCTIONS ---
 // --- UPDATED AUTO FETCH WITH EXTRA DETAILS ---
-async function fetchDetails(id, title, year) {
+// Fetch details using MediaWiki API for richer content
+async function fetchDetails(id, title, year, director) {
     const modalContent = document.getElementById('detailsContent');
     if (!modalContent) return;
 
     modalContent.innerHTML = '<div style="text-align:center;padding:40px;">Fetching info from the cosmos... 🪐</div>';
 
-    // Open Dialog First
     const dlg = document.getElementById('detailsDialog');
     if (dlg) dlg.showModal();
 
-    let plot = 'No specific plot details found.';
-    let rating = 'N/A';
+    let plot = 'No specific plot details found on Wikipedia.';
     let wikiUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`;
 
     try {
-        // 1. Wikipedia Summary
-        const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-        if (wikiRes.ok) {
-            const wikiData = await wikiRes.json();
-            if (wikiData.extract) plot = wikiData.extract;
-            if (wikiData.content_urls && wikiData.content_urls.desktop) wikiUrl = wikiData.content_urls.desktop.page;
-        }
+        // Use MediaWiki Query API for full Intro (longer than summary)
+        // origin=* is needed for CORS
+        const searchTitle = encodeURIComponent(title);
+        const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro&explaintext&redirects=1&titles=${searchTitle}&origin=*`;
 
-        // 2. OMDb Rating (Demo/Fallback)
-        rating = `<a class="btn" href="https://www.google.com/search?q=${encodeURIComponent(title + ' ' + year + ' rating')}" target="_blank">Search Rating</a>`;
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+
+        // Extract page content (keys are dynamic page IDs)
+        const pages = data.query?.pages;
+        if (pages) {
+            const pageIds = Object.keys(pages);
+            if (pageIds.length > 0 && pageIds[0] !== '-1') {
+                const page = pages[pageIds[0]];
+                if (page.extract) {
+                    plot = page.extract; // This is the full intro
+                }
+                // Construct real Wiki URL from page info if available, else fallback
+                wikiUrl = `https://en.wikipedia.org/?curid=${page.pageid}`;
+            }
+        }
 
     } catch (e) {
         console.warn('Fetch error:', e);
@@ -222,33 +232,24 @@ async function fetchDetails(id, title, year) {
 
     modalContent.innerHTML = `
         <div style="text-align:left;">
-            <h2 style="margin-top:0;">${escapeHtml(title)} <span style="font-weight:400;opacity:0.6;">(${year || 'N/A'})</span></h2>
+            <h2 style="margin-top:0; font-family:'Dancing Script', cursive; font-size:2rem; margin-bottom:4px;">${escapeHtml(title)}</h2>
+            <div style="font-size:0.9rem; opacity:0.7; margin-bottom:16px;">
+                <span>${year || 'N/A'}</span> • <span>${director || 'Director Unknown'}</span>
+            </div>
             
             <div style="margin: 20px 0;">
-                <strong>Plot Summary:</strong>
-                <div class="spoiler-box" style="margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:8px; cursor:pointer;" onclick="this.classList.toggle('revealed')">
-                    <span class="spoiler-warning">⚠️ Tap to Reveal Spoiler / Plot</span>
-                    <div class="spoiler-content">${plot}</div>
+                <strong>Wikipedia Intro:</strong>
+                <div class="spoiler-box" style="margin-top:8px; padding:16px; background:rgba(0,0,0,0.2); border-radius:8px; cursor:pointer;" onclick="this.classList.toggle('revealed')">
+                    <span class="spoiler-warning">⚠️ Tap to Reveal Full Plot / Intro</span>
+                    <div class="spoiler-content" style="line-height:1.6; font-size:0.95rem; white-space: pre-wrap;">${plot}</div>
                 </div>
             </div>
 
             <div style="margin: 20px 0; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-                <a class="glossy-box social-link google" href="${googleUrl}" target="_blank">
-                     Google
-                </a>
-                <a class="glossy-box social-link imdb" href="${imdbUrl}" target="_blank">
-                     IMDb
-                </a>
-                <a class="glossy-box social-link letterboxd" href="${lbUrl}" target="_blank">
-                     Letterboxd
-                </a>
-                <a class="glossy-box social-link wiki" href="${wikiUrl}" target="_blank">
-                     Wikipedia
-                </a>
-            </div>
-
-            <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
-                 ${rating}
+                <a class="glossy-box social-link google" href="${googleUrl}" target="_blank">Google</a>
+                <a class="glossy-box social-link imdb" href="${imdbUrl}" target="_blank">IMDb</a>
+                <a class="glossy-box social-link letterboxd" href="${lbUrl}" target="_blank">Letterboxd</a>
+                <a class="glossy-box social-link wiki" href="${wikiUrl}" target="_blank">Wikipedia</a>
             </div>
         </div>
     `;
