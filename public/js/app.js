@@ -167,19 +167,23 @@ function setupListeners() {
 
     // Theme
     const themeBtn = document.querySelector('#themeToggle');
-    themeBtn.addEventListener('click', () => {
-        const curr = document.documentElement.getAttribute('data-theme');
-        const next = curr === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        themeBtn.innerHTML = next === 'light' ? `☀ Light` : `${ICONS.letterboxd.replace('path', 'circle')} Dark`;
-        localStorage.setItem('theme', next);
-    });
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const curr = document.documentElement.getAttribute('data-theme');
+            const next = curr === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            themeBtn.innerHTML = next === 'light' ? `☀ Light` : `${ICONS.letterboxd.replace('path', 'circle')} Dark`;
+            localStorage.setItem('theme', next);
+        });
+    }
 
     // Comfort Mode
     const comfortCheck = document.querySelector('#comfortToggle');
-    comfortCheck.addEventListener('change', (e) => {
-        document.body.classList.toggle('comfort-mode', e.target.checked);
-    });
+    if (comfortCheck) {
+        comfortCheck.addEventListener('change', (e) => {
+            document.body.classList.toggle('comfort-mode', e.target.checked);
+        });
+    }
 
     // Pagination
     document.querySelector('#prev').addEventListener('click', () => {

@@ -74,24 +74,24 @@
 
       <!-- Year Filter -->
       <div class="control-group">
-        <label for="year" class="visually-hidden">Filter by Year</label>
-        <select id="year">
+        <label for="yearFilter" class="visually-hidden">Filter by Year</label>
+        <select id="yearFilter">
           <option value="all">All Years</option>
         </select>
       </div>
 
       <!-- Director Filter -->
       <div class="control-group">
-        <label for="director" class="visually-hidden">Filter by Director</label>
-        <select id="director">
+        <label for="dirFilter" class="visually-hidden">Filter by Director</label>
+        <select id="dirFilter">
           <option value="all">All Directors</option>
         </select>
       </div>
 
       <!-- Link Filter -->
       <div class="control-group">
-        <label for="filter" class="visually-hidden">Filter by Links</label>
-        <select id="filter">
+        <label for="missingFilter" class="visually-hidden">Filter by Links</label>
+        <select id="missingFilter">
           <option value="all">Show: All</option>
           <option value="both_links">Show: With both links</option>
           <option value="missing_any">Show: Missing any link</option>
@@ -103,8 +103,8 @@
 
       <!-- Sort -->
       <div class="control-group">
-        <label for="sort" class="visually-hidden">Sort</label>
-        <select id="sort">
+        <label for="sortFilter" class="visually-hidden">Sort</label>
+        <select id="sortFilter">
           <option value="year_desc">Sort: Year ↓</option>
           <option value="year_asc">Sort: Year ↑</option>
           <option value="title_asc">Sort: Title A→Z</option>
@@ -115,7 +115,7 @@
 
       <!-- Theme/Layout Toggles -->
       <div class="control-group" style="flex-direction: row; gap: 10px;">
-        <button id="themeBtn" class="btn-ghost" aria-label="Toggle dark/light theme"></button>
+        <button id="themeToggle" class="btn-ghost" aria-label="Toggle dark/light theme"></button>
         <button id="compactBtn" class="btn-ghost" aria-label="Toggle compact view"></button>
       </div>
     </div>
