@@ -179,6 +179,9 @@ header {
   gap: 12px;
   margin-top: 20px;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  justify-content: center;
+  /* Center grid items if they don't fill width */
+  text-align: center;
 }
 
 .control-group {
@@ -234,7 +237,10 @@ select option {
 
 select,
 button {
-  cursor: pointer
+  cursor: pointer;
+  text-align: center;
+  text-align-last: center;
+  /* Center text in Chrome/Firefox */
 }
 
 button {
@@ -904,6 +910,8 @@ dialog.dialog-modal::backdrop {
   /* Gold */
   padding: 8px 16px;
   /* Reduced from 10px 20px */
+  margin-top: 12px;
+  /* User requested "bring it down a little" */
   display: inline-flex;
   align-items: center;
   justify-content: center;
