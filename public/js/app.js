@@ -482,17 +482,25 @@ function render() {
         const dr = r.drive || '';
         const dl = r.dl || '';
 
-        // GLOSSY BUTTONS
-        // GLOSSY BUTTONS
-        const lbBtn = lb ? `<a class="glossy-box btn-glossy letter" href="${lb}" target="_blank" rel="noopener noreferrer">${ICONS.letterboxd} Letterboxd</a>` : '';
-        const drBtn = dr ? `<a class="glossy-box btn-glossy drive" href="${dr}" target="_blank" rel="noopener noreferrer">${ICONS.drive} Drive</a>` : '';
-        const dlBtn = dl ? `<a class="glossy-box btn-glossy download" href="${dl}" target="_blank" rel="noopener noreferrer">${ICONS.download} Download</a>` : '';
+        // SOCIAL BUTTONS (Pills)
+        const lbBtn = lb ? `<a class="btn letter" href="${lb}" target="_blank" rel="noopener noreferrer">${ICONS.letterboxd} Letterboxd</a>` : '';
+        const drBtn = dr ? `<a class="btn drive" href="${dr}" target="_blank" rel="noopener noreferrer">${ICONS.drive} Drive</a>` : '';
 
+        // DOWNLOAD TEXT LINE
+        const dlHtml = dl
+            ? `Download: <a href="${dl}" target="_blank" style="color:var(--accent2);text-decoration:none;">Link</a>`
+            : `Download: <span style="opacity:0.5;font-style:italic;">N/A</span>`;
 
-        // Poster HTML with Link
+        // NOTES (Dummy for now or from data if exists? Data doesn't seem to have notes, sticking to N/A as per screenshot)
+        // Check if data has notes, otherwise N/A
+        const notesHtml = r.notes
+            ? `Isi: ${r.notes}`
+            : `📝 Notes: <span style="opacity:0.5;font-style:italic;">N/A</span>`;
+
+        // POSTER LINK WRAPPER
         const posterUrl = getPosterUrl(t, yr);
         const posterLink = r.lb ? r.lb : `https://letterboxd.com/search/${encodeURIComponent(t + ' ' + yr)}`;
-        // Wrap poster in link
+
         const posterHtml = `
             <a href="${posterLink}" target="_blank" rel="noopener noreferrer" style="display:block;position:relative;">
                 <img src="${posterUrl}" class="card-poster" alt="${escapeHtml(t)}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMmgtNWwtNS01bDUtNSAzIDN6Ii8+PC9zdmc+';this.style.opacity='0.3'">
@@ -503,11 +511,20 @@ function render() {
             ${posterHtml}
             <div class="title">${interactiveTitleHtml}</div>
             <div class="meta">${metaHtml}</div>
-            <div class="actions">${lbBtn}${drBtn}${dlBtn}</div>
             
-            <button class="btn info-btn" style="margin-top:10px;width:100%;justify-content:center;" onclick="fetchDetails('${r.id}', '${escapeHtml(r.title)}', '${r.year}', '${escapeHtml(r.director || '')}')">
-                ${ICONS.info} Movie Details
-            </button>
+            <div class="actions" style="margin-top:auto;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    ${lbBtn} ${drBtn}
+                </div>
+                <div style="font-size:0.85rem;color:var(--muted);margin-bottom:4px;">
+                    ${dlHtml}
+                </div>
+                <div style="font-size:0.85rem;color:var(--muted);">
+                    ${notesHtml}
+                </div>
+            </div>
+            
+            <!-- Removed Big Info Button -->
         `;
         frag.appendChild(card);
     });
