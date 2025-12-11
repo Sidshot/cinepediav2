@@ -1,4 +1,4 @@
 node_modules/
 .env
-data/cinepedia.data.json
+# data/cinepedia.data.json
 .DS_Store

@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json({ limit: '10mb' }));
 
 // Database Connection
+const fs = require('fs');
 const connectDB = async () => {
     if (!process.env.MONGO_URI) {
         console.log('⚠️ No MONGO_URI found. Server will start but DB calls will fail.');
@@ -22,6 +23,44 @@ const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
         console.log('✅ MongoDB Connected');
+
+        // AUTO-SEED: Check if empty
+        const count = await Movie.countDocuments();
+        if (count === 0) {
+            console.log('🌱 Database is empty. Attempting auto-seed...');
+            const dataPath = path.join(__dirname, 'data', 'cinepedia.data.json');
+            if (fs.existsSync(dataPath)) {
+                const raw = fs.readFileSync(dataPath, 'utf8');
+                const movies = JSON.parse(raw);
+
+                // Normalize items to ensure IDs
+                const validMovies = movies.map(m => {
+                    const t = m.title || m.Title; // Handle casing if any
+                    // Ensure ID
+                    const fp = [t || '', m.year || '', m.director || ''].join('|').toLowerCase();
+                    let h1 = 0xdeadbeef ^ fp.length, h2 = 0x41c6ce57 ^ fp.length;
+                    for (let i = 0; i < fp.length; i++) {
+                        const c = fp.charCodeAt(i);
+                        h1 = Math.imul(h1 ^ c, 2654435761);
+                        h2 = Math.imul(h2 ^ c, 1597334677);
+                    }
+                    h1 = (h1 ^ (h1 >>> 16)) >>> 0;
+                    h2 = (h2 ^ (h2 >>> 13)) >>> 0;
+                    const hash = (h2 * 4294967296 + h1).toString(36);
+
+                    return {
+                        ...m,
+                        __id: m.__id || `fm_${hash}_Init`,
+                        title: t
+                    };
+                }).filter(m => m.title); // Skip empty
+
+                await Movie.insertMany(validMovies, { ordered: false });
+                console.log(`✅ Auto-Seeded ${validMovies.length} movies.`);
+            } else {
+                console.log('ℹ️ cinepedia.data.json not found, skipping seed.');
+            }
+        }
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err);
     }
