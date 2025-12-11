@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#FF8A00"/>
+      <stop offset="100%" stop-color="#FFB86B"/>
+    </linearGradient>
+    <filter id="f1" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="14" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Emblem (left) -->
+  <g transform="translate(60,60)">
+    <!-- rounded badge -->
+    <rect x="0" y="0" rx="28" ry="28" width="240" height="240" fill="url(#g1)" filter="url(#f1)"/>
+
+    <!-- small glossy highlight -->
+    <path d="M16,30 C72,10 168,6 212,42 L212,42 C172,12 52,8 16,30 Z" fill="#ffffff" fill-opacity="0.06"/>
+
+    <!-- film reel / heart mashup -->
+    <g transform="translate(120,120)">
+      <!-- heart base subtle clip -->
+      <path d="M0,-44 C28,-76 72,-60 72,-20 C72,8 40,36 0,68 C-40,36 -72,8 -72,-20 C-72,-60 -28,-76 0,-44 Z" fill="#ffffff" fill-opacity="0.06" transform="scale(0.45)" />
+
+      <!-- reel circle -->
+      <circle cx="0" cy="0" r="60" fill="#fff" fill-opacity="0.96"/>
+      <circle cx="0" cy="0" r="54" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2"/>
+
+      <!-- reel holes -->
+      <g fill="#FF8A00">
+        <circle cx="-28" cy="-18" r="10"/>
+        <circle cx="28" cy="-18" r="10"/>
+        <circle cx="-8" cy="28" r="10"/>
+        <circle cx="18" cy="24" r="10"/>
+      </g>
+
+      <!-- small inner ring -->
+      <circle cx="0" cy="0" r="16" fill="#FFB86B"/>
+    </g>
+  </g>
+
+  <!-- Wordmark (right) -->
+  <g transform="translate(360, 210)">
+    <!-- 'CineAmore' text; uses script-like font if available -->
+    <text x="0" y="0" font-family="Lobster, Pacifico, 'Segoe UI', Arial" font-weight="700" font-size="88" fill="#111111">Cine</text>
+    <text x="208" y="0" font-family="Lobster, Pacifico, 'Segoe UI', Arial" font-weight="700" font-size="88" fill="#111111">Amore</text>
+
+    <!-- subtle tag-line under (optional) -->
+    <text x="0" y="50" font-family="Segoe UI, Arial" font-size="18" fill="#6B6B6B">A carefully curated film catalogue</text>
+  </g>
+</svg>

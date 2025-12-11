@@ -42,90 +42,76 @@
           <span>Message Me</span>
         </a>
 
-        <div class="brand-center">
-          <svg class="main-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2z" />
-            <path d="M7 2v20" />
-            <path d="M17 2v20" />
-            <path d="M2 12h20" />
-            <path d="M2 7h5" />
-            <path d="M2 17h5" />
-            <path d="M17 17h5" />
-            <path d="M17 7h5" />
-            <path d="M12 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="currentColor" stroke="none" />
-          </svg>
-          <h1>CineAmore</h1>
-        </div>
-
-        <div class="header-spacer"></div>
+        <h1>CineAmore</h1>
       </div>
 
-      <div class="controls-wrapper">
-        <!-- Search -->
-        <div class="control-group" style="grid-column: 1 / -1;">
-          <label for="q" class="visually-hidden">Search</label>
-          <input id="q" type="search" placeholder="Search title / original title / director…">
-        </div>
+      <div class="header-spacer"></div>
+    </div>
 
-        <!-- Year Filter -->
-        <div class="control-group">
-          <label for="year" class="visually-hidden">Filter by Year</label>
-          <select id="year">
-            <option value="all">All Years</option>
-          </select>
-        </div>
-
-        <!-- Director Filter -->
-        <div class="control-group">
-          <label for="director" class="visually-hidden">Filter by Director</label>
-          <select id="director">
-            <option value="all">All Directors</option>
-          </select>
-        </div>
-
-        <!-- Link Filter -->
-        <div class="control-group">
-          <label for="filter" class="visually-hidden">Filter by Links</label>
-          <select id="filter">
-            <option value="all">Show: All</option>
-            <option value="both_links">Show: With both links</option>
-            <option value="missing_any">Show: Missing any link</option>
-            <option value="missing_letterboxd">Show: Missing Letterboxd</option>
-            <option value="missing_drive">Show: Missing Drive</option>
-            <option value="no_year">Show: No Year</option>
-          </select>
-        </div>
-
-        <!-- Sort -->
-        <div class="control-group">
-          <label for="sort" class="visually-hidden">Sort</label>
-          <select id="sort">
-            <option value="year_desc">Sort: Year ↓</option>
-            <option value="year_asc">Sort: Year ↑</option>
-            <option value="title_asc">Sort: Title A→Z</option>
-            <option value="original_asc">Sort: Original Title A→Z</option>
-            <option value="director_asc">Sort: Director A→Z</option>
-          </select>
-        </div>
-
-        <!-- Theme/Layout Toggles -->
-        <div class="control-group" style="flex-direction: row; gap: 10px;">
-          <button id="themeBtn" class="btn-ghost" aria-label="Toggle dark/light theme"></button>
-          <button id="compactBtn" class="btn-ghost" aria-label="Toggle compact view"></button>
-        </div>
+    <div class="controls-wrapper">
+      <!-- Search -->
+      <div class="control-group" style="grid-column: 1 / -1;">
+        <label for="q" class="visually-hidden">Search</label>
+        <input id="q" type="search" placeholder="Search title / original title / director…">
       </div>
 
-      <!-- Toolbar (Counters & Pagination) -->
-      <div class="toolbar">
-        <div class="counter"><span id="count">0</span> films</div>
-        <div class="pagination">
-          <button id="prev" class="page-btn">Prev</button>
-          <div id="pageInfo" class="counter"></div>
-          <button id="next" class="page-btn">Next</button>
-        </div>
+      <!-- Year Filter -->
+      <div class="control-group">
+        <label for="year" class="visually-hidden">Filter by Year</label>
+        <select id="year">
+          <option value="all">All Years</option>
+        </select>
       </div>
+
+      <!-- Director Filter -->
+      <div class="control-group">
+        <label for="director" class="visually-hidden">Filter by Director</label>
+        <select id="director">
+          <option value="all">All Directors</option>
+        </select>
+      </div>
+
+      <!-- Link Filter -->
+      <div class="control-group">
+        <label for="filter" class="visually-hidden">Filter by Links</label>
+        <select id="filter">
+          <option value="all">Show: All</option>
+          <option value="both_links">Show: With both links</option>
+          <option value="missing_any">Show: Missing any link</option>
+          <option value="missing_letterboxd">Show: Missing Letterboxd</option>
+          <option value="missing_drive">Show: Missing Drive</option>
+          <option value="no_year">Show: No Year</option>
+        </select>
+      </div>
+
+      <!-- Sort -->
+      <div class="control-group">
+        <label for="sort" class="visually-hidden">Sort</label>
+        <select id="sort">
+          <option value="year_desc">Sort: Year ↓</option>
+          <option value="year_asc">Sort: Year ↑</option>
+          <option value="title_asc">Sort: Title A→Z</option>
+          <option value="original_asc">Sort: Original Title A→Z</option>
+          <option value="director_asc">Sort: Director A→Z</option>
+        </select>
+      </div>
+
+      <!-- Theme/Layout Toggles -->
+      <div class="control-group" style="flex-direction: row; gap: 10px;">
+        <button id="themeBtn" class="btn-ghost" aria-label="Toggle dark/light theme"></button>
+        <button id="compactBtn" class="btn-ghost" aria-label="Toggle compact view"></button>
+      </div>
+    </div>
+
+    <!-- Toolbar (Counters & Pagination) -->
+    <div class="toolbar">
+      <div class="counter"><span id="count">0</span> films</div>
+      <div class="pagination">
+        <button id="prev" class="page-btn">Prev</button>
+        <div id="pageInfo" class="counter"></div>
+        <button id="next" class="page-btn">Next</button>
+      </div>
+    </div>
     </div>
   </header>
 

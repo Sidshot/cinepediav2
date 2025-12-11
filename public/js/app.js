@@ -26,7 +26,8 @@ const ICONS = {
     letterboxd: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>',
     drive: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 12-7 8-7-8z"/></svg>',
     download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10m0 0 4-4m-4 4-4-4M4 21h16"/></svg>',
-    edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04l-2.34-2.34-1.83 1.83 3.75 3.75L20.71 7.04z"/></svg>'
+    edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04l-2.34-2.34-1.83 1.83 3.75 3.75L20.71 7.04z"/></svg>',
+    info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
 };
 
 // Utilities
@@ -69,7 +70,8 @@ function toNormalized(obj) {
     const dl = g('dl', 'download', 'Download', 'Download Link', 'Link de Download');
     const year = yearStr ? (parseInt(yearStr, 10) || null) : null;
 
-    // Preserve ID from server if it exists
+    // Notes can now be legacy, but we still preserve them structure-wise just in case
+    // though the UI won't show them anymore.
     const __id = obj.__id || obj._id || null;
 
     return { __id, title, original, year, director, lb, drive, dl };
@@ -99,10 +101,6 @@ async function fetchData() {
 // Core Logic: ID Assignment & Edit Application
 function ensureIdsAndEdits() {
     if (!Array.isArray(NORM)) return;
-    // We only generate IDs if they are missing from the server
-    // Server generates fm_xyz ids. 
-    // This is just a fallback for legacy items.
-
     for (const r of NORM) {
         if (!r.__id) {
             const fp = [
@@ -178,24 +176,74 @@ function highlight(text, query) {
     } catch (e) { return escapeHtml(text || ''); }
 }
 
-function reserveEditSpace() {
-    document.querySelectorAll('.card').forEach(c => {
-        const btn = c.querySelector('.edit-btn');
-        const title = c.querySelector('.title');
-        if (!btn || !title) return;
-        const w = btn.getBoundingClientRect().width || 0;
-        title.style.paddingRight = (w + 24) + 'px';
-    });
-}
-
 function getPosterUrl(title, year) {
-    // Bing Image Search Hack
-    // w=300, h=450 (2:3 aspect ratio), c=7 (Smart Crop)
-    // p=0 means return image directly if possible? No, Bing returns a page unless stripped.
-    // Actually simply using th?q returns a thumbnail which is an image.
     const query = encodeURIComponent(`${title} ${year || ''} movie poster`);
     return `https://tse2.mm.bing.net/th?q=${query}&w=300&h=450&c=7&rs=1&p=0`;
 }
+
+// --- NEW AUTOMATED FETCH FUNCTIONS ---
+// --- UPDATED AUTO FETCH WITH EXTRA DETAILS ---
+async function fetchDetails(id, title, year) {
+    const modalContent = document.getElementById('detailsContent');
+    if (!modalContent) return;
+
+    modalContent.innerHTML = '<div style="text-align:center;padding:40px;">Fetching info from the cosmos... 🪐</div>';
+
+    // Open Dialog First
+    const dlg = document.getElementById('detailsDialog');
+    if (dlg) dlg.showModal();
+
+    let plot = 'No specific plot details found.';
+    let rating = 'N/A';
+    let wikiUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`;
+
+    try {
+        // 1. Wikipedia Summary
+        const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+        if (wikiRes.ok) {
+            const wikiData = await wikiRes.json();
+            if (wikiData.extract) plot = wikiData.extract;
+            if (wikiData.content_urls && wikiData.content_urls.desktop) wikiUrl = wikiData.content_urls.desktop.page;
+        }
+
+        // 2. OMDb Rating (Demo/Fallback)
+        rating = `<a class="btn" href="https://www.google.com/search?q=${encodeURIComponent(title + ' ' + year + ' rating')}" target="_blank">Search Rating</a>`;
+
+    } catch (e) {
+        console.warn('Fetch error:', e);
+    }
+
+    // External Search Links
+    const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(title + ' ' + year + ' film')}`;
+    const imdbUrl = `https://www.imdb.com/find?q=${encodeURIComponent(title + ' ' + year)}`;
+    const lbUrl = `https://letterboxd.com/search/${encodeURIComponent(title + ' ' + year)}`;
+
+    modalContent.innerHTML = `
+        <div style="text-align:left;">
+            <h2 style="margin-top:0;">${escapeHtml(title)} <span style="font-weight:400;opacity:0.6;">(${year || 'N/A'})</span></h2>
+            
+            <div style="margin: 20px 0;">
+                <strong>Plot Summary:</strong>
+                <div class="spoiler-box" style="margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:8px; cursor:pointer;" onclick="this.classList.toggle('revealed')">
+                    <span class="spoiler-warning">⚠️ Tap to Reveal Spoiler / Plot</span>
+                    <div class="spoiler-content">${plot}</div>
+                </div>
+            </div>
+
+            <div style="margin: 20px 0; display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="btn" href="${googleUrl}" target="_blank" style="background:#4285F4;color:#fff;">Google</a>
+                <a class="btn" href="${imdbUrl}" target="_blank" style="background:#F5C518;color:#000;">IMDb</a>
+                <a class="btn" href="${lbUrl}" target="_blank" style="background:#00D735;color:#000;">Letterboxd</a>
+                <a class="btn" href="${wikiUrl}" target="_blank" style="background:#fff;color:#000;">Wikipedia</a>
+            </div>
+
+            <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+                 ${rating}
+            </div>
+        </div>
+    `;
+}
+
 
 function render() {
     ensureIdsAndEdits();
@@ -250,12 +298,28 @@ function render() {
         const yr = (r.year == null || r.year === '') ? NA : r.year;
         const og = fmt(r.original);
         const dir = fmt(r.director);
-        const notes = (r.notes && String(r.notes).trim() !== '') ? String(r.notes).trim() : NA;
 
         const titleHtml = `${highlight(t, state.q)} <span class="badge">${yr}</span>`;
+
+        // Interactive Title: Click -> Letterboxd
+        const lbLink = r.lb ? r.lb : `https://letterboxd.com/search/${encodeURIComponent(t + ' ' + yr)}`;
+        // We override titleHtml to be a link now
+        const interactiveTitleHtml = `<a href="${lbLink}" target="_blank" rel="noopener noreferrer" class="title-link" style="color:inherit;text-decoration:none;">${highlight(t, state.q)}</a> 
+            <span class="badge year-badge" onclick="event.stopPropagation(); filterByYear('${r.year}')" style="cursor:pointer;" title="Filter by ${r.year}">${yr}</span>`;
+
+
+        // --- NEW LINKS ---
+        // Director Link
+        const dirUrl = `https://www.google.com/search?q=${encodeURIComponent(r.director + ' director')}`;
+        const dirHtml = r.director ? `<a href="${dirUrl}" target="_blank" class="dir-link" style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted);">${highlight(dir, state.q)}</a>` : NA;
+
+        // Interactive Original: Click -> Google
+        const ogUrl = `https://www.google.com/search?q=${encodeURIComponent(og + ' film')}`;
+        const ogHtml = r.original ? `<a href="${ogUrl}" target="_blank" class="meta-link" style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted);">${highlight(og, state.q)}</a>` : NA;
+
         const metaHtml = `
-            <span class="kv"><span class="label">Original:</span> ${highlight(og, state.q)}</span>
-            <span class="kv"><span class="label">Director:</span> ${highlight(dir, state.q)}</span>`;
+            <span class="kv"><span class="label">Original:</span> ${ogHtml}</span>
+            <span class="kv"><span class="label">Director:</span> ${dirHtml}</span>`;
 
         const lb = r.lb || '';
         const dr = r.drive || '';
@@ -265,17 +329,25 @@ function render() {
         const drBtn = dr ? `<a class="btn drive" href="${dr}" target="_blank" rel="noopener noreferrer">${ICONS.drive} Drive</a>` : `<span class="btn na">Drive: ${NA}</span>`;
         const dlBtn = dl ? `<a class="btn download" href="${dl}" target="_blank" rel="noopener noreferrer">${ICONS.download} Download</a>` : `<span class="btn na">Download: ${NA}</span>`;
 
-        // Poster HTML
+        // Poster HTML with Link
         const posterUrl = getPosterUrl(t, yr);
-        const posterHtml = `<img src="${posterUrl}" class="card-poster" alt="${escapeHtml(t)}" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMikiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMmgtNWwtNS01bDUtNSAzIDN6Ii8+PC9zdmc+';this.style.opacity=0.3;">`;
+        const posterLink = r.lb ? r.lb : `https://letterboxd.com/search/${encodeURIComponent(t + ' ' + yr)}`;
+        // Wrap poster in link
+        const posterHtml = `
+            <a href="${posterLink}" target="_blank" rel="noopener noreferrer" style="display:block;position:relative;">
+                <img src="${posterUrl}" class="card-poster" alt="${escapeHtml(t)}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMmgtNWwtNS01bDUtNSAzIDN6Ii8+PC9zdmc+';this.style.opacity='0.3'">
+            </a>`;
 
         card.innerHTML = `
             <button class="edit-btn" data-id="${r.__id || ''}">${ICONS.edit} Edit</button>
             ${posterHtml}
-            <div class="title">${titleHtml}</div>
+            <div class="title">${interactiveTitleHtml}</div>
             <div class="meta">${metaHtml}</div>
             <div class="actions">${lbBtn}${drBtn}${dlBtn}</div>
-            <div class="notes"><strong>📝 Notes:</strong> ${notes}</div>
+            
+            <button class="btn info-btn" style="margin-top:10px;width:100%;justify-content:center;" data-id="${r.__id}">
+                ${ICONS.info} Movie Details
+            </button>
         `;
         frag.appendChild(card);
     });
@@ -286,7 +358,13 @@ function render() {
         btn.addEventListener('click', () => openEditDialog(btn.getAttribute('data-id')));
     });
 
-    reserveEditSpace();
+    // Wire Info Buttons
+    grid.querySelectorAll('.info-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const r = NORM.find(x => x.__id === btn.getAttribute('data-id'));
+            if (r) fetchDetails(r.__id, r.title, r.year);
+        });
+    });
 }
 
 // UI: Dialogs (Add / Edit / Import)
@@ -305,10 +383,25 @@ function getDialog(id, html) {
     return dlg;
 }
 
+// New Auto-Info Dialog
+function initDetailsDialog() {
+    const html = `
+        <div style="position:relative;">
+            <button class="btn-ghost" style="position:absolute;top:0;right:0;padding:4px 8px;" onclick="document.getElementById('detailsDialog').close()">✕</button>
+            <div id="detailsContent"></div>
+        </div>
+    `;
+    getDialog('detailsDialog', html);
+}
+// Init immediately
+initDetailsDialog();
+
+
 function openEditDialog(id) {
     const row = NORM.find(x => x.__id === id);
     if (!row) return;
 
+    // --- REMOVED NOTES FIELD ---
     const html = `
       <form method="dialog" id="editForm">
         <h3 style="margin:0 0 10px 0;">Edit film</h3>
@@ -321,7 +414,6 @@ function openEditDialog(id) {
           <div class="full"><label>Letterboxd link<input name="lb"></label></div>
           <div class="full"><label>Drive link<input name="drive"></label></div>
           <div class="full"><label>Download link<input name="dl"></label></div>
-          <div class="full"><label>Notes<textarea name="notes" rows="4" placeholder="Your annotations, rip/source, subs, etc."></textarea></label></div>
         </div>
         <div class="actions-row">
           <button value="cancel" class="btn-ghost" type="button">Cancel</button>
@@ -341,11 +433,6 @@ function openEditDialog(id) {
     f.lb.value = row.lb || '';
     f.drive.value = row.drive || '';
     f.dl.value = row.dl || '';
-    f.notes.value = row.notes || '';
-
-    // Handle submit (one-time logic check or replace listener)
-    // To avoid duplicate listeners, we can rely on standard onsubmit property
-    // --- Persistence Logic ---
 
     // EDIT SUBMIT
     f.onsubmit = async (e) => {
@@ -361,8 +448,7 @@ function openEditDialog(id) {
             director: fd.director || '',
             lb: fd.lb || '',
             drive: fd.drive || '',
-            dl: fd.dl || '',
-            notes: fd.notes || ''
+            dl: fd.dl || ''
         };
 
         try {
@@ -372,15 +458,7 @@ function openEditDialog(id) {
                 body: JSON.stringify(patch)
             });
             if (!res.ok) throw new Error('Update failed');
-
-            // Success: reload or update local NORM
             await fetchData();
-            // Or manually update NORM to avoid full reload flickers
-            /*
-            const row = NORM.find(r => r.__id === pid);
-            if(row) Object.assign(row, patch);
-            render();
-            */
             dlg.close();
         } catch (err) {
             alert('Error saving edit: ' + err.message);
@@ -391,7 +469,6 @@ function openEditDialog(id) {
 }
 
 function openAddDialog() {
-    // ... HTML setup (reused from before) ...
     const html = `
       <form method="dialog" id="addForm">
         <h3 style="margin:0 0 10px 0;">Add a film</h3>
@@ -437,7 +514,7 @@ function openAddDialog() {
     dlg.showModal();
 }
 
-// ... parseCSV helper stays same ...
+// ... parseCSV ...
 function parseCSV(text) {
     const rows = []; let i = 0, f = '', row = [], q = false;
     while (i < text.length) {
@@ -555,6 +632,18 @@ function refreshFilters() {
     if (d.value !== currentD) d.value = 'all';
 }
 
+// Helper for UI clicks
+window.filterByYear = function (year) {
+    const ySel = document.getElementById('year');
+    if (ySel) {
+        ySel.value = year;
+        // Trigger change event to update state and render
+        ySel.dispatchEvent(new Event('change'));
+        // Scroll to filters
+        ySel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+};
+
 // Initialization & Event Binding
 function init() {
     // Load Prefs
@@ -595,7 +684,7 @@ function init() {
         };
     }
 
-    // Compact Logic
+    // Compact Logic (Reuse)
     if (state.compact) document.body.classList.add('compact');
     if (compactBtn) {
         compactBtn.innerHTML = state.compact ? ICONS.densityCompact : ICONS.densityComfort;
@@ -688,16 +777,11 @@ function initLockScreen() {
 
     if (!lockScreen || !lockInput || !lockBtn) return;
 
-    // Check optional session persistence if desired, but request implies "when it loads"
-    // For better UX during dev, maybe session? Let's stick to strict compliance first.
-    // Uncomment next line to allow refresh without relock:
-    // if (sessionStorage.getItem('isUnlocked') === 'true') { lockScreen.classList.add('hidden'); return; }
-
     const checkPassword = () => {
         const val = lockInput.value;
         if (val === '2025') {
             lockScreen.classList.add('hidden');
-            sessionStorage.setItem('isUnlocked', 'true'); // UX enhancement
+            sessionStorage.setItem('isUnlocked', 'true');
             lockInput.value = '';
         } else {
             // Wrong password -> Redirect
