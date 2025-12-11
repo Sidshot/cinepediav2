@@ -494,19 +494,19 @@ function render() {
         const lbBtn = lb ? `<a class="btn letter" href="${lb}" target="_blank" rel="noopener noreferrer">${ICONS.letterboxd} Letterboxd</a>` : '';
         const drBtn = dr ? `<a class="btn drive" href="${dr}" target="_blank" rel="noopener noreferrer">${ICONS.drive} Drive</a>` : '';
 
-        // DOWNLOAD TEXT LINE
-        // User wants "Download tile" behavior maybe? But requested text line like Image 2.
-        // If valid link exists, show clickable "Download" word or "Link".
-        const dlHtml = dl
-            ? `Download: <a href="${dl}" target="_blank" style="color:var(--accent2);text-decoration:underline;">Link</a>`
-            : `Download: <span style="opacity:0.5;font-style:italic;">N/A</span>`;
+        // DOWNLOAD BUTTON (Pill) - Only if exists
+        const dlBtn = dl ? `<a class="btn download" href="${dl}" target="_blank" rel="noopener noreferrer">${ICONS.download} Download</a>` : '';
 
-        // NOTES (CLICKABLE -> FETCH DETAILS)
-        // Wraps the entire Notes line in a clickable element
-        const notesContent = r.notes ? r.notes : 'N/A';
-        const notesHtml = `<div class="notes-line" onclick="event.stopPropagation(); fetchDetails('${r.__id}', '${escapeHtml(t)}', '${r.year}', '${escapeHtml(dir)}')" title="Click for Movie Details">
-            📝 Notes: <span style="${r.notes ? '' : 'opacity:0.5;font-style:italic;'}">${escapeHtml(notesContent)}</span>
-        </div>`;
+        // PLOT BUTTON (Pill) - "Plot of film" (Replaces Notes)
+        // Always show or only if notes exist? User said "changes the notes tile name... make it similar".
+        // Assuming always show "Plot of film" that opens details (which fetches Wiki if no notes).
+        // OR if user implies only show if 'notes' field exists? 
+        // "removed download tile... keep it only at places where there is a link".
+        // Notes tile -> "Plot of film".
+        // Let's make it a button that behaves like the others.
+        const plotBtn = `<button class="btn info" onclick="event.stopPropagation(); fetchDetails('${r.__id}', '${escapeHtml(t)}', '${r.year}', '${escapeHtml(dir)}')" title="View Plot">
+            ${ICONS.info} Plot of film
+        </button>`;
 
         // POSTER LINK WRAPPER
         const posterUrl = getPosterUrl(t, yr);
@@ -524,15 +524,8 @@ function render() {
             <div class="meta">${metaHtml}</div>
             
             <div class="actions" style="margin-top:auto;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">
-                <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-                    ${lbBtn} ${drBtn}
-                </div>
-                <!-- Alignment Fix: Stack these neatly -->
-                <div style="font-size:0.85rem;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;">
-                   ${dlHtml}
-                </div>
-                <div style="font-size:0.85rem;color:var(--muted);cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
-                    ${notesHtml}
+                <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;">
+                    ${lbBtn} ${drBtn} ${dlBtn} ${plotBtn}
                 </div>
             </div>
             
