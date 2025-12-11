@@ -811,3 +811,174 @@ dialog.dialog-modal::backdrop {
     height: 32px;
   }
 }
+
+/* --- SPOILER STYLES --- */
+.spoiler-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.spoiler-warning {
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 0;
+}
+
+.spoiler-content {
+  filter: blur(8px);
+  opacity: 0.4;
+  user-select: none;
+  pointer-events: none;
+  transition: all 0.5s ease;
+  max-height: 60px;
+  /* Collapsed view */
+  overflow: hidden;
+}
+
+.spoiler-box.revealed .spoiler-content {
+  filter: blur(0);
+  opacity: 1;
+  user-select: auto;
+  pointer-events: auto;
+  max-height: 1000px;
+  /* Expanded */
+}
+
+.spoiler-box.revealed .spoiler-warning {
+  display: none;
+}
+
+.spoiler-box:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* --- GLOSSY UI STYLES --- */
+.glossy-box {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Color leak effect */
+.glossy-box::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(var(--leak-color, 255, 192, 67), 0.15), transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.glossy-box:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 12px 40px 0 rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Specific variants */
+.glossy-logo {
+  --leak-color: 255, 192, 67;
+  /* Gold */
+  padding: 10px 20px;
+  display: inline-block;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 4px 0px rgba(176, 95, 0, 0.5);
+  /* 3D hint */
+}
+
+.glossy-logo:active {
+  transform: translateY(2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.social-link {
+  position: relative;
+  z-index: 1;
+  text-decoration: none;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.social-link.google {
+  --leak-color: 66, 133, 244;
+}
+
+.social-link.imdb {
+  --leak-color: 245, 197, 24;
+}
+
+.social-link.letterboxd {
+  --leak-color: 0, 215, 53;
+}
+
+.social-link.wiki {
+  --leak-color: 200, 200, 200;
+}
+
+/* Search Bar Sizing */
+#q {
+  max-width: 600px;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Loading Overlay */
+#app-loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease;
+}
+
+#app-loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
