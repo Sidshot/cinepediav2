@@ -166,14 +166,22 @@ function setupListeners() {
 
 
     // Theme
+    // Theme
     const themeBtn = document.querySelector('#themeToggle');
     if (themeBtn) {
+        // Init Button Text
+        const updateThemeUI = (theme) => {
+            themeBtn.innerHTML = theme === 'light' ? `☀ Light` : `${ICONS.letterboxd.replace('path', 'circle')} Dark`;
+        };
+        // Run once on load
+        updateThemeUI(localStorage.getItem('theme') || 'dark');
+
         themeBtn.addEventListener('click', () => {
             const curr = document.documentElement.getAttribute('data-theme');
             const next = curr === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', next);
-            themeBtn.innerHTML = next === 'light' ? `☀ Light` : `${ICONS.letterboxd.replace('path', 'circle')} Dark`;
             localStorage.setItem('theme', next);
+            updateThemeUI(next);
         });
     }
 
@@ -487,15 +495,18 @@ function render() {
         const drBtn = dr ? `<a class="btn drive" href="${dr}" target="_blank" rel="noopener noreferrer">${ICONS.drive} Drive</a>` : '';
 
         // DOWNLOAD TEXT LINE
+        // User wants "Download tile" behavior maybe? But requested text line like Image 2.
+        // If valid link exists, show clickable "Download" word or "Link".
         const dlHtml = dl
-            ? `Download: <a href="${dl}" target="_blank" style="color:var(--accent2);text-decoration:none;">Link</a>`
+            ? `Download: <a href="${dl}" target="_blank" style="color:var(--accent2);text-decoration:underline;">Link</a>`
             : `Download: <span style="opacity:0.5;font-style:italic;">N/A</span>`;
 
-        // NOTES (Dummy for now or from data if exists? Data doesn't seem to have notes, sticking to N/A as per screenshot)
-        // Check if data has notes, otherwise N/A
-        const notesHtml = r.notes
-            ? `Isi: ${r.notes}`
-            : `📝 Notes: <span style="opacity:0.5;font-style:italic;">N/A</span>`;
+        // NOTES (CLICKABLE -> FETCH DETAILS)
+        // Wraps the entire Notes line in a clickable element
+        const notesContent = r.notes ? r.notes : 'N/A';
+        const notesHtml = `<div class="notes-line" onclick="event.stopPropagation(); fetchDetails('${r.__id}', '${escapeHtml(t)}', '${r.year}', '${escapeHtml(dir)}')" title="Click for Movie Details">
+            📝 Notes: <span style="${r.notes ? '' : 'opacity:0.5;font-style:italic;'}">${escapeHtml(notesContent)}</span>
+        </div>`;
 
         // POSTER LINK WRAPPER
         const posterUrl = getPosterUrl(t, yr);
@@ -513,13 +524,14 @@ function render() {
             <div class="meta">${metaHtml}</div>
             
             <div class="actions" style="margin-top:auto;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">
-                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
                     ${lbBtn} ${drBtn}
                 </div>
-                <div style="font-size:0.85rem;color:var(--muted);margin-bottom:4px;">
-                    ${dlHtml}
+                <!-- Alignment Fix: Stack these neatly -->
+                <div style="font-size:0.85rem;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;">
+                   ${dlHtml}
                 </div>
-                <div style="font-size:0.85rem;color:var(--muted);">
+                <div style="font-size:0.85rem;color:var(--muted);cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
                     ${notesHtml}
                 </div>
             </div>

@@ -43,7 +43,13 @@ body {
     radial-gradient(1000px 800px at 100% 0%, rgba(255, 138, 61, 0.12), transparent 45%),
     var(--bg);
   background-attachment: fixed;
+  background-attachment: fixed;
   transition: background-color .3s ease, color .3s ease;
+}
+
+body.comfort-mode {
+  letter-spacing: 0.5px;
+  line-height: 1.6;
 }
 
 /* Seamless Header - GLOBAL RELATIVE (Not Sticky) */
