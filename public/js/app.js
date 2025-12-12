@@ -108,20 +108,19 @@ function initLockScreen() {
         if (e.key === 'Enter') tryUnlock();
     });
 
-}, 500);
-    }
 
-function unlockApp() {
-    lockScreen.style.opacity = '0';
-    setTimeout(() => {
-        lockScreen.style.display = 'none';
-        fetchData();
-        // Show Admin Controls
-        if (state.userMode === 'admin') {
-            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-        }
-    }, 500);
-}
+
+    function unlockApp() {
+        lockScreen.style.opacity = '0';
+        setTimeout(() => {
+            lockScreen.style.display = 'none';
+            fetchData();
+            // Show Admin Controls
+            if (state.userMode === 'admin') {
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            }
+        }, 500);
+    }
 }
 
 // 1. Fetch Data
