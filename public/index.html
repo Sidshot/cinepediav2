@@ -133,7 +133,14 @@
 
       <!-- Theme/Layout Toggles -->
       <div class="control-group buttons-group" style="flex-direction: row; gap: 10px;">
-        <button id="themeToggle" class="btn-ghost" aria-label="Toggle dark/light theme"></button>
+        <button id="themeToggle" class="btn-ghost" aria-label="Toggle dark/light theme">
+          <!-- Default Content (JS will update) -->
+          <svg class="ui-icon" viewBox="0 0 24 24">
+            <path
+              d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" />
+          </svg>
+          Dark
+        </button>
         <div class="custom-toggle"
           style="border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.03);gap:6px;width:100%;">
           <input type="checkbox" id="comfortToggle"

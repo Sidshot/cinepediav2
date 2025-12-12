@@ -684,6 +684,7 @@ function renderHero() {
         <img class="hero-backdrop" src="${img}" alt="Backdrop">
         <div class="hero-overlay"></div>
         <div class="hero-content">
+            <h3 class="hero-label">✨ A Film For You</h3>
             <h1 class="hero-title">${escapeHtml(rand.title)}</h1>
             <div class="hero-meta">
                 <span class="hero-badge">${rand.year || 'N/A'}</span>

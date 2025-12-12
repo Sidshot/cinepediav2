@@ -697,6 +697,17 @@ footer {
   animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+.hero-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
 .hero-title {
   font-family: 'Outfit', sans-serif;
   font-size: 3rem;
