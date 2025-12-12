@@ -116,7 +116,7 @@ app.get('/api/movies', async (req, res) => {
 });
 
 // POST /api/movies - Create new
-app.post('/api/movies', async (req, res) => {
+app.post('/api/movies', requireAdmin, async (req, res) => {
     try {
         const newFilm = req.body;
         if (!newFilm.title) return res.status(400).json({ error: 'Title required' });
@@ -132,7 +132,7 @@ app.post('/api/movies', async (req, res) => {
 });
 
 // PUT /api/movies/:id - Update existing
-app.put('/api/movies/:id', async (req, res) => {
+app.put('/api/movies/:id', requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const update = req.body;

@@ -4,7 +4,8 @@ const state = {
     q: '',
     page: 1,
     pageSize: 100,
-    userMode: null // 'admin' or 'guest'
+    userMode: null, // 'admin' or 'guest'
+    adminPass: null // Store password for API calls
 };
 
 // Data Store
@@ -78,6 +79,7 @@ function initLockScreen() {
         // Client-side quick check for "2025" logic requested by user
         if (password === '2025') {
             state.userMode = 'admin';
+            state.adminPass = password;
             unlockApp();
             return;
         }
@@ -94,6 +96,7 @@ function initLockScreen() {
 
             if (data.success) {
                 state.userMode = 'admin';
+                state.adminPass = password;
                 unlockApp();
             } else {
                 // Fail Style
@@ -142,7 +145,9 @@ async function fetchData() {
         RAW_DATA = await res.json();
         normalize();
         populateFilters();
+        populateFilters();
         render(); // First Render
+        renderHero(); // Render Hero using normalized data
         updateBottomPagination(); // Ensure visible
     } catch (e) {
         document.querySelector('#grid').innerHTML = `<div class="error">Failed to load payload. <br/><small>${e.message}</small></div>`;
@@ -216,6 +221,16 @@ function setupListeners() {
         compactBtn.innerHTML = `<svg viewBox="0 0 24 24" class="icon"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z"/></svg> View`;
         compactBtn.addEventListener('click', () => {
             document.body.classList.toggle('compact');
+        });
+    }
+
+    // Shuffle Button (Re-rolls Hero)
+    const shuffleBtn = document.querySelector('#shuffleBtn');
+    if (shuffleBtn) {
+        shuffleBtn.addEventListener('click', () => {
+            renderHero(); // This function was defined at end of file
+            // Optionally scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
@@ -473,7 +488,10 @@ async function saveItem(id) {
         const url = id ? '/api/movies/' + id : '/api/movies';
         const res = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-pass': state.adminPass
+            },
             body: JSON.stringify(payload)
         });
         if (res.ok) {
@@ -651,4 +669,34 @@ window.filterByYear = (y) => { state.filter = { type: 'year', val: parseInt(y) }
 window.filterByDir = (d) => { state.filter = { type: 'director', val: d }; state.page = 1; document.querySelector('#dirFilter').value = d; render(); };
 window.openEditDialog = openEditDialog;
 
+// Hero Section Logic
+function renderHero() {
+    const heroEl = document.getElementById('hero-section');
+    if (!heroEl || NORM.length === 0) return;
 
+    const rand = NORM[Math.floor(Math.random() * NORM.length)];
+    let img = 'https://via.placeholder.com/1200x600?text=No+Backdrop';
+    if (rand.title) {
+        img = getPosterUrl(rand.title, rand.year);
+    }
+
+    heroEl.innerHTML = `
+        <img class="hero-backdrop" src="${img}" alt="Backdrop">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">${escapeHtml(rand.title)}</h1>
+            <div class="hero-meta">
+                <span class="hero-badge">${rand.year || 'N/A'}</span>
+                <span>${escapeHtml(rand.director || 'Unknown Director')}</span>
+            </div>
+            <div class="hero-actions">
+                <button class="hero-btn primary" onclick="fetchDetails('${rand.__id}')">
+                    <svg class="ui-icon" style="width:20px;height:20px;fill:currentColor" viewBox="0 0 24 24"><path d="M8,5.14V19.14L19,12.14L8,5.14Z" /></svg>
+                    View Details
+                </button>
+            </div>
+        </div>
+    `;
+    heroEl.classList.remove('hidden');
+}
+window.renderHero = renderHero;
