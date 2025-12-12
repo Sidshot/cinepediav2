@@ -108,13 +108,20 @@ function initLockScreen() {
         if (e.key === 'Enter') tryUnlock();
     });
 
-    function unlockApp() {
-        lockScreen.style.opacity = '0';
-        setTimeout(() => {
-            lockScreen.style.display = 'none';
-            fetchData();
-        }, 500);
+}, 500);
     }
+
+function unlockApp() {
+    lockScreen.style.opacity = '0';
+    setTimeout(() => {
+        lockScreen.style.display = 'none';
+        fetchData();
+        // Show Admin Controls
+        if (state.userMode === 'admin') {
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+        }
+    }, 500);
+}
 }
 
 // 1. Fetch Data
@@ -217,11 +224,26 @@ function setupListeners() {
     document.querySelector('#prev').addEventListener('click', prevPage);
     document.querySelector('#next').addEventListener('click', nextPage);
 
-    // Bottom Pagination Wiring (Using Event Delegation or just ensure static HTML exists?)
-    // The bottom HTML is in index.html, we just need to render it.
-    // We will render buttons dynamically or wire them once?
-    // Let's wire them once if they exist, or re-render them.
-    // For simplicity, we'll re-render them inside render() to keep sync.
+    // For simplicity, we'll re-render them inside render() to keep sync. or wire global ones below:
+
+    // Admin Tools Listeners (Safe)
+    const addBtn = document.querySelector('.add-btn');
+    if (addBtn) addBtn.addEventListener('click', () => openEditDialog());
+
+    const csvBtn = document.querySelector('.csv-btn');
+    if (csvBtn) {
+        csvBtn.addEventListener('click', () => {
+            getDialog('csvDialog', `
+                <h2>Import CSV</h2>
+                <br>
+                <textarea id="csvInput" placeholder="Paste CSV content here..." style="width:100%;height:200px;font-family:monospace;"></textarea>
+                <div class="actions" style="justify-content:flex-end;margin-top:10px;">
+                    <button class="btn btn-ghost">Cancel</button>
+                    <button class="btn btn-primary" onclick="processCSV()">Import</button>
+                </div>
+            `).showModal();
+        });
+    }
 }
 
 function prevPage() {
@@ -571,20 +593,7 @@ async function fetchDetails(id, title, year, director) {
 
 const NA = '<span class="na">N/A</span>';
 const fmt = (s) => s || '';
-// Add CSV Listener 
-document.querySelector('.csv-btn').addEventListener('click', () => {
-    getDialog('csvDialog', `
-            <h2>Import CSV</h2>
-            <br>
-            <textarea id="csvInput" placeholder="Paste CSV content here..." style="width:100%;height:200px;font-family:monospace;"></textarea>
-            <div class="actions" style="justify-content:flex-end;margin-top:10px;">
-                <button class="btn btn-ghost">Cancel</button>
-                <button class="btn btn-primary" onclick="processCSV()">Import</button>
-            </div>
-        `).showModal();
-});
-// Add New Film Btn Listener
-document.querySelector('.add-btn').addEventListener('click', () => openEditDialog());
+
 
 // Finish file content
 
