@@ -232,6 +232,46 @@ app.post('/api/import', requireAdmin, async (req, res) => {
     }
 });
 
+// POST /api/request - User Request Film
+app.post('/api/request', async (req, res) => {
+    try {
+        const { title } = req.body;
+        if (!title || typeof title !== 'string' || !title.trim()) {
+            return res.status(400).json({ error: 'Title is required' });
+        }
+
+        const requestData = {
+            title: title.trim(),
+            date: new Date().toISOString(),
+            ip: req.ip
+        };
+
+        const filePath = path.join(__dirname, 'data', 'requests.json');
+        let currentRequests = [];
+
+        // Read existing
+        if (fs.existsSync(filePath)) {
+            try {
+                const raw = fs.readFileSync(filePath, 'utf8');
+                currentRequests = JSON.parse(raw);
+            } catch (e) {
+                // Ignore corrupt file, start fresh
+                currentRequests = [];
+            }
+        }
+
+        currentRequests.push(requestData);
+
+        // Save back
+        fs.writeFileSync(filePath, JSON.stringify(currentRequests, null, 2));
+
+        res.json({ success: true, message: 'Request saved' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to save request' });
+    }
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

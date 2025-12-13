@@ -40,7 +40,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupListeners();
     initDetailsDialog(); // Ensure modal exists
+    initRequestFilm(); // Request Feature
 });
+
+function initRequestFilm() {
+    const btn = document.getElementById('requestBtn');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+        const title = prompt("Search for your film? 🎬\nEnter the name of the movie you'd like to request:");
+        if (!title || !title.trim()) return;
+
+        try {
+            // Optimistic UI feedback
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Sent!';
+            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+
+            const res = await fetch('/api/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: title.trim() })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed');
+
+            alert(`Request received: "${title}"\nWe'll look into it!`);
+
+        } catch (e) {
+            console.error(e);
+            alert('Failed to send request. Please try again.');
+        }
+    });
+}
 
 // 0. Lock Screen
 function initLockScreen() {

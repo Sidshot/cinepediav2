@@ -802,18 +802,129 @@ footer {
   bottom: 24px;
   right: 24px;
   z-index: 50;
+  border-radius: 50%;
   width: 48px;
   height: 48px;
   padding: 0;
-  border-radius: 50%;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(30, 30, 30, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px) scale(0.9);
-  transition: all .3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translateY(20px);
+  transition: all 0.3s;
+  pointer-events: none;
+}
+
+#scrollTopBtn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+#scrollTopBtn:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* Request Film Floating Button (Glossy Selenium Style) */
+.fab-request {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  /* Bottom left */
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 99px;
+  /* Pill shape */
+
+  /* Glossy Gradient Background */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  /* Top shine */
+
+  color: #fff;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+
+  /* Glassmorphism */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* Inner Shine Element */
+.fab-request::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: skewX(-20deg) translateX(-150%);
+  transition: transform 0.5s;
+  pointer-events: none;
+}
+
+.fab-request:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.fab-request:hover::before {
+  transform: skewX(-20deg) translateX(150%);
+  transition: transform 0.7s;
+}
+
+.fab-request:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.fab-label {
+  display: inline-block;
+}
+
+@media (max-width: 600px) {
+  .fab-request .fab-label {
+    display: none;
+    /* Icon only on mobile if space is tight, or keep it? User said "circular button", but pill is nicer for text. Let's start with pill. */
+  }
+
+  .fab-request {
+    padding: 14px;
+    border-radius: 50%;
+  }
+}
+
+width: 48px;
+height: 48px;
+padding: 0;
+border-radius: 50%;
+box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+border: 1px solid rgba(255, 255, 255, 0.1);
+background: rgba(30, 30, 30, 0.6);
+backdrop-filter: blur(10px);
+opacity: 0;
+visibility: hidden;
+transform: translateY(10px) scale(0.9);
+transition: all .3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 #scrollTopBtn.visible {
