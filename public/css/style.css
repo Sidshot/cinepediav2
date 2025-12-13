@@ -828,64 +828,80 @@ footer {
   color: var(--bg);
 }
 
-/* Request Film Floating Button (Glossy Selenium Style) */
+/* Request Film Floating Button (Glossy Rainbow iOS Style) */
 .fab-request {
   position: fixed;
   bottom: 24px;
-  left: 24px;
-  /* Bottom left */
+  right: 24px;
+  left: auto;
   z-index: 100;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
   border-radius: 99px;
-  /* Pill shape */
 
-  /* Glossy Gradient Background */
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
-  /* Top shine */
+  /* Rainbow Glossy Gradient */
+  background: linear-gradient(120deg,
+      rgba(255, 0, 0, 0.15),
+      rgba(255, 165, 0, 0.15),
+      rgba(255, 255, 0, 0.15),
+      rgba(0, 128, 0, 0.15),
+      rgba(0, 0, 255, 0.15),
+      rgba(75, 0, 130, 0.15),
+      rgba(238, 130, 238, 0.15));
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
 
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
+  letter-spacing: 0.5px;
 
-  /* Glassmorphism */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  /* Strong Glassmorphism */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 10px 30px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
 
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
   overflow: hidden;
 }
 
-/* Inner Shine Element */
+/* Shimmer Effect */
 .fab-request::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: -50%;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  inset: 0;
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent);
   transform: skewX(-20deg) translateX(-150%);
   transition: transform 0.5s;
   pointer-events: none;
 }
 
 .fab-request:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-4px) scale(1.05);
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-  border-color: rgba(255, 255, 255, 0.4);
+    0 15px 40px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(120deg,
+      rgba(255, 0, 0, 0.25),
+      rgba(255, 165, 0, 0.25),
+      rgba(255, 255, 0, 0.25),
+      rgba(0, 128, 0, 0.25),
+      rgba(0, 0, 255, 0.25),
+      rgba(75, 0, 130, 0.25),
+      rgba(238, 130, 238, 0.25));
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .fab-request:hover::before {
@@ -904,7 +920,6 @@ footer {
 @media (max-width: 600px) {
   .fab-request .fab-label {
     display: none;
-    /* Icon only on mobile if space is tight, or keep it? User said "circular button", but pill is nicer for text. Let's start with pill. */
   }
 
   .fab-request {
