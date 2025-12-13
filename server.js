@@ -170,11 +170,11 @@ app.get('/api/requests', (req, res) => {
         }
 
         const requests = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        // Convert to CSV
-        const header = 'Title;Year;Director;Letterboxd;Drive;Download\n';
-        const rows = requests.map(r => `${r.title};;;;;;`).join('\n');
+        // Convert to CSV with BOM for Excel and CRLF for Windows
+        const header = '\uFEFFTitle;Year;Director;Letterboxd;Drive;Download\r\n';
+        const rows = requests.map(r => `${r.title};;;;;;`).join('\r\n');
 
-        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', 'attachment; filename="requests.csv"');
         res.send(header + rows);
     } catch (err) {
