@@ -11,6 +11,9 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = config.PORT;
 
+// Trust Proxy (Required for Render/Heroku to see real IPs)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet({
     contentSecurityPolicy: false, // relaxed for images/scripts
@@ -18,7 +21,7 @@ app.use(helmet({
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 requests per IP
+    max: 1000, // Increased limit for viral traffic
     message: 'Too many requests, please try again later.'
 });
 app.use(limiter);
