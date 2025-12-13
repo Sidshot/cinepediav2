@@ -27,12 +27,17 @@ const ICONS = {
 // Init
 document.addEventListener('DOMContentLoaded', () => {
     // Hide loader initially (it will be shown by fetchData after unlock)
-    const loader = document.getElementById('app-loader');
-    if (loader && !loader.classList.contains('hidden')) {
-        loader.classList.add('hidden');
-    }
+    // REFACTORED: We are removing the lock screen, so we proceed directly to fetch data.
+    // The loader logic inside fetchData will handle the loading state.
 
-    initLockScreen();
+    // const loader = document.getElementById('app-loader');
+    // if (loader && !loader.classList.contains('hidden')) {
+    //     loader.classList.add('hidden');
+    // }
+
+    // initLockScreen(); // <-- DISABLED LOCK SCREEN
+    fetchData();      // <-- DIRECT LOADING
+
     setupListeners();
     initDetailsDialog(); // Ensure modal exists
 });
