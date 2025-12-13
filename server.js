@@ -147,7 +147,29 @@ app.put('/api/movies/:id', requireAdmin, async (req, res) => {
     }
 });
 
-// POST /api/import - Bulk Import
+// GET /api/requests - Export Requests as CSV
+app.get('/api/requests', (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'data', 'requests.json');
+        if (!fs.existsSync(filePath)) {
+            return res.send(''); // Empty CSV
+        }
+
+        const requests = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        // Convert to CSV
+        const header = 'Title;Year;Director;Letterboxd;Drive;Download\n';
+        const rows = requests.map(r => `${r.title};;;;;;`).join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="requests.csv"');
+        res.send(header + rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error exporting requests');
+    }
+});
+
+// POST /api/import - Bulk Import & Fulfill
 app.post('/api/import', requireAdmin, async (req, res) => {
     try {
         let imports = req.body;
@@ -155,14 +177,8 @@ app.post('/api/import', requireAdmin, async (req, res) => {
         // Handle raw CSV string if sent
         if (req.body.csv) {
             const lines = req.body.csv.split('\n').filter(l => l.trim());
-            // Assume simple CSV: Title;Original;Year;Director;Letterboxd;Drive;Download
-            // Skipping header check for simplicity or assume no header? user pasted "content".
-            // Let's assume the user pastes WITH header if they copied from Excel? Or without?
-            // Safest to just map based on position.
-            // But wait, the previous code expected an object.
-            // Let's implement a quick parser
             imports = lines.map(line => {
-                const cols = line.split(';'); // Semicolon separated based on previous prompt hints
+                const cols = line.split(';');
                 if (cols.length < 1) return null;
                 return {
                     title: cols[0]?.trim(),
@@ -186,36 +202,44 @@ app.post('/api/import', requireAdmin, async (req, res) => {
         };
 
         const operations = [];
+        const fulfilledTitles = [];
 
         // Validate and Prepare
         imports.forEach((f, idx) => {
-            // Row number (Visual 1-based)
             const rowNum = idx + 1;
-
             if (!f.title) {
                 results.failed++;
                 results.errors.push(`Row ${rowNum}: Missing 'title'`);
                 return;
             }
 
-            // Create Operation
             const doc = { ...f, __id: generateId(f) };
-
-            // Push to operations for bulkWrite (more robust than insertMany with errors)
-            operations.push({
-                insertOne: { document: doc }
-            });
+            operations.push({ insertOne: { document: doc } });
+            fulfilledTitles.push(f.title.toLowerCase());
         });
 
         if (operations.length > 0) {
             try {
-                // ordered: false ensures one failure doesn't stop the rest
                 const bulkRes = await Movie.bulkWrite(operations, { ordered: false });
                 results.success = bulkRes.insertedCount;
+
+                // FULFILLMENT LOGIC: Remove from requests.json
+                const reqPath = path.join(__dirname, 'data', 'requests.json');
+                if (fs.existsSync(reqPath)) {
+                    let pending = JSON.parse(fs.readFileSync(reqPath, 'utf8'));
+                    const originalCount = pending.length;
+                    // Filter out requests that match imported titles
+                    pending = pending.filter(p => !fulfilledTitles.includes(p.title.toLowerCase()));
+
+                    if (pending.length < originalCount) {
+                        fs.writeFileSync(reqPath, JSON.stringify(pending, null, 2));
+                        console.log(`🧹 Creating fulfillment: Removed ${originalCount - pending.length} fulfilled requests.`);
+                    }
+                }
+
             } catch (bulkError) {
-                // If there are write errors (e.g. duplicates if we had unique index, though we don't yet)
                 if (bulkError.writeErrors) {
-                    results.success = bulkError.result.insertedCount; // Partial success
+                    results.success = bulkError.result.insertedCount;
                     results.failed += bulkError.writeErrors.length;
                     bulkError.writeErrors.forEach(we => {
                         results.errors.push(`Row ? (Duplicate/Error): ${we.errmsg}`);
