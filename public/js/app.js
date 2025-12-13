@@ -52,16 +52,30 @@ function initRequestFilm() {
         // 1. Magic Code Check
         if (title && title.trim() === 'get_admin') {
             const pass = prompt("Enter Admin Password:");
-            if (pass === '2025') {
-                state.userMode = 'admin';
-                state.adminPass = pass;
-                alert('🔓 Admin Mode Unlocked!');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-                const csvBtn = document.getElementById('getCsvBtn');
-                if (csvBtn) csvBtn.classList.remove('hidden');
-                if (typeof render === 'function') render();
-            } else {
-                alert('❌ Access Denied');
+            if (!pass) return;
+
+            try {
+                const authRes = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass })
+                });
+                const authData = await authRes.json();
+
+                if (authData.success) {
+                    state.userMode = 'admin';
+                    state.adminPass = pass; // Keep for subsequent requests (headers)
+                    alert('🔓 Admin Mode Unlocked!');
+                    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                    const csvBtn = document.getElementById('getCsvBtn');
+                    if (csvBtn) csvBtn.classList.remove('hidden');
+                    if (typeof render === 'function') render();
+                } else {
+                    alert('❌ Access Denied');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('❌ Auth Error');
             }
             return;
         }
