@@ -27,7 +27,7 @@ A personal film archive dashboard built as a Node.js monolith. It features a glo
     ```env
     MONGO_URI=mongodb://localhost:27017/cinepedia
     PORT=3000
-    ADMIN_PASSWORD=2025
+    ADMIN_PASSWORD=your_secure_password
     ```
 4.  **Run the Server:**
     ```bash
@@ -51,7 +51,7 @@ A personal film archive dashboard built as a Node.js monolith. It features a glo
 2.  **Authentication:**
     -   **Client-Side:** `app.js` manages `state.userMode` ('admin' or 'guest').
     -   **Server-Side:** Key write operations (`/api/import`) are protected by `requireAdmin` middleware.
-    -   **Default Password:** `2025` (Configurable via `ADMIN_PASSWORD` env var).
+    -   **Default Password:** Configurable via `ADMIN_PASSWORD` env var.
 
 3.  **Data Seeding:**
     -   The system auto-seeds from `data/cinepedia.data.json` if the DB is empty.
