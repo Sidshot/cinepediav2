@@ -469,7 +469,8 @@ function render() {
 
         const metaHtml = `
             <span class="kv"><span class="label">Original:</span> ${r.original ? escapeHtml(r.original) : NA}</span>
-            <span class="kv"><span class="label">Director:</span> ${r.director ? `<a href="#" onclick="event.stopPropagation();filterByDir('${escapeHtml(r.director)}')" style="color:inherit;text-decoration:none;border-bottom:1px dotted;">${highlight(r.director, state.q)}</a>` : NA}</span>`;
+            <span class="kv"><span class="label">Director:</span> ${r.director ? `<a href="#" onclick="event.stopPropagation();filterByDir('${escapeHtml(r.director)}')" style="color:inherit;text-decoration:none;border-bottom:1px dotted;">${highlight(r.director, state.q)}</a>` : NA}</span>
+            ${renderRating(r.__id, r.ratingSum, r.ratingCount)}`;
 
         // Buttons
         const lbBtn = r.lb ? `<a class="btn letter" href="${r.lb}" target="_blank">${ICONS.letterboxd} Letterboxd</a>` : '';
@@ -524,7 +525,9 @@ function filterByDir(d) {
 // ... (Rest of formatters, helpers, and Dialog functions remain similar, ensuring Admin checks in saveItem)
 
 function getPosterUrl(title, year) {
-    const query = encodeURIComponent(`${title} ${year || ''} movie poster`);
+    // strict query: "Title" (Year) film poster
+    const yStr = year ? ` (${year})` : '';
+    const query = encodeURIComponent(`"${title}"${yStr} film poster original`);
     return `https://tse2.mm.bing.net/th?q=${query}&w=300&h=450&c=7&rs=1&p=0`;
 }
 
@@ -745,6 +748,260 @@ window.fetchDetails = fetchDetails;
 window.filterByYear = (y) => { state.filter = { type: 'year', val: parseInt(y) }; state.page = 1; document.querySelector('#yearFilter').value = y; render(); };
 window.filterByDir = (d) => { state.filter = { type: 'director', val: d }; state.page = 1; document.querySelector('#dirFilter').value = d; render(); };
 window.openEditDialog = openEditDialog;
+
+// --- Rating System ---
+function renderRating(id, sum, count) {
+    sum = sum || 0;
+    count = count || 0;
+    const avg = count > 0 ? (sum / count).toFixed(1) : '0.0';
+
+    // Check if user already voted locally (simple localStorage check to prevent spamming UI)
+    const hasVoted = localStorage.getItem(`voted_${id}`);
+    const votedClass = hasVoted ? 'voted' : '';
+
+    return `
+    <div class="rating-container ${votedClass}" id="rate-${id}" onclick="event.stopPropagation()">
+        <!-- Egg (0) -->
+        <button class="rate-btn" onclick="rateFilm('${id}', 0)" title="Rotten Egg (0)">
+            <div class="egg-icon"></div>
+        </button>
+        
+        <!-- Stars (1-5) -->
+        ${[1, 2, 3, 4, 5].map(i => `
+            <button class="rate-btn" onclick="rateFilm('${id}', ${i})" title="${i} Stars">
+                <div class="star-icon"></div>
+            </button>
+        `).join('')}
+        
+        <span class="rating-score" title="${count} votes">
+            ${count > 0 ? `★ ${avg}` : 'Rate This'}
+        </span>
+    </div>`;
+}
+
+async function rateFilm(id, val) {
+    if (localStorage.getItem(`voted_${id}`)) {
+        alert('You have already rated this film!');
+        return;
+    }
+
+    // Optimistic UI
+    const container = document.getElementById(`rate-${id}`);
+    if (container) {
+        container.style.opacity = '0.5';
+        container.style.pointerEvents = 'none';
+    }
+
+    try {
+        const res = await fetch(`/api/movies/${id}/rate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: val })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            // Update Local Data Store
+            const film = NORM.find(f => f.__id === id);
+            if (film) {
+                film.ratingSum = data.ratingSum;
+                film.ratingCount = data.ratingCount;
+
+                // Re-render this specific rating block
+                if (container) {
+                    container.outerHTML = renderRating(id, data.ratingSum, data.ratingCount);
+                }
+
+                localStorage.setItem(`voted_${id}`, 'true');
+                // visual confirmation
+                const newCont = document.getElementById(`rate-${id}`);
+                if (newCont) {
+                    newCont.classList.add('voted');
+                    // animation
+                    const score = newCont.querySelector('.rating-score');
+                    if (score) {
+                        score.style.color = '#ffd700';
+                        score.innerText = 'Thanks!';
+                        setTimeout(() => {
+                            const avg = (data.ratingSum / data.ratingCount).toFixed(1);
+                            score.style.color = '';
+                            score.innerText = `★ ${avg}`;
+                        }, 1500);
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Failed to submit rating.');
+        if (container) container.style.opacity = '1';
+    }
+}
+window.rateFilm = rateFilm;
+
+// --- Tips & Updates Manager ---
+const TipsManager = {
+    updates: [
+        "✨ **New Rating System:** Rate films with Eggs (0) to 5 Stars!",
+        "🛠️ **Poster Fix:** 'The Alienist' (1970) now shows the correct poster.",
+        "📱 **Import Fix:** CSV imports are now smoother and faster."
+    ],
+    tips: [
+        "💡 **Tip:** Click any *Director's Name* to instantly filter their films.",
+        "🎲 **Tip:** Use the *Magic Wand* icon in the header for a random pick!",
+        "🌙 **Tip:** Toggle *Dark Mode* for a better night-time viewing experience."
+    ],
+    timer: null,
+    currentIdx: 0,
+    isOpen: false,
+
+    init() {
+        if (localStorage.getItem('hideTips') === 'true') return;
+
+        this.injectModal();
+        // Show after a slight delay so page loads first
+        setTimeout(() => this.show(), 1000);
+    },
+
+    injectModal() {
+        const div = document.createElement('div');
+        div.id = 'tips-modal';
+        div.innerHTML = `
+            <div class="tips-header">
+                <span class="tips-title">🚀 Updates & Tips</span>
+                <button class="tips-close" onclick="TipsManager.close(true)">×</button>
+            </div>
+            <div class="tips-content" id="tips-content">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="tips-controls">
+                <button class="tips-btn" onclick="TipsManager.turnOff()">Don't show again</button>
+                <div style="display:flex;gap:10px;">
+                    <button class="tips-btn" onclick="TipsManager.next()">Next Tip</button>
+                </div>
+            </div>
+            <div class="tips-progress" id="tips-progress"></div>
+        `;
+
+        // Interaction Logic for Auto-Close
+        div.addEventListener('mouseenter', () => this.pauseTimer());
+        div.addEventListener('mouseleave', () => this.resumeTimer());
+
+        document.body.appendChild(div);
+        this.renderContent();
+    },
+
+    renderContent() {
+        const contentEl = document.getElementById('tips-content');
+        if (!contentEl) return;
+
+        // Show updates first, then tips
+        if (this.currentIdx === 0) {
+            let html = '<ul class="tips-list">';
+            this.updates.forEach(u => html += `<li>${this.convertMarkdown(u)}</li>`);
+            html += '</ul>';
+            contentEl.innerHTML = html;
+        } else {
+            // Show random tip
+            const tip = this.tips[(this.currentIdx - 1) % this.tips.length];
+            contentEl.innerHTML = this.convertMarkdown(tip);
+        }
+    },
+
+    convertMarkdown(text) {
+        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    },
+
+    show() {
+        const el = document.getElementById('tips-modal');
+        if (el) {
+            el.classList.add('visible');
+            this.startTimer();
+            this.isOpen = true;
+        }
+    },
+
+    close(force = false) {
+        const el = document.getElementById('tips-modal');
+        if (el) {
+            el.classList.remove('visible');
+            this.isOpen = false;
+            // Remove from DOM after transition
+            if (force) setTimeout(() => el.remove(), 400);
+        }
+    },
+
+    next() {
+        this.currentIdx++;
+        this.renderContent();
+        this.resetTimer();
+    },
+
+    turnOff() {
+        localStorage.setItem('hideTips', 'true');
+        this.close(true);
+    },
+
+    startTimer() {
+        this.stopTimer();
+        const progress = document.getElementById('tips-progress');
+        if (progress) {
+            progress.style.transition = 'none';
+            progress.style.transform = 'scaleX(0)';
+
+            // Force reflow
+            void progress.offsetWidth;
+
+            progress.classList.add('animate');
+            progress.style.transition = 'transform 10s linear'; // 10s duration
+            progress.style.transform = 'scaleX(1)';
+        }
+
+        this.timer = setTimeout(() => {
+            this.close();
+        }, 10000); // 10 seconds
+    },
+
+    stopTimer() {
+        if (this.timer) clearTimeout(this.timer);
+        const progress = document.getElementById('tips-progress');
+        if (progress) {
+            progress.classList.remove('animate');
+            progress.style.transform = 'scaleX(0)';
+        }
+    },
+
+    pauseTimer() {
+        // Stop the close timer but keep modal open
+        if (this.timer) clearTimeout(this.timer);
+        const progress = document.getElementById('tips-progress');
+        // Freeze animation at current state? Hard with simple CSS transition.
+        // For now, just stop the bar appearing to signify "held"
+        if (progress) {
+            progress.style.transition = 'none';
+            progress.style.transform = 'scaleX(0)';
+        }
+    },
+
+    resumeTimer() {
+        if (this.isOpen) this.startTimer();
+    },
+
+    resetTimer() {
+        this.pauseTimer();
+        this.startTimer();
+    }
+};
+
+// Replace window.onload to include Tips init
+const originalOnLoad = window.onload;
+window.onload = function () {
+    if (originalOnLoad) originalOnLoad();
+    renderHero();
+    TipsManager.init();
+};
+
+window.TipsManager = TipsManager; // Expose globally
 
 // Hero Section Logic
 function renderHero() {

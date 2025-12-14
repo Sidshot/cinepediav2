@@ -164,6 +164,38 @@ app.put('/api/movies/:id', requireAdmin, async (req, res) => {
     }
 });
 
+// POST /api/movies/:id/rate - Rate a film
+app.post('/api/movies/:id/rate', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { value } = req.body; // 0 (Egg) to 5
+
+        if (typeof value !== 'number' || value < 0 || value > 5) {
+            return res.status(400).json({ error: 'Invalid rating' });
+        }
+
+        // Atomic update
+        const updated = await Movie.findOneAndUpdate(
+            { __id: id },
+            {
+                $inc: { ratingSum: value, ratingCount: 1 }
+            },
+            { new: true }
+        );
+
+        if (!updated) return res.status(404).json({ error: 'Film not found' });
+
+        res.json({
+            success: true,
+            ratingSum: updated.ratingSum,
+            ratingCount: updated.ratingCount
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to save rating' });
+    }
+});
+
 // GET /api/requests - Export Requests as CSV
 app.get('/api/requests', (req, res) => {
     try {

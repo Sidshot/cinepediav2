@@ -10,6 +10,8 @@ const MovieSchema = new mongoose.Schema({
     drive: String, // Drive Link
     dl: String,    // Download Link
     notes: String,
+    ratingSum: { type: Number, default: 0 },
+    ratingCount: { type: Number, default: 0 },
     addedAt: { type: Date, default: Date.now }
 });
 
