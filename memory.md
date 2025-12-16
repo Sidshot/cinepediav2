@@ -25,9 +25,9 @@
 
 ## ⏭️ Immediate Next Steps (Strict Order)
 1.  **Freeze V1:** Disconnect write paths/ensure read-only (Done).
-2.  **Deploy V2:** Push `v2/identity-migration` to Vercel (Preview/Prod).
-3.  **Refine Config:** Decide on Image Proxy (Commit or Defer).
-4.  **Phase 3:** Cut roadmap to ONE concrete feature (Social/Lists).
+2.  **Deploy V2:** Push `v2/identity-migration` to Vercel (Done).
+3.  **Refine Config:** Setup `NEXT_PUBLIC_IMAGE_PROXY` (ImageKit recommended).
+4.  **Phase 3 START:** Implement Google Auth & List Schema.
 
 ## 🧠 Key Context & Rules
 *   **Identity:** Film Catalogue (Not streaming/social).
@@ -58,10 +58,14 @@
 - [x] **UI Overhaul:** Dark/Light Mode, Glossy Aesthetic, Interactive Ratings.
 - [ ] **Image Optimization:** Cloudinary/ImageKit integration.
 
-### Phase 3: Infinite Expansion
-- [ ] **Automated Data:** TMDB API integration.
-- [ ] **AI Search:** Vector embeddings for "Vibe Search".
-- [ ] **Social:** Lists, Activity Feeds.
+### Phase 2.4: Admin "Easy Mode" (Completed)
+- [x] **Magic Search:** Integrated TMDB API for auto-filling movie details.
+- [x] **Client Components:** Refactored Search, Delete, and Forms for Next.js Server Actions compatibility.
+
+### Phase 3: The Social Layer (Collections)
+- [ ] **Authentication:** NextAuth.js (Google OAuth only).
+- [ ] **Feature:** User Lists (Watchlist, Custom Collections).
+- [ ] **Sharing:** Public URLs for lists.
 
 ## 🛑 Session Handoff (2025-12-16)
 **Everything is Saved & Verified.**
@@ -110,25 +114,17 @@
 *   **Status:** All features verified on localhost:3002. Code pushed to `v2/identity-migration`.
 
 ### 2025-12-16: V2 Identity Migration & Features Complete
-*   **Major Milestone: Identity Migration**
-    *   **Persistent IDs:** Generated stable `_id` and `__id` for all movies using `scripts/stabilize_ids.js`.
-    *   **Logic:** IDs are now derived from Letterboxd URL (primary) or Title+Year+Director hash (backup), ensuring they persist across deployments.
-    *   **Deploy Script:** Updated `deploy_static_bundle.js` to preserve these stable IDs during bundling.
-
-*   **V2 Feature Refinements (The "Polish" Phase)**
-    *   **Missing Features Restored:**
-        *   **Request & Report:** Ported from legacy V1. Implemented as Floating Action Buttons (FABs) with "Glossy iOS" styling.
-        *   **Backend:** Created `models/Request.js` and `models/Report.js` + API routes to store user interactions in MongoDB.
-    *   **Dynamic Hero:** Converted the "A Film For You" Hero section to a Client Component. It now reliably randomizes the movie on every browser refresh.
-    *   **Header Polish:** Added a scroll listener to fade out the "CineAmore" title when scrolling down.
-    *   **Image Optimization:** Centralized image URL logic (`lib/images.js`) with support for a future Image Proxy via `NEXT_PUBLIC_IMAGE_PROXY`.
-
-*   **Debugging & Stability**
-    *   **Duplicate Key Crash:** Fixed a critical React crash caused by duplicate movies in the list. Added deduplication logic to `app/page.js` that runs for both DB and Static data sources.
-    *   **Wait, why is Auth failing locally?** Clarified that "Authentication Failed" on localhost is expected if the MongoDB credentials are unset/invalid, but the site successfully falls back to "Static Mode" (View Only). Added user-friendly alerts to explain this.
+### 2025-12-16: Admin "Easy Mode" & Stability
+*   **TMDB Integration:**
+    *   Added "✨ Magic Auto-Fill" to `/admin/add`.
+    *   Implemented `lib/tmdb.js` Server Actions to fetch metadata (Title, Director, Year, Plot, Poster).
+    *   **Secrets:** Added `TMDB_API_KEY` to `.env.local` (and fixed User Pwd `Password2025`).
+*   **Stability Corrections:**
+    *   **Env Vars:** Fixed `AdminDashboard` to check both `MONGO_URI` and `MONGODB_URI`.
+    *   **Serialization:** Fixed `Only plain objects` error in Edit Page by deep-cloning DB objects.
+    *   **Client Components:** Extracted `AdminSearch` and `DeleteButton` to valid Client Components to fix `onClick` and `onSearch` errors.
 
 *   **Ready for:**
-    1.  **Production Deployment:** (Vercel/Netlify).
-    2.  **Proxy Setup:** Setting up an ImageKit/Cloudinary proxy for potentially faster images.
-    3.  **Real Auth Fix:** Getting the local MongoDB connection 100% stable for the user.
+    1.  Deployment of Admin Fixes (Merge to V2 branch).
+    2.  Resuming Phase 3 (Lists).
 
