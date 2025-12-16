@@ -9,14 +9,23 @@ import mongoose from 'mongoose';
 
 export async function generateMetadata({ params }) {
     await dbConnect();
-    const { id } = await params; // await params in Next 15+
+    const { id } = await params;
 
-    // Lookup
     let movie;
-    if (mongoose.Types.ObjectId.isValid(id)) {
-        movie = await Movie.findOne({ _id: id }).select('title year description').lean();
+
+    // STATIC FALLBACK
+    if (!process.env.MONGODB_URI) {
+        try {
+            const staticMovies = require('@/lib/movies.json');
+            movie = staticMovies.find(m => m._id === id || m.__id === id);
+        } catch (e) { console.warn('Static lookup failed', e); }
     } else {
-        movie = await Movie.findOne({ __id: id }).select('title year description').lean();
+        // DB LOOKUP
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            movie = await Movie.findOne({ _id: id }).select('title year director').lean();
+        } else {
+            movie = await Movie.findOne({ __id: id }).select('title year director').lean();
+        }
     }
 
     if (!movie) return { title: 'Film Not Found' };
@@ -32,18 +41,37 @@ export default async function MoviePage({ params }) {
     const { id } = await params;
 
     let movie;
-    // Smart Lookup
-    if (mongoose.Types.ObjectId.isValid(id)) {
-        movie = await Movie.findOne({ _id: id }).lean();
+
+    // STATIC FALLBACK
+    if (!process.env.MONGODB_URI) {
+        try {
+            const staticMovies = require('@/lib/movies.json');
+            movie = staticMovies.find(m => m._id === id || m.__id === id);
+            // Simulate Mongoose serialization for dates/ids
+            if (movie) {
+                // Determine if ID is valid objectID style or simple string for clean checks
+                // JSON data is already strings mostly
+            }
+        } catch (e) {
+            console.error('Static fallback error:', e);
+        }
     } else {
-        movie = await Movie.findOne({ __id: id }).lean();
+        // DB LOOKUP
+        // Smart Lookup
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            movie = await Movie.findOne({ _id: id }).lean();
+        } else {
+            movie = await Movie.findOne({ __id: id }).lean();
+        }
+
+        // Serialize dates for DB path only (JSON is already string)
+        if (movie) {
+            if (movie.addedAt) movie.addedAt = movie.addedAt.toISOString();
+            movie._id = movie._id.toString();
+        }
     }
 
     if (!movie) notFound();
-
-    // Serialize dates
-    if (movie.addedAt) movie.addedAt = movie.addedAt.toISOString();
-    movie._id = movie._id.toString();
 
     // Parse Links
     // Backward compatibility for 'dl' and 'drive' fields
