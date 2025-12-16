@@ -10,6 +10,7 @@ export default function MovieForm({ action, defaultValues = {} }) {
         year: defaultValues.year || '',
         director: defaultValues.director || '',
         original: defaultValues.original || '',
+        plot: defaultValues.plot || '',
         lb: defaultValues.lb || '',
         notes: defaultValues.notes || '',
         downloadLinks: defaultValues.downloadLinks
@@ -48,7 +49,8 @@ export default function MovieForm({ action, defaultValues = {} }) {
                 year: details.year,
                 director: details.director,
                 original: details.original,
-                notes: details.notes,
+                plot: details.plot || details.overview || '', // Map overview to plot
+                // notes: details.notes, // Notes are usually empty from TMDB, handled manually
                 // We don't overwrite LB or Download links usually, but we could if we had them
             }));
             setResults([]); // Clear results
@@ -164,12 +166,23 @@ export default function MovieForm({ action, defaultValues = {} }) {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-[var(--muted)] font-bold">Plot / Notes</label>
+                    <label className="text-xs uppercase tracking-widest text-[var(--muted)] font-bold">Plot Summary</label>
+                    <textarea
+                        name="plot"
+                        value={formData.plot}
+                        onChange={handleChange}
+                        rows={6}
+                        className="w-full p-4 rounded-xl bg-black/20 border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none resize-none"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-[var(--muted)] font-bold">Editor's Notes (Optional)</label>
                     <textarea
                         name="notes"
                         value={formData.notes}
                         onChange={handleChange}
-                        rows={4}
+                        rows={2}
                         className="w-full p-4 rounded-xl bg-black/20 border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none resize-none"
                     />
                 </div>

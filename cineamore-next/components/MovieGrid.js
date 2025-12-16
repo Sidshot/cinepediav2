@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import SearchBar from './SearchBar';
-import { getPosterUrl } from '@/lib/images';
+import OptimizedPoster from './OptimizedPoster';
 
-export default function MovieGrid({ initialMovies }) {
+export default function MovieGrid({ initialMovies, currentPage = 1, totalPages = 1, totalCount = 0 }) {
+    const router = useRouter();
     const [query, setQuery] = useState('');
     const [filterYear, setFilterYear] = useState('all');
     const [filterDirector, setFilterDirector] = useState('all');
@@ -93,12 +95,14 @@ export default function MovieGrid({ initialMovies }) {
                     return (
                         <div key={movie._id || movie.__id} className="group relative flex flex-col h-full p-4 rounded-[var(--radius)] card-gloss transition-all hover:-translate-y-2 hover:shadow-2xl hover:border-white/20">
                             {/* Poster Link */}
-                            <Link href={`/movie/${movie._id || movie.__id}`} className="block aspect-[2/3] w-full rounded-xl bg-black/40 mb-4 shadow-lg overflow-hidden relative">
-                                <img
-                                    src={getPosterUrl(movie.title, movie.year, movie.poster)}
-                                    alt={movie.title}
-                                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                                    loading="lazy"
+                            <Link href={`/movie/${movie._id || movie.__id}`} className="block aspect-[2/3] w-full rounded-xl mb-4 shadow-lg overflow-hidden relative">
+                                <OptimizedPoster
+                                    src={movie.poster}
+                                    title={movie.title}
+                                    year={movie.year}
+                                    width={250}
+                                    height={375}
+                                    className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                             </Link>
@@ -115,21 +119,35 @@ export default function MovieGrid({ initialMovies }) {
                             </div>
 
                             {/* Rating */}
-                            <div className="mt-auto mb-4 flex items-center gap-1 opacity-80">
-                                {[1, 2, 3, 4, 5].map(i => (
-                                    <svg key={i} className={`w-4 h-4 ${i <= Math.round((movie.ratingSum / movie.ratingCount) || 0) ? 'fill-[var(--muted)]' : 'fill-[#333]'}`} viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                ))}
-                                <span className="text-xs ml-1 font-mono">{parseFloat((movie.ratingSum / movie.ratingCount) || 0).toFixed(1)}</span>
-                            </div>
+                            {(() => {
+                                // Safe rating calculation to prevent hydration mismatches
+                                const sum = Number(movie.ratingSum) || 0;
+                                const count = Number(movie.ratingCount) || 0;
+                                const avgRating = count > 0 ? sum / count : 0;
+                                const roundedRating = Math.round(avgRating);
+                                const displayRating = avgRating.toFixed(1);
+
+                                return (
+                                    <div className="mt-auto mb-4 flex items-center gap-1 opacity-80">
+                                        {[1, 2, 3, 4, 5].map(i => (
+                                            <svg key={i} className={`w-4 h-4 ${i <= roundedRating ? 'fill-[var(--muted)]' : 'fill-[#333]'}`} viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                                        ))}
+                                        <span className="text-xs ml-1 font-mono">{displayRating}</span>
+                                    </div>
+                                );
+                            })()}
 
                             {/* Actions Row */}
                             <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/5">
                                 {/* Download Button */}
                                 <a
-                                    href={movie.download || movie.drive || '#'}
+                                    href={movie.downloadLinks?.length > 0 ? movie.downloadLinks[0].url : '#'}
                                     target="_blank"
-                                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${movie.download || movie.drive ? 'bg-[#3dffb8]/10 text-[#3dffb8] border border-[#3dffb8]/20 hover:bg-[#3dffb8]/20' : 'opacity-30 cursor-not-allowed bg-white/5'}`}
-                                    onClick={(e) => { e.stopPropagation(); }}
+                                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${movie.downloadLinks?.length > 0
+                                        ? 'bg-[#3dffb8]/10 text-[#3dffb8] border border-[#3dffb8]/20 hover:bg-[#3dffb8]/20'
+                                        : 'opacity-30 cursor-not-allowed bg-white/5'
+                                        }`}
+                                    onClick={(e) => { if (!movie.downloadLinks?.length) e.preventDefault(); e.stopPropagation(); }}
                                 >
                                     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" /></svg>
                                     Download
@@ -164,6 +182,41 @@ export default function MovieGrid({ initialMovies }) {
             {filteredMovies.length === 0 && (
                 <div className="py-20 text-center border border-dashed border-[var(--border)] rounded-3xl text-[var(--muted)]">
                     No movies found matching your criteria.
+                </div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-12 pt-8 border-t border-[var(--border)]">
+                    <button
+                        onClick={() => router.push(`/?page=${currentPage - 1}`)}
+                        disabled={currentPage <= 1}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${currentPage <= 1
+                            ? 'opacity-30 cursor-not-allowed bg-white/5'
+                            : 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 hover:bg-[var(--accent)]/20 hover:-translate-y-1'
+                            }`}
+                    >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /></svg>
+                        Previous
+                    </button>
+
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.03)] border border-[var(--border)]">
+                        <span className="text-[var(--fg)] font-bold">{currentPage}</span>
+                        <span className="text-[var(--muted)]">of</span>
+                        <span className="text-[var(--fg)] font-bold">{totalPages}</span>
+                    </div>
+
+                    <button
+                        onClick={() => router.push(`/?page=${currentPage + 1}`)}
+                        disabled={currentPage >= totalPages}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${currentPage >= totalPages
+                            ? 'opacity-30 cursor-not-allowed bg-white/5'
+                            : 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 hover:bg-[var(--accent)]/20 hover:-translate-y-1'
+                            }`}
+                    >
+                        Next
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></svg>
+                    </button>
                 </div>
             )}
         </div>

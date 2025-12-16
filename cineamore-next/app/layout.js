@@ -1,4 +1,6 @@
+
 import Header from "@/components/Header";
+import UserMenu from "@/components/UserMenu";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -36,7 +38,7 @@ export default function RootLayout({ children }) {
           }}
         />
 
-        <Header />
+        <Header userMenu={<UserMenu />} />
 
         {children}
       </body>

@@ -13,6 +13,7 @@ const MovieSchema = z.object({
     year: z.coerce.number().min(1888, "Year must be valid"),
     director: z.string().optional(),
     original: z.string().optional(),
+    plot: z.string().optional(),
     notes: z.string().optional(),
     lb: z.string().url("Invalid Letterboxd URL").optional().or(z.literal('')),
     posterUrl: z.string().url("Invalid Poster URL").optional().or(z.literal('')), // Not in DB schema but useful for future
@@ -28,6 +29,7 @@ export async function createMovie(formData) {
         year: formData.get('year'),
         director: formData.get('director'),
         original: formData.get('original'),
+        plot: formData.get('plot'),
         notes: formData.get('notes'),
         lb: formData.get('lb'),
         downloadLinks: formData.get('downloadLinks')
@@ -80,6 +82,7 @@ export async function updateMovie(id, formData) {
         year: formData.get('year'),
         director: formData.get('director'),
         original: formData.get('original'),
+        plot: formData.get('plot'),
         notes: formData.get('notes'),
         lb: formData.get('lb'),
         downloadLinks: formData.get('downloadLinks')

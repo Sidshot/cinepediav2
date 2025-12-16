@@ -6,8 +6,9 @@ const MovieSchema = new mongoose.Schema({
     original: String,
     year: Number,
     director: String,
+    plot: String, // Plot Summary
     lb: String,
-    notes: String,
+    notes: String, // Editor's Notes
     ratingSum: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },
     downloadLinks: [{

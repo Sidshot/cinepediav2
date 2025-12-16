@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ThemeToggle from './ThemeToggle';
+// import UserMenu from './UserMenu'; // Removed
 
-export default function Header() {
+export default function Header({ userMenu }) {
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -33,6 +34,7 @@ export default function Header() {
                     {/* Right Controls */}
                     <div className="flex items-center gap-4">
                         <ThemeToggle />
+                        {userMenu}
                     </div>
                 </div>
             </div>

@@ -42,7 +42,8 @@ export async function getMovieDetails(tmdbId) {
             original: data.original_title !== data.title ? data.original_title : '',
             year: data.release_date ? data.release_date.split('-')[0] : '',
             director: director,
-            notes: data.overview || '',
+            plot: data.overview || '',
+            notes: '', // Notes are for editor, not auto-filled usually
             posterUrl: posterUrl,
             lb: '', // We don't get LB url from TMDB directly
         };
