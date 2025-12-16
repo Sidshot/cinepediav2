@@ -1,6 +1,8 @@
 import { login } from '@/lib/auth';
 
-export default function LoginPage({ searchParams }) {
+export default async function LoginPage({ searchParams }) {
+    const params = await searchParams; // Await params in Next.js 15
+
     return (
         <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-6">
             <div className="w-full max-w-md bg-[var(--card-bg)] p-8 rounded-3xl border border-[var(--border)] shadow-2xl backdrop-blur-xl">
@@ -20,9 +22,9 @@ export default function LoginPage({ searchParams }) {
                         />
                     </div>
 
-                    {searchParams?.error && (
+                    {params?.error && (
                         <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm text-center font-medium">
-                            {searchParams.error}
+                            {params.error}
                         </div>
                     )}
 
@@ -40,7 +42,4 @@ export default function LoginPage({ searchParams }) {
             </div>
         </main>
     );
-}
-
-// Next 15+ searchParams are async, but in basic server components they can be props.
-// We'll keep it simple for now. 
+} 

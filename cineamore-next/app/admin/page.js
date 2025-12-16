@@ -2,12 +2,13 @@ import { logout } from '@/lib/auth';
 import { deleteMovie } from '@/lib/actions';
 import dbConnect from '@/lib/mongodb';
 import Movie from '@/models/Movie';
-import SearchBar from '@/components/SearchBar';
+import AdminSearch from '@/components/AdminSearch';
+import DeleteButton from '@/components/DeleteButton';
 import Link from 'next/link';
 
 export default async function AdminDashboard({ searchParams }) {
     // STATIC MODE GUARD: If no DB, render maintenance view
-    if (!process.env.MONGODB_URI) {
+    if (!process.env.MONGO_URI && !process.env.MONGODB_URI) {
         return (
             <main className="min-h-screen p-8 text-center flex flex-col items-center justify-center">
                 <h1 className="text-3xl font-bold text-[var(--fg)] mb-4">Admin Dashboard Unavailable</h1>
@@ -18,7 +19,8 @@ export default async function AdminDashboard({ searchParams }) {
     }
 
     await dbConnect();
-    const query = (await searchParams)?.q || '';
+    const params = await searchParams; // Next 15 await
+    const query = params?.q || '';
 
     // Search Logic (reuse from Home, or simplified)
     const filter = query ? {
@@ -57,7 +59,7 @@ export default async function AdminDashboard({ searchParams }) {
             </header>
 
             <div className="mb-8 max-w-md">
-                <SearchBar placeholder="Search movies to edit..." />
+                <AdminSearch placeholder="Search movies to edit..." />
             </div>
 
             <div className="bg-[var(--card-bg)] rounded-3xl border border-[var(--border)] overflow-hidden">
@@ -92,14 +94,7 @@ export default async function AdminDashboard({ searchParams }) {
                                         >
                                             Edit
                                         </Link>
-                                        <form action={deleteMovie.bind(null, id)}>
-                                            <button
-                                                onClick="return confirm('Delete this movie?');"
-                                                className="text-sm font-bold text-red-500 hover:text-red-400 opacity-60 hover:opacity-100 transition"
-                                            >
-                                                Delete
-                                            </button>
-                                        </form>
+                                        <DeleteButton id={id} deleteAction={deleteMovie} />
                                     </td>
                                 </tr>
                             );

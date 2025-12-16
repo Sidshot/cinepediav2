@@ -20,9 +20,10 @@ export default async function EditMoviePage({ params }) {
 
     if (!movie) notFound();
 
-    // Serialize
-    movie._id = movie._id.toString();
-    const updateAction = updateMovie.bind(null, movie._id);
+    // Serialize for Client Component
+    // This handles _id, Dates, and nested ObjectIDs automatically
+    const serializedMovie = JSON.parse(JSON.stringify(movie));
+    const updateAction = updateMovie.bind(null, serializedMovie._id);
 
     return (
         <main className="min-h-screen p-8 max-w-7xl mx-auto bg-[var(--bg)] flex flex-col items-center">
@@ -31,10 +32,10 @@ export default async function EditMoviePage({ params }) {
                     ← Back to Dashboard
                 </a>
                 <h1 className="text-3xl font-extrabold text-[var(--fg)]">Edit Movie</h1>
-                <p className="text-[var(--muted)]">Updating details for {movie.title}.</p>
+                <p className="text-[var(--muted)]">Updating details for {serializedMovie.title}.</p>
             </div>
 
-            <MovieForm action={updateAction} defaultValues={movie} />
+            <MovieForm action={updateAction} defaultValues={serializedMovie} />
         </main>
     );
 }
