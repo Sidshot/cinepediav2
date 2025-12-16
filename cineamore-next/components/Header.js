@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ThemeToggle from './ThemeToggle';
-// import UserMenu from './UserMenu'; // Removed
 
-export default function Header({ userMenu }) {
+export default function Header({ userMenu, isLoggedIn }) {
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -31,6 +30,24 @@ export default function Header({ userMenu }) {
                         </h1>
                     </Link>
 
+                    {/* Center Navigation */}
+                    <nav className="hidden md:flex items-center gap-6">
+                        <Link
+                            href="/"
+                            className="text-sm font-medium text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
+                        >
+                            Browse
+                        </Link>
+                        {isLoggedIn && (
+                            <Link
+                                href="/lists"
+                                className="text-sm font-medium text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
+                            >
+                                My Lists
+                            </Link>
+                        )}
+                    </nav>
+
                     {/* Right Controls */}
                     <div className="flex items-center gap-4">
                         <ThemeToggle />
@@ -41,3 +58,4 @@ export default function Header({ userMenu }) {
         </header>
     );
 }
+

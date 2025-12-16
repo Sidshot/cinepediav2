@@ -1,7 +1,7 @@
-
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import { Geist, Geist_Mono } from "next/font/google";
+import { auth } from "@/lib/auth-next";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,7 +14,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -38,10 +41,11 @@ export default function RootLayout({ children }) {
           }}
         />
 
-        <Header userMenu={<UserMenu />} />
+        <Header userMenu={<UserMenu />} isLoggedIn={isLoggedIn} />
 
         {children}
       </body>
     </html>
   );
 }
+

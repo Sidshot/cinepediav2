@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SearchBar from './SearchBar';
 import OptimizedPoster from './OptimizedPoster';
+import AddToListButton from './AddToListButton';
 
 export default function MovieGrid({ initialMovies, currentPage = 1, totalPages = 1, totalCount = 0 }) {
     const router = useRouter();
@@ -105,6 +106,11 @@ export default function MovieGrid({ initialMovies, currentPage = 1, totalPages =
                                     className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+                                {/* Save Button - Top Right */}
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <AddToListButton movieId={movie._id || movie.__id} movieTitle={movie.title} variant="icon" />
+                                </div>
                             </Link>
 
                             {/* Title Link */}
