@@ -6,27 +6,59 @@ import { auth } from './auth-next';
 import { revalidatePath } from 'next/cache';
 
 /**
+ * Check if user is authenticated - can be called from client
+ */
+export async function checkAuthStatus() {
+    try {
+        const session = await auth();
+        return {
+            isLoggedIn: !!session?.user?.id,
+            userId: session?.user?.id || null,
+            userName: session?.user?.name || null
+        };
+    } catch (error) {
+        return { isLoggedIn: false, userId: null, userName: null };
+    }
+}
+
+/**
  * Get the current authenticated user's ID
+ * Returns null if not authenticated (instead of throwing)
  */
 async function getCurrentUserId() {
-    const session = await auth();
-    if (!session?.user?.id) {
-        throw new Error('You must be logged in to perform this action');
+    try {
+        const session = await auth();
+        console.log('[List Actions] Session:', session?.user?.email || 'No session');
+        if (!session?.user?.id) {
+            return null;
+        }
+        return session.user.id;
+    } catch (error) {
+        console.error('[List Actions] Auth error:', error);
+        return null;
     }
-    return session.user.id;
 }
 
 /**
  * Create a new list
  */
 export async function createList(formData) {
+    console.log('[List Actions] createList called');
+
     const userId = await getCurrentUserId();
+    if (!userId) {
+        console.log('[List Actions] No user ID - not authenticated');
+        return { error: 'You must be logged in to create a list' };
+    }
+
     await dbConnect();
 
-    const title = formData.get('title') || formData.title;
-    const description = formData.get('description') || formData.description || '';
-    const type = formData.get('type') || formData.type || 'custom';
-    const isPublic = formData.get('isPublic') === 'true' || formData.isPublic || false;
+    const title = formData.get?.('title') || formData.title;
+    const description = formData.get?.('description') || formData.description || '';
+    const type = formData.get?.('type') || formData.type || 'custom';
+    const isPublic = formData.get?.('isPublic') === 'true' || formData.isPublic || false;
+
+    console.log('[List Actions] Creating list:', { title, type, userId });
 
     if (!title || title.trim().length === 0) {
         return { error: 'Title is required' };
@@ -42,11 +74,12 @@ export async function createList(formData) {
             movies: []
         });
 
+        console.log('[List Actions] List created:', list._id);
         revalidatePath('/lists');
         return { success: true, listId: list._id.toString() };
     } catch (error) {
-        console.error('Error creating list:', error);
-        return { error: 'Failed to create list' };
+        console.error('[List Actions] Error creating list:', error);
+        return { error: 'Failed to create list: ' + error.message };
     }
 }
 
@@ -55,6 +88,10 @@ export async function createList(formData) {
  */
 export async function getUserLists() {
     const userId = await getCurrentUserId();
+    if (!userId) {
+        console.log('[List Actions] getUserLists - not authenticated');
+        return [];
+    }
     await dbConnect();
 
     try {
@@ -131,7 +168,12 @@ export async function getListById(listId) {
  * Add a movie to a list
  */
 export async function addMovieToList(listId, movieId) {
+    console.log('[List Actions] addMovieToList:', { listId, movieId });
+
     const userId = await getCurrentUserId();
+    if (!userId) {
+        return { error: 'You must be logged in' };
+    }
     await dbConnect();
 
     try {
@@ -237,7 +279,12 @@ export async function toggleListVisibility(listId) {
  * Creates the list if it doesn't exist
  */
 export async function quickAddToList(movieId, listType) {
+    console.log('[List Actions] quickAddToList:', { movieId, listType });
+
     const userId = await getCurrentUserId();
+    if (!userId) {
+        return { error: 'You must be logged in' };
+    }
     await dbConnect();
 
     try {

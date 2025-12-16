@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
-import { quickAddToList, getUserLists, addMovieToList, getListsContainingMovie } from '@/lib/list-actions';
+import { checkAuthStatus, quickAddToList, getUserLists, addMovieToList, getListsContainingMovie } from '@/lib/list-actions';
 
 /**
  * AddToListButton - A dropdown button for adding movies to user lists
@@ -25,15 +25,28 @@ export default function AddToListButton({ movieId, movieTitle, variant = 'icon' 
 
     async function loadLists() {
         try {
+            // First check auth status
+            const authStatus = await checkAuthStatus();
+            console.log('[AddToListButton] Auth status:', authStatus);
+
+            if (!authStatus.isLoggedIn) {
+                setIsLoggedIn(false);
+                return;
+            }
+
+            setIsLoggedIn(true);
+
+            // Now fetch lists
             const [userLists, containingLists] = await Promise.all([
                 getUserLists(),
                 getListsContainingMovie(movieId)
             ]);
-            setLists(userLists);
-            setInLists(containingLists.map(l => l._id));
-            setIsLoggedIn(true);
+
+            console.log('[AddToListButton] Lists loaded:', userLists?.length || 0);
+            setLists(Array.isArray(userLists) ? userLists : []);
+            setInLists(Array.isArray(containingLists) ? containingLists.map(l => l._id) : []);
         } catch (error) {
-            // User not logged in
+            console.error('[AddToListButton] Error loading lists:', error);
             setIsLoggedIn(false);
         }
     }
