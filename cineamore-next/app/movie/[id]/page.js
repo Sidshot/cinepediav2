@@ -5,6 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import Movie from '@/models/Movie';
 import mongoose from 'mongoose';
 import { getPosterUrl, getBackdropUrl } from '@/lib/images';
+import staticData from '@/lib/movies.json';
 
 // Force dynamic rendering if params are not known static (which they aren't)
 // actually in Next 13+ app dir, dynamic segments are dynamic by default if not generated static.
@@ -28,8 +29,7 @@ export async function generateMetadata({ params }) {
     // 2. Static Fallback
     if (!movie) {
         try {
-            const staticMovies = require('@/lib/movies.json');
-            movie = staticMovies.find(m => m._id === id || m.__id === id);
+            movie = staticData.find(m => m._id === id || m.__id === id);
         } catch (e) { console.warn('Static metadata lookup failed', e); }
     }
 
@@ -67,8 +67,7 @@ export default async function MoviePage({ params }) {
     // 2. Static Fallback (if no DB, DB failed, or movie not found in DB)
     if (!movie) {
         try {
-            const staticMovies = require('@/lib/movies.json');
-            movie = staticMovies.find(m => m._id === id || m.__id === id);
+            movie = staticData.find(m => m._id === id || m.__id === id);
         } catch (e) {
             console.error('Static fallback error:', e);
         }

@@ -2,34 +2,32 @@ import dbConnect from '@/lib/mongodb';
 import Movie from '@/models/Movie';
 import MovieGrid from '@/components/MovieGrid';
 import { getBackdropUrl } from '@/lib/images';
+import staticData from '@/lib/movies.json';
 
 // Server Component
 export default async function Home() {
   let serializedMovies = [];
 
   try {
-    await dbConnect();
-    const movies = await Movie.find({})
-      .select('title year director ratingSum ratingCount __id addedAt')
-      .sort({ addedAt: -1 })
-      .lean();
+    if (process.env.MONGODB_URI) {
+      await dbConnect();
+      const movies = await Movie.find({})
+        .select('title year director ratingSum ratingCount __id addedAt')
+        .sort({ addedAt: -1 })
+        .lean();
 
-    serializedMovies = movies.map(doc => {
-      const d = { ...doc };
-      d._id = d._id.toString();
-      if (d.addedAt) d.addedAt = d.addedAt.toISOString();
-      return d;
-    });
+      serializedMovies = movies.map(doc => {
+        const d = { ...doc };
+        d._id = d._id.toString();
+        if (d.addedAt) d.addedAt = d.addedAt.toISOString();
+        return d;
+      });
+    } else {
+      throw new Error("No Mongo URI");
+    }
   } catch (error) {
     console.warn('⚠️ Database connection failed or missing. Using Static Fallback.');
-    // Lazy load JSON to avoid build-time errors if file missing
-    try {
-      const staticData = require('../lib/movies.json');
-      serializedMovies = staticData;
-    } catch (e) {
-      console.error('❌ Static fallback failed:', e);
-      serializedMovies = [];
-    }
+    serializedMovies = staticData;
   }
 
   // Select a random movie for "A Film For You"
