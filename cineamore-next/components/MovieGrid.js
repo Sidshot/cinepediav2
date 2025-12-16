@@ -146,8 +146,8 @@ export default function MovieGrid({ initialMovies, currentPage = 1, totalPages =
                                 );
                             })()}
 
-                            {/* Actions Row */}
-                            <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/5">
+                            {/* Actions Row - z-10 ensures it's above card-gloss ::after */}
+                            <div className="relative z-10 grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/5">
                                 {/* Download Button */}
                                 <a
                                     href={movie.downloadLinks?.length > 0 ? movie.downloadLinks[0].url : '#'}
