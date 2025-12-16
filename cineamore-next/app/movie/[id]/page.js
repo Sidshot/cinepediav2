@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import InteractiveRating from '@/components/InteractiveRating';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/mongodb';
 import Movie from '@/models/Movie';
@@ -8,24 +9,27 @@ import mongoose from 'mongoose';
 // actually in Next 13+ app dir, dynamic segments are dynamic by default if not generated static.
 
 export async function generateMetadata({ params }) {
-    await dbConnect();
     const { id } = await params;
-
     let movie;
 
-    // STATIC FALLBACK
-    if (!process.env.MONGODB_URI) {
+    // 1. Try DB
+    if (process.env.MONGODB_URI) {
+        try {
+            await dbConnect();
+            if (mongoose.Types.ObjectId.isValid(id)) {
+                movie = await Movie.findOne({ _id: id }).select('title year director').lean();
+            } else {
+                movie = await Movie.findOne({ __id: id }).select('title year director').lean();
+            }
+        } catch (e) { console.warn('DB metadata lookup failed', e); }
+    }
+
+    // 2. Static Fallback
+    if (!movie) {
         try {
             const staticMovies = require('@/lib/movies.json');
             movie = staticMovies.find(m => m._id === id || m.__id === id);
-        } catch (e) { console.warn('Static lookup failed', e); }
-    } else {
-        // DB LOOKUP
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            movie = await Movie.findOne({ _id: id }).select('title year director').lean();
-        } else {
-            movie = await Movie.findOne({ __id: id }).select('title year director').lean();
-        }
+        } catch (e) { console.warn('Static metadata lookup failed', e); }
     }
 
     if (!movie) return { title: 'Film Not Found' };
@@ -37,41 +41,45 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function MoviePage({ params }) {
-    await dbConnect();
     const { id } = await params;
-
     let movie;
 
-    // STATIC FALLBACK
-    if (!process.env.MONGODB_URI) {
+    // 1. Try DB Lookup if configured
+    if (process.env.MONGODB_URI) {
+        try {
+            await dbConnect();
+            if (mongoose.Types.ObjectId.isValid(id)) {
+                movie = await Movie.findOne({ _id: id }).lean();
+            } else {
+                movie = await Movie.findOne({ __id: id }).lean();
+            }
+
+            if (movie) {
+                if (movie.addedAt) movie.addedAt = movie.addedAt.toISOString();
+                movie._id = movie._id.toString();
+            }
+        } catch (err) {
+            console.warn('DB Lookup failed, attempting static fallback:', err);
+        }
+    }
+
+    // 2. Static Fallback (if no DB, DB failed, or movie not found in DB)
+    if (!movie) {
         try {
             const staticMovies = require('@/lib/movies.json');
             movie = staticMovies.find(m => m._id === id || m.__id === id);
-            // Simulate Mongoose serialization for dates/ids
-            if (movie) {
-                // Determine if ID is valid objectID style or simple string for clean checks
-                // JSON data is already strings mostly
-            }
         } catch (e) {
             console.error('Static fallback error:', e);
-        }
-    } else {
-        // DB LOOKUP
-        // Smart Lookup
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            movie = await Movie.findOne({ _id: id }).lean();
-        } else {
-            movie = await Movie.findOne({ __id: id }).lean();
-        }
-
-        // Serialize dates for DB path only (JSON is already string)
-        if (movie) {
-            if (movie.addedAt) movie.addedAt = movie.addedAt.toISOString();
-            movie._id = movie._id.toString();
         }
     }
 
     if (!movie) notFound();
+
+    // 3. Wikipedia Plot Fallback
+    if (!movie.plot || movie.plot === 'No plot summary available.') {
+        const wikiPlot = await fetchWikipediaSummary(movie.title, movie.year);
+        if (wikiPlot) movie.plot = wikiPlot;
+    }
 
     // Parse Links
     // Backward compatibility for 'dl' and 'drive' fields
@@ -106,11 +114,6 @@ export default async function MoviePage({ params }) {
                 <div className="flex flex-col gap-6">
                     <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10 aspect-[2/3] relative group">
                         <img src={posterUrl} className="w-full h-full object-cover" alt={movie.title} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-6">
-                            <a href={movie.lb || '#'} target="_blank" className="bg-[#ff8000] text-white font-bold px-6 py-3 rounded-xl w-full text-center hover:bg-[#e67300] transition">
-                                View on Letterboxd
-                            </a>
-                        </div>
                     </div>
                 </div>
 
@@ -131,17 +134,12 @@ export default async function MoviePage({ params }) {
                         </div>
                     </div>
 
-                    <div className="flex gap-4 py-6 border-y border-white/10">
-                        {movie.ratingCount > 0 ? (
-                            <div className="flex flex-col">
-                                <span className="text-3xl font-bold text-[var(--accent)]">
-                                    {parseFloat(movie.ratingSum / movie.ratingCount).toFixed(1)} <span className="text-lg text-[var(--muted)]">/ 5</span>
-                                </span>
-                                <span className="text-xs uppercase tracking-widest text-[var(--muted)]">{movie.ratingCount} Ratings</span>
-                            </div>
-                        ) : (
-                            <div className="text-[var(--muted)] italic">No ratings yet</div>
-                        )}
+                    <div className="flex gap-4 py-6 border-y border-white/10 justify-center md:justify-start">
+                        <InteractiveRating
+                            movieId={movie._id || movie.__id}
+                            initialSum={movie.ratingSum}
+                            initialCount={movie.ratingCount}
+                        />
                     </div>
 
                     {/* Links Section */}
@@ -165,11 +163,31 @@ export default async function MoviePage({ params }) {
                         </div>
                     </div>
 
-                    {/* Plot Placeholder (If we had it in DB) or Wiki Embed Button */}
+                    {/* External Actions */}
+                    <div className="flex flex-wrap gap-3">
+                        <a href={movie.letterboxd ? (movie.letterboxd.startsWith('http') ? movie.letterboxd : `https://letterboxd.com/film/${movie.letterboxd}`) : `https://letterboxd.com/search/${encodeURIComponent(movie.title)}`} target="_blank" className="glossy-box social-link letterboxd flex-1">
+                            <span className="text-xl mr-2">●</span> Letterboxd
+                        </a>
+                        <a href={movie.imdb ? (movie.imdb.startsWith('http') ? movie.imdb : `https://www.imdb.com/title/${movie.imdb}`) : `https://www.imdb.com/find?q=${encodeURIComponent(movie.title + ' ' + movie.year)}`} target="_blank" className="glossy-box social-link imdb flex-1">
+                            <span className="font-black text-lg mr-2">IMDb</span>
+                        </a>
+                        <a href={`https://www.google.com/search?q=${encodeURIComponent(movie.title + ' ' + movie.year + ' movie')}`} target="_blank" className="glossy-box social-link google flex-1">
+                            Google
+                        </a>
+                    </div>
+
+                    {/* Plot & Notes */}
                     <div className="prose prose-invert max-w-none">
-                        <p className="text-lg leading-relaxed text-[var(--muted)]">
-                            {movie.notes || "No additional notes or plot summary available for this title."}
+                        <h3 className="text-2xl font-bold text-white mb-2">Synopsis</h3>
+                        <p className="text-lg leading-relaxed text-[var(--fg)]">
+                            {movie.plot || movie.overview || "No plot summary available."}
                         </p>
+                        {movie.notes && (
+                            <div className="mt-6 p-4 bg-yellow-500/10 border-l-4 border-yellow-500 rounded-r-lg">
+                                <h4 className="text-yellow-500 font-bold uppercase text-xs tracking-wider mb-1">Editor's Notes</h4>
+                                <p className="text-[var(--muted)] italic m-0">{movie.notes}</p>
+                            </div>
+                        )}
                     </div>
 
                 </div>
@@ -179,4 +197,24 @@ export default async function MoviePage({ params }) {
 }
 
 // NextJS 15 requires async params
-export const dynamicParams = true; 
+export const dynamicParams = true;
+
+async function fetchWikipediaSummary(title, year) {
+    try {
+        const query = `${title} ${year || ''} film`;
+        const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json`;
+        const searchRes = await fetch(searchUrl, { next: { revalidate: 3600 } }); // Cache for 1 hour
+        const searchData = await searchRes.json();
+
+        if (searchData.query?.search?.length > 0) {
+            const pageId = searchData.query.search[0].pageid;
+            const extractUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=10&explaintext&pageids=${pageId}&format=json`;
+            const extractRes = await fetch(extractUrl, { next: { revalidate: 3600 } });
+            const extractData = await extractRes.json();
+            return extractData.query?.pages?.[pageId]?.extract;
+        }
+    } catch (e) {
+        console.error('Wiki Fetch Error:', e);
+    }
+    return null;
+}

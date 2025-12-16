@@ -24,8 +24,15 @@ try {
             title: movie.title,
             year: movie.year || 'N/A',
             director: movie.director || 'Unknown',
+            plot: movie.plot || 'No plot summary available.',
+            notes: movie.notes || '',
+            imdb: movie.imdb || '', // Can be ID or full link
+            letterboxd: movie.letterboxd || movie.lb || '', // Can be slug or full link
+            rating: movie.rating || 0,
             ratingSum: 0,
             ratingCount: 0,
+            genres: movie.genres || [],
+            duration: movie.duration || '',
             addedAt: new Date().toISOString(),
             // Keep original links for detail view if needed (though page.js only needs basic info)
             drive: movie.drive,
