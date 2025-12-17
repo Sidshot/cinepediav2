@@ -1,49 +1,52 @@
 # CineAmore Session Memory
-**Last Updated:** 2025-12-17 05:42 IST (Mongoose 8.x Fix Deployed)
+**Last Updated:** 2025-12-17 15:35 IST (Production OAuth + Atlas Migration Complete)
 
 ## 🟢 Current Status
 *   **Active Branch:** `main`
 *   **Mode:** `STABLE` (All bugs fixed)
-*   **Server Status:** Deployed to Vercel (auto-deploy from main)
-*   **Last Commit:** `5e2ec89` - Mongoose 8.x pre-save hook fix
+*   **Production URL:** https://cineamore.vercel.app
+*   **Database:** MongoDB Atlas (`cluster0.lallguq.mongodb.net/cinepedia`)
+*   **Last Commit:** `9199629` - Download button fallback fix
 
-## 📅 Session Log: 2025-12-17 (Early Morning)
-### Issue Resolved
-*   **Mongoose 8.x Pre-Save Hook:** Updated `models/List.js` from callback syntax to async/await syntax.
-    *   **Before:** `ListSchema.pre('save', function (next) { ... next(); })`
-    *   **After:** `ListSchema.pre('save', async function () { ... })`
-*   **User Lists Functionality:** Verified working - creating lists, adding movies to Watchlist/Favorites.
-*   **Google Sign-In:** Working correctly.
-*   **Download Links:** Working correctly on movie cards.
+## 📅 Session Log: 2025-12-17 (Afternoon) - Production Setup
+### ✅ Completed
+1.  **Google OAuth Production Setup:**
+    *   Added redirect URI: `https://cineamore.vercel.app/api/auth/callback/google`
+    *   Fixed `invalid_client` error (newline in GOOGLE_CLIENT_ID env var)
+    *   Added `trustHost: true` for Vercel compatibility
+    *   JWT session strategy for serverless
 
-## 📝 Staged Changes
-*   **User Lists:** Full Watchlist/Favorites/Custom collections system.
-*   **Profile Page:** User stats and quick actions.
-*   **Save Button:** Integrated on all movie cards.
+2.  **MongoDB Atlas Migration:**
+    *   Created migration script: `scripts/migrate-to-atlas.js`
+    *   Migrated **2,436 movies** from local to Atlas
+    *   Fixed auth failure (`bad auth`) by updating password
+
+3.  **Download Button Regression Fix:**
+    *   Updated `MovieGrid.js` to fall back to legacy `dl`/`drive` fields
+    *   Issue: migrated data uses old fields, not `downloadLinks` array
+
+### 🔑 Production Environment Variables (Vercel)
+| Variable | Purpose |
+|----------|---------|
+| `AUTH_SECRET` | NextAuth session encryption |
+| `AUTH_URL` | `https://cineamore.vercel.app` |
+| `GOOGLE_CLIENT_ID` | OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | OAuth client secret |
+| `MONGODB_URI` | Atlas connection string |
+| `TMDB_API_KEY` | Movie metadata API |
+
+### ⚠️ Lessons Learned (This Session)
+1.  **ALWAYS test locally before pushing to production**
+2.  **Check for invisible characters** in copy-pasted env vars (`%0A` newlines)
+3.  **Update memory.md** with every issue encountered
+4.  **MongoDB password mismatch** causes silent auth failures
 
 ## 🐛 Active Bugs
-*   *None known.* All critical bugs fixed + Phase 3 complete.
-
-## ✅ Recent Actions (2025-12-17)
-### Bug Fixes
-1.  **Pagination:** 48 movies/page with Prev/Next navigation.
-2.  **Image Proxy:** `OptimizedPoster.js` with Next.js Image optimization.
-3.  **Data Migrations:** 732 download links consolidated, 2,330 plots fetched.
-4.  **Hydration:** Safe rating calculations.
-
-### Phase 3 - User Lists
-5.  **List Model:** `models/List.js` with owner, movies, visibility.
-6.  **Server Actions:** `lib/list-actions.js` for CRUD operations.
-7.  **AddToListButton:** Quick-add to Watchlist/Favorites from any movie.
-8.  **Lists Dashboard:** `/lists` with create form and list grid.
-9.  **List Detail:** `/lists/[id]` with movie grid and owner controls.
-10. **Profile Page:** `/profile` with user stats and quick links.
-11. **Header/UserMenu:** Navigation for logged-in users.
+*   **Local Sign-In:** `.env.local` has wrong MongoDB password (production works fine)
 
 ## ⏭️ Immediate Next Steps
-1.  **Deploy:** Push to Vercel (Done - auto-deploy enabled).
-2.  **Configure Google OAuth:** Add callback URLs in Google Console.
-3.  **Phase 4:** Comments & Reviews system.
+1.  **Update local `.env.local`** with new MongoDB password (`mongoadmin`)
+2.  **Phase 4:** Comments & Reviews system
 
 
 ## 🧠 Key Context & Rules
