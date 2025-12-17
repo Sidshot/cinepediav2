@@ -148,25 +148,38 @@ export default function MovieGrid({ initialMovies, currentPage = 1, totalPages =
 
                             {/* Actions Row - z-10 ensures it's above card-gloss ::after */}
                             <div className="relative z-10 grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/5">
-                                {/* Download Button */}
-                                <a
-                                    href={movie.downloadLinks?.length > 0 ? movie.downloadLinks[0].url : '#'}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${movie.downloadLinks?.length > 0
-                                        ? 'bg-[#3dffb8]/10 text-[#3dffb8] border border-[#3dffb8]/20 hover:bg-[#3dffb8]/20'
-                                        : 'opacity-30 cursor-not-allowed bg-white/5'
-                                        }`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (!movie.downloadLinks?.length) {
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                >
-                                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" /></svg>
-                                    Download
-                                </a>
+                                {/* Download Button - supports downloadLinks array OR legacy dl/drive fields */}
+                                {(() => {
+                                    // Get download URL from various sources
+                                    const getDownloadUrl = () => {
+                                        if (movie.downloadLinks?.length > 0) return movie.downloadLinks[0].url;
+                                        if (movie.dl) return movie.dl;
+                                        if (movie.drive) return movie.drive;
+                                        return null;
+                                    };
+                                    const downloadUrl = getDownloadUrl();
+
+                                    return (
+                                        <a
+                                            href={downloadUrl || '#'}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${downloadUrl
+                                                ? 'bg-[#3dffb8]/10 text-[#3dffb8] border border-[#3dffb8]/20 hover:bg-[#3dffb8]/20'
+                                                : 'opacity-30 cursor-not-allowed bg-white/5'
+                                                }`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (!downloadUrl) {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                        >
+                                            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" /></svg>
+                                            Download
+                                        </a>
+                                    );
+                                })()}
 
                                 {/* Letterboxd / Info Button */}
                                 {lbLink ? (
