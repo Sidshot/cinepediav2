@@ -56,8 +56,26 @@ export default async function MoviePage({ params }) {
             }
 
             if (movie) {
-                if (movie.addedAt) movie.addedAt = movie.addedAt.toISOString();
+                // Deep serialize all MongoDB types for Client Components
                 movie._id = movie._id.toString();
+                if (movie.__id) movie.__id = String(movie.__id);
+                if (movie.addedAt && typeof movie.addedAt.toISOString === 'function') {
+                    movie.addedAt = movie.addedAt.toISOString();
+                } else if (movie.addedAt) {
+                    movie.addedAt = String(movie.addedAt);
+                }
+                // Serialize ratingSum and ratingCount to plain numbers
+                movie.ratingSum = Number(movie.ratingSum) || 0;
+                movie.ratingCount = Number(movie.ratingCount) || 0;
+                // Serialize downloadLinks subdocuments
+                if (movie.downloadLinks && Array.isArray(movie.downloadLinks)) {
+                    movie.downloadLinks = movie.downloadLinks.map(link => ({
+                        label: link.label || 'Download',
+                        url: link.url || '',
+                        _id: link._id ? link._id.toString() : undefined,
+                        addedAt: link.addedAt ? (typeof link.addedAt.toISOString === 'function' ? link.addedAt.toISOString() : String(link.addedAt)) : undefined
+                    }));
+                }
             }
         } catch (err) {
             console.warn('DB Lookup failed, attempting static fallback:', err);

@@ -43,6 +43,7 @@ export async function getMovieDetails(tmdbId) {
             year: data.release_date ? data.release_date.split('-')[0] : '',
             director: director,
             plot: data.overview || '',
+            genre: data.genres ? data.genres.map(g => g.name) : [],
             notes: '', // Notes are for editor, not auto-filled usually
             posterUrl: posterUrl,
             lb: '', // We don't get LB url from TMDB directly

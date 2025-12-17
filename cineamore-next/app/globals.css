@@ -163,3 +163,66 @@ body {
   font-weight: 600;
   vertical-align: middle;
 }
+
+/* Genre Filter Tiles */
+.genre-tiles-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.genre-tile {
+  padding: 8px 18px;
+  border-radius: 99px;
+  /* Pill shape for modern look */
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.08);
+  /* Increased from 0.05 */
+  backdrop-filter: blur(16px) saturate(180%);
+  /* Increased blur from 8px */
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* Stronger border */
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  white-space: nowrap;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  /* Added subtle shadow */
+}
+
+.genre-tile:hover {
+  background: rgba(255, 255, 255, 0.2);
+  /* Brighter hover */
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--fg);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  /* Lift effect */
+}
+
+.genre-tile.active {
+  background: linear-gradient(135deg, rgba(255, 192, 67, 0.9) 0%, rgba(255, 138, 61, 0.9) 100%);
+  /* More opacity */
+  color: #000;
+  border-color: rgba(255, 255, 255, 0.5);
+  font-weight: 800;
+  box-shadow: 0 4px 20px rgba(255, 192, 67, 0.4);
+  /* Stronger glow */
+  backdrop-filter: blur(20px);
+}
+
+.genre-tile.more-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border-style: dashed;
+  color: var(--accent);
+}
+
+.genre-tile.more-btn:hover {
+  background: rgba(255, 192, 67, 0.1);
+  border-color: var(--accent);
+}

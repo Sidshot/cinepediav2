@@ -17,6 +17,7 @@ const MovieSchema = z.object({
     notes: z.string().optional(),
     lb: z.string().url("Invalid Letterboxd URL").optional().or(z.literal('')),
     posterUrl: z.string().url("Invalid Poster URL").optional().or(z.literal('')), // Not in DB schema but useful for future
+    genre: z.string().optional(), // Comma separated string from form
     // For now we handle downloads as a JSON string or simplified
     downloadLinks: z.string().optional() // We'll parse this from a textarea "Label|URL" per line
 });
@@ -32,6 +33,7 @@ export async function createMovie(formData) {
         plot: formData.get('plot'),
         notes: formData.get('notes'),
         lb: formData.get('lb'),
+        genre: formData.get('genre'),
         downloadLinks: formData.get('downloadLinks')
     };
 
@@ -41,7 +43,10 @@ export async function createMovie(formData) {
         return { error: validated.error.flatten().fieldErrors };
     }
 
-    const { downloadLinks, ...movieData } = validated.data;
+    const { downloadLinks, genre, ...movieData } = validated.data;
+
+    // Parse Genre: "Action, Drama" -> ["Action", "Drama"]
+    const genreArray = genre ? genre.split(',').map(g => g.trim()).filter(Boolean) : [];
 
     // Parse Download Links (Format: "Label | URL" per line)
     const parsedLinks = [];
@@ -62,6 +67,7 @@ export async function createMovie(formData) {
             _id,
             __id: _id.toString(), // Use the new ID as the legacy ID for new items
             ...movieData,
+            genre: genreArray,
             downloadLinks: parsedLinks,
             addedAt: new Date()
         });
@@ -85,6 +91,7 @@ export async function updateMovie(id, formData) {
         plot: formData.get('plot'),
         notes: formData.get('notes'),
         lb: formData.get('lb'),
+        genre: formData.get('genre'),
         downloadLinks: formData.get('downloadLinks')
     };
 
@@ -94,7 +101,10 @@ export async function updateMovie(id, formData) {
         return { error: validated.error.flatten().fieldErrors };
     }
 
-    const { downloadLinks, ...movieData } = validated.data;
+    const { downloadLinks, genre, ...movieData } = validated.data;
+
+    // Parse Genre
+    const genreArray = genre ? genre.split(',').map(g => g.trim()).filter(Boolean) : [];
 
     // Parse Download Links
     const parsedLinks = [];
@@ -108,6 +118,7 @@ export async function updateMovie(id, formData) {
     try {
         await Movie.findByIdAndUpdate(id, {
             ...movieData,
+            genre: genreArray,
             downloadLinks: parsedLinks
         });
     } catch (e) {

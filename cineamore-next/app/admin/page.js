@@ -59,6 +59,13 @@ export default async function AdminDashboard({ searchParams }) {
                         >
                             <span>📥</span> Reports
                         </a>
+                        <a
+                            href="/admin/auto-genre"
+                            className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 font-bold px-4 py-2 rounded-xl transition text-sm flex items-center gap-2"
+                            title="Open Auto-Genre Manager"
+                        >
+                            <span>🪄</span> Auto-Genre
+                        </a>
                     </div>
 
                     <Link

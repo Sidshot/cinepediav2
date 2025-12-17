@@ -7,6 +7,7 @@ const MovieSchema = new mongoose.Schema({
     year: Number,
     director: String,
     plot: String, // Plot Summary
+    genre: { type: [String], default: [] }, // Genre Tags
     lb: String,
     notes: String, // Editor's Notes
     ratingSum: { type: Number, default: 0 },
@@ -21,4 +22,12 @@ const MovieSchema = new mongoose.Schema({
     addedAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.models.Movie || mongoose.model('Movie', MovieSchema);
+
+
+// FORCE REFRESH: Delete the stale model from Mongoose cache to ensure new schema fields (genre) are recognized
+// This fixes the Next.js hot-reload issue where schema updates aren't applied
+if (mongoose.models.Movie) {
+    delete mongoose.models.Movie;
+}
+
+export default mongoose.model('Movie', MovieSchema);
