@@ -39,13 +39,16 @@
     <script>
       let count = 5;
       const el = document.getElementById('redir-timer');
-      setInterval(() => {
+      const interval = setInterval(() => {
         count--;
-        if(el) el.innerText = count;
-        if(count <= 0) window.location.href = "https://cineamore.vercel.app";
+        if(el) el.innerText = count > 0 ? count : 0;
+        if(count <= 0) {
+            clearInterval(interval);
+            window.location.href = "https://cineamore.vercel.app";
+        }
       }, 1000);
       // Fallback
-      setTimeout(() => { window.location.href = "https://cineamore.vercel.app"; }, 5000);
+      setTimeout(() => { window.location.href = "https://cineamore.vercel.app"; }, 6000);
     </script>
   </div>
 

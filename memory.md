@@ -244,7 +244,26 @@ If V2 fails catastrophicall and you need the "Old Viral Site" back:
   - **Added Features**: Created API endpoints (`/api/export/requests`, `/api/export/reports`) and added "📥 Download CSV" buttons to the Admin Dashboard.
 - **Outcome**: **Deployed to Production.** `main` branch updated (Commit: `7641e0f`). Live site `cineamore.vercel.app` should now reflect these changes.
 
-### 🔍 Comprehensive Error Log & Post-Mortem (Current Session)
+## 📝 Session Log: 2025-12-17 (Auto-Genre Automation)
+- **Goal**: Implement persistent, automated genre categorization for all movies (new and existing).
+- **Actions**:
+  - **Schema Update**: Added `genre: [String]` to `Movie.js`.
+  - **TMDB Integration**: Updated `tmdb.js` to fetch genres and `actions.js` to save them.
+  - **Magic Auto-Fill**: Updated `MovieForm.js` to auto-fill genres when adding new movies.
+  - **Backfill Tool**: Created `app/admin/auto-genre` (UI) and `api/admin/backfill-genres` (Backend) to automatically categorize thousands of existing movies.
+  - **Optimization**: Implemented "Batch 5" processing and direct MongoDB driver writes (`updateOne`) to bypass Mongoose hot-reload caching issues and incorrect "Title Year" strict matching.
+- **Status**: **Verified Locally.** User is currently running the backfill process.
+
+### � CRITICAL LESSON (2025-12-17): PREMATURE DEPLOYMENT CONFIDENCE
+- **Incident**: I recommended merging to `main` while the "Auto-Genre" backfill tool was still encountering edge cases (timeouts, "4k" title mismatches, infinite loops).
+- **Rule**: **NEVER** recommend deployment for a **Data Automation/Migration Tool** until it has successfully processed a significant chunk of real-world (dirty) data without intervention.
+- **Key Takeaway**: "Verified Locally" on a small sample (mock data) is NOT sufficient for data pipelines. Always anticipate:
+    1.  **Dirty Data**: Titles will have "4k", "HDR", etc. (Must clean inputs).
+    2.  **API Failures**: Search will fail. (Must handle failure states explicitly to prevent loops).
+    3.  **Timeouts**: 20 items per batch is too slow. (Use smaller batches + client timeouts).
+    4.  **Edge Cases**: Mongoose hot-reload won't register new schema fields immediately. (Use `collection.updateOne`).
+
+### �🔍 Comprehensive Error Log & Post-Mortem (Current Session)
 This section documents every major technical hurdle encountered during the implementation of Google Auth and V2 UI fixes, analyzing the root cause and the specific resolution.
 
 #### 1. "Use Server" Action Error in Client Component
@@ -330,3 +349,45 @@ These items are currently working but are fragile or unscalable. **Must be addre
 *   **Impact:** UI shows "No plot summary available" for thousands of films.
 *   **Fix:** Create a background script that iterates through the DB, fetches the plot from TMDB for existing movies, and patches the records.
 
+
+## 📝 Session Log: 2025-12-17 (Late Night) - Auto-Genre Debugging
+- **Goal**: Resolve "Infinite Loop" in backfill tool and "Missing Genres" in UI.
+- **Outcome**: **Success.** All issues resolved. Project is ready for deployment.
+
+### 🔍 detailed Debug Log & Post-Mortem
+
+#### 1. The Case of the Infinite Backfill Loop
+- **Symptom**: Auto-Genre process got stuck on specific movies (e.g., "Ash", "Black Bag") and won't progress.
+- **Cause**:
+    1.  **Dirty Titles**: Movies like "Furiosa: A Mad Max Saga 4k" failed TMDB search due to "4k" suffix.
+    2.  **Logic Flaw**: When search failed, no genres were saved. The loop query (`genre: { $size: 0 }`) thus re-picked the same movies endlessly.
+- **Fix**:
+    - **Backfill API**: Added regex to clean titles (remove "4k", "1080p").
+    - **Loop Breaker**: Explicitly save `genre: ["Uncategorized"]` if search fails.
+    - **Optimization**: Switched to `Movie.collection.updateOne` (native driver) to bypass Mongoose schema validation.
+
+#### 2. The Case of the Missing Genres (UI)
+- **Symptom**: Backfill was "Success", but genres didn't appear on `localhost:3000` cards.
+- **Cause**:
+    1.  **Stale Mongoose Schema**: Next.js Hot Reloading kept an old version of the `Movie` model in memory that didn't know about `genre` field, effectively stripping it from results.
+    2.  **Frontend Crash**: A hidden error `d.addedAt.toISOString is not a function` (invalid date format in DB) caused `app/page.js` to crash silently and fallback to **Static JSON Data** (Safe Mode), which naturally lacked the new genre data.
+- **Fix**:
+    - **Schema Refresh**: Added `delete mongoose.models.Movie` in `models/Movie.js` to force schema reload.
+    - **Crash Prevention**: Added type checks (`typeof === 'function'`) for `addedAt` in `app/page.js`.
+    - **Cache Killing**: Added `export const dynamic = 'force-dynamic'` to `app/page.js`.
+    - **Query Update**: Added `genre` to `.select()` chain.
+
+#### 3. Critical Mistakes (Mea Culpa)
+- **Premature Confidence**: I recommended deploying the Backfill Tool before it handled "dirty data" (4k titles), leading to a stuck loop.
+- **Hidden Errors**: I initially missed the `addedAt` crash because the logs hid the real error under a generic "DB Connection Failed" warning.
+- **Syntax Error**: I accidentally duplicated lines in `Movie.js` while fixing the schema, causing a build fail.
+
+## 🏁 Current Project Status (End of Session)
+- **Feature**: Auto-Genre System is **Fully Functional**.
+    - **Schema**: `genre` field is active.
+    - **Data**: ~2400 movies have been backfilled.
+    - **UI**: Homepage cards now display genre tags (e.g., "HORROR", "SCI-FI").
+- **Stability**:
+    - **Hot Reload**: Fixed for Mongoose models.
+    - **Date Handling**: Robust against invalid DB dates.
+- **Next Step**: READY for deployment to Production.
