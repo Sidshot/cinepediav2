@@ -41,10 +41,9 @@ const ListSchema = new mongoose.Schema({
     }
 });
 
-// Update the updatedAt timestamp on save
-ListSchema.pre('save', function (next) {
+// Update the updatedAt timestamp on save (Mongoose 8.x async syntax)
+ListSchema.pre('save', async function () {
     this.updatedAt = new Date();
-    next();
 });
 
 // Compound index for faster user list queries
