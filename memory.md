@@ -233,6 +233,17 @@ If V2 fails catastrophicall and you need the "Old Viral Site" back:
 ### ⏭️ Next Actions
 1.  **Phase 3: Social Features:**
     *   User Lists (Watchlist/Favorites).
+
+## 📝 Session Log: 2025-12-17 (V2 Admin & UI Polish)
+- **Goal**: Fix mobile layout, admin login, and enhance UI with glossy, iOS-style elements.
+- **Actions**:
+  - **Fixed Mobile Posters**: Switched `OptimizedPoster.js` to use `fill` layout, resolving blank spaces on mobile.
+  - **Fixed Header Scroll**: `Header.js` now fades out and slides up on scroll for better immersion.
+  - **Fixed Admin Login**: Rewrote `middleware.js` to correctly verify custom JWT session cookies (fixed `403/redirect` loop).
+  - **Enhanced UI**: Updated `ActionFABs.js` (Request/Report buttons) to use a premium "Glossy/Glassmorphism" iOS style (pill-shaped, gradients, blur) in dark/light mode.
+  - **Added Features**: Created API endpoints (`/api/export/requests`, `/api/export/reports`) and added "📥 Download CSV" buttons to the Admin Dashboard.
+- **Outcome**: **Deployed to Production.** `main` branch updated (Commit: `7641e0f`). Live site `cineamore.vercel.app` should now reflect these changes.
+
 ### 🔍 Comprehensive Error Log & Post-Mortem (Current Session)
 This section documents every major technical hurdle encountered during the implementation of Google Auth and V2 UI fixes, analyzing the root cause and the specific resolution.
 
