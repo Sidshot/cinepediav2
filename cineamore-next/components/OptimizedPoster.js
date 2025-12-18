@@ -53,7 +53,7 @@ export default function OptimizedPoster({
                     }
                 }}
                 priority={priority}
-                unoptimized={imageUrl.includes('bing.net')} // Bing URLs sometimes fail optimization
+                unoptimized={imageUrl.includes('bing.net') || imageUrl.includes('/api/image')} // Bing URLs sometimes fail optimization
             />
 
             {/* Error state with title fallback */}
