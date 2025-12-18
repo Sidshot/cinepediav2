@@ -44,9 +44,10 @@ export async function getMovieDetails(tmdbId) {
             director: director,
             plot: data.overview || '',
             genre: data.genres ? data.genres.map(g => g.name) : [],
-            notes: '', // Notes are for editor, not auto-filled usually
+            notes: '',
             posterUrl: posterUrl,
-            lb: '', // We don't get LB url from TMDB directly
+            backdropUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : '',
+            lb: '',
         };
     } catch (e) {
         console.error('TMDB Details Error:', e);

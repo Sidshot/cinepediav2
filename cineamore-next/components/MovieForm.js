@@ -50,7 +50,6 @@ export default function MovieForm({ action, defaultValues = {} }) {
                 year: details.year,
                 director: details.director,
                 original: details.original,
-                original: details.original,
                 plot: details.plot || details.overview || '', // Map overview to plot
                 genre: details.genre ? details.genre.join(', ') : '',
                 // notes: details.notes, // Notes are usually empty from TMDB, handled manually
@@ -86,7 +85,7 @@ export default function MovieForm({ action, defaultValues = {} }) {
 
                 {/* Results Dropdown */}
                 {results.length > 0 && (
-                    <div className="absolute top-20 left-0 w-full bg-[#1a1a1a] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50 p-2">
+                    <div className="absolute top-20 left-0 w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50 p-2">
                         {results.map(movie => (
                             <button
                                 key={movie.id}

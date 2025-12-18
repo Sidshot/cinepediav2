@@ -16,14 +16,15 @@ export default async function Home({ searchParams }) {
   const params = await searchParams;
   const currentPage = Math.max(1, parseInt(params?.page) || 1);
   const currentGenre = params?.genre || null;
-  const searchQuery = params?.q || null; // NEW: Server-side search
-  const sortBy = params?.sort || 'newest'; // NEW: Sort option (newest, oldest, year-asc, year-desc)
+  const searchQuery = params?.q || null;
+  const sortBy = params?.sort || 'year-desc'; // Default: newest films by year
 
   let serializedMovies = [];
   let totalCount = 0;
   let totalPages = 1;
-  let heroMovies = []; // Separate sample for Hero (random selection)
-  let allGenres = []; // Unique genres for filter tiles
+  let heroMovies = [];
+  let allGenres = [];
+  let recentlyAdded = []; // NEW: Films from last import
 
   try {
     if (process.env.MONGODB_URI) {
@@ -122,6 +123,27 @@ export default async function Home({ searchParams }) {
         { $sort: { _id: 1 } }
       ]);
       allGenres = genreAgg.map(g => g._id).filter(g => g && g !== 'Uncategorized');
+
+      // Fetch recently added movies (added in last 24 hours)
+      if (currentPage === 1 && !searchQuery && !currentGenre) {
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const recentMovies = await Movie.find({ addedAt: { $gte: oneDayAgo } })
+          .select('title year director __id addedAt poster downloadLinks genre')
+          .sort({ addedAt: -1 })
+          .limit(20)
+          .lean();
+
+        recentlyAdded = recentMovies.map(doc => ({
+          ...doc,
+          _id: doc._id.toString(),
+          addedAt: doc.addedAt?.toISOString?.() || doc.addedAt,
+          downloadLinks: (doc.downloadLinks || []).map(link => ({
+            ...link,
+            _id: link._id?.toString(),
+            addedAt: link.addedAt?.toISOString?.() || link.addedAt
+          }))
+        }));
+      }
     } else {
       throw new Error("No Mongo URI");
     }
@@ -190,6 +212,49 @@ export default async function Home({ searchParams }) {
     <main className="min-h-screen p-8 max-w-[1600px] mx-auto">
       {/* Client Hero handling Randomization (only on page 1 and no search active) */}
       {currentPage === 1 && !searchQuery && <Hero movies={heroMovies.length > 0 ? heroMovies : serializedMovies.slice(0, 10)} />}
+
+      {/* Recently Added Section (only on page 1, no search/genre) */}
+      {currentPage === 1 && !searchQuery && !currentGenre && recentlyAdded.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-[var(--fg)] mb-4 flex items-center gap-2">
+            <span className="text-green-400">🆕</span> Recently Added
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {recentlyAdded.slice(0, 12).map(movie => (
+              <a
+                key={movie._id}
+                href={`/movie/${movie.__id || movie._id}`}
+                className="group bg-[var(--card-bg)] rounded-xl overflow-hidden border border-[var(--border)] hover:border-[var(--accent)] transition-all hover:scale-[1.02]"
+              >
+                <div className="aspect-[2/3] bg-[var(--card-bg)] relative flex items-center justify-center">
+                  {movie.poster ? (
+                    <img
+                      src={movie.poster}
+                      alt={movie.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-4xl opacity-30">🎬</span>
+                  )}
+                  <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow">
+                    NEW
+                  </div>
+                </div>
+                <div className="p-3">
+                  <h3 className="font-bold text-sm text-[var(--fg)] truncate">{movie.title}</h3>
+                  <p className="text-xs text-[var(--muted)]">{movie.year || '—'} • {movie.director || 'Unknown'}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+          {recentlyAdded.length > 12 && (
+            <p className="text-center text-[var(--muted)] text-sm mt-4">
+              +{recentlyAdded.length - 12} more added recently
+            </p>
+          )}
+        </section>
+      )}
 
       <MovieGrid
         initialMovies={serializedMovies}

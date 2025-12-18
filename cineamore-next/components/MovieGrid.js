@@ -160,13 +160,12 @@ export default function MovieGrid({
                     <select
                         value={currentSort}
                         onChange={handleSortChange}
-                        className="h-[42px] px-4 rounded-full bg-[#1a1a1a] border border-[var(--border)] text-sm font-semibold text-[var(--fg)] focus:border-[var(--accent)] outline-none cursor-pointer hover:bg-[#252525] transition-colors"
-                        style={{ colorScheme: 'dark' }}
+                        className="h-[42px] px-4 rounded-full bg-[var(--card-bg)] border border-[var(--border)] text-sm font-semibold text-[var(--fg)] focus:border-[var(--accent)] outline-none cursor-pointer hover:brightness-110 transition-all"
                     >
-                        <option value="newest" className="bg-[#1a1a1a] text-[var(--fg)]">Recently Added</option>
-                        <option value="oldest" className="bg-[#1a1a1a] text-[var(--fg)]">Oldest Added</option>
-                        <option value="year-desc" className="bg-[#1a1a1a] text-[var(--fg)]">Year: New → Old</option>
-                        <option value="year-asc" className="bg-[#1a1a1a] text-[var(--fg)]">Year: Old → New</option>
+                        <option value="newest">Recently Added</option>
+                        <option value="oldest">Oldest Added</option>
+                        <option value="year-desc">Year: New → Old</option>
+                        <option value="year-asc">Year: Old → New</option>
                     </select>
                 </div>
             </div>

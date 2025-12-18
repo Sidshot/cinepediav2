@@ -38,7 +38,7 @@ export default function CreateListForm() {
 
             {/* Modal */}
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <div className="w-full max-w-md bg-[#1a1a1a] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                <div className="w-full max-w-md bg-[var(--bg)] rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-white/5">
                         <h2 className="text-xl font-bold text-[var(--fg)]">Create New List</h2>

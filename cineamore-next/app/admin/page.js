@@ -66,6 +66,13 @@ export default async function AdminDashboard({ searchParams }) {
                         >
                             <span>🪄</span> Auto-Genre
                         </a>
+                        <a
+                            href="/admin/import"
+                            className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 font-bold px-4 py-2 rounded-xl transition text-sm flex items-center gap-2"
+                            title="Bulk Import Movies"
+                        >
+                            <span>📦</span> Bulk Import
+                        </a>
                     </div>
 
                     <Link

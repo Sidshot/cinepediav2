@@ -141,7 +141,7 @@ export default function AddToListButton({ movieId, movieTitle, variant = 'icon' 
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 z-50 rounded-xl bg-[#1a1a1a] border border-white/10 shadow-2xl overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-56 z-50 rounded-xl bg-[var(--bg)] border border-[var(--border)] shadow-2xl overflow-hidden">
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-white/5 bg-white/5">
                         <p className="text-xs text-[var(--muted)] truncate">
