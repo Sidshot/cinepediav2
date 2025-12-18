@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getProxyUrl } from '@/lib/image-proxy';
 
 /**
@@ -19,6 +19,12 @@ export default function OptimizedPoster({
 }) {
     const [error, setError] = useState(false);
     const [loaded, setLoaded] = useState(false);
+
+    // Reset state when src changes (e.g. user updates poster in Admin)
+    useEffect(() => {
+        setError(false);
+        setLoaded(false);
+    }, [src]);
 
     // Generate fallback URL using Bing search
     const fallbackUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(`"${title}" (${year}) film poster`)}&w=300&h=450&c=7&rs=1&p=0`;
