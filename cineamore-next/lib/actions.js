@@ -18,7 +18,8 @@ const MovieSchema = z.object({
     plot: z.string().optional(),
     notes: z.string().optional(),
     lb: z.string().url("Invalid Letterboxd URL").optional().or(z.literal('')),
-    posterUrl: z.string().url("Invalid Poster URL").optional().or(z.literal('')), // Not in DB schema but useful for future
+    lb: z.string().url("Invalid Letterboxd URL").optional().or(z.literal('')),
+    poster: z.string().optional(), // TMDB path or full URL
     genre: z.string().optional(), // Comma separated string from form
     // For now we handle downloads as a JSON string or simplified
     downloadLinks: z.string().optional() // We'll parse this from a textarea "Label|URL" per line
@@ -35,6 +36,7 @@ export async function createMovie(formData) {
         plot: formData.get('plot'),
         notes: formData.get('notes'),
         lb: formData.get('lb'),
+        poster: formData.get('poster'),
         genre: formData.get('genre'),
         downloadLinks: formData.get('downloadLinks')
     };
@@ -96,6 +98,7 @@ export async function updateMovie(id, formData) {
         plot: formData.get('plot'),
         notes: formData.get('notes'),
         lb: formData.get('lb'),
+        poster: formData.get('poster'),
         genre: formData.get('genre'),
         downloadLinks: formData.get('downloadLinks')
     };

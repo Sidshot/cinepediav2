@@ -13,6 +13,7 @@ export default function MovieForm({ action, defaultValues = {} }) {
         plot: defaultValues.plot || '',
         genre: defaultValues.genre ? defaultValues.genre.join(', ') : '',
         lb: defaultValues.lb || '',
+        poster: defaultValues.poster || '',
         notes: defaultValues.notes || '',
         downloadLinks: defaultValues.downloadLinks
             ? defaultValues.downloadLinks.map(l => `${l.label} | ${l.url}`).join('\n')
@@ -50,6 +51,7 @@ export default function MovieForm({ action, defaultValues = {} }) {
                 year: details.year,
                 director: details.director,
                 original: details.original,
+                poster: details.poster_path,
                 plot: details.plot || details.overview || '', // Map overview to plot
                 genre: details.genre ? details.genre.join(', ') : '',
                 // notes: details.notes, // Notes are usually empty from TMDB, handled manually
@@ -174,6 +176,17 @@ export default function MovieForm({ action, defaultValues = {} }) {
                         type="url"
                         value={formData.lb}
                         onChange={handleChange}
+                        className="w-full h-12 px-4 rounded-xl bg-black/20 border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-[var(--muted)] font-bold">Poster URL / Path</label>
+                    <input
+                        name="poster"
+                        value={formData.poster}
+                        onChange={handleChange}
+                        placeholder="/path.jpg or https://..."
                         className="w-full h-12 px-4 rounded-xl bg-black/20 border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none"
                     />
                 </div>
