@@ -18,25 +18,68 @@ export async function GET(req) {
         await dbConnect();
         const reports = await Report.find({}).sort({ createdAt: -1 }).lean();
 
-        // 2. Convert to CSV
-        const csvHeader = 'Name,Message,Movie,Resolved,Date\n';
-        const csvRows = reports.map(r => {
-            const date = new Date(r.createdAt).toISOString();
-            const name = (r.name || 'Anonymous').replace(/,/g, ' ');
-            const msg = (r.message || '').replace(/,/g, ' ').replace(/\n/g, ' ');
-            const movie = (r.movieTitle || 'General').replace(/,/g, ' ');
-            const status = r.resolved ? 'Fixed' : 'Open';
-            return `${name},${msg},${movie},${status},${date}`;
-        }).join('\n');
+        // 2. Format as human-readable plain text
+        const separator = '─'.repeat(60);
+        const doubleSeparator = '═'.repeat(60);
+        const today = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
 
-        const csvContent = csvHeader + csvRows;
+        // Count stats
+        const openCount = reports.filter(r => !r.resolved).length;
+        const fixedCount = reports.filter(r => r.resolved).length;
 
-        // 3. Return CSV File
-        return new NextResponse(csvContent, {
+        // Header
+        let content = `${doubleSeparator}
+  CINEAMORE - REPORTED ISSUES
+  Generated: ${today}
+  Total Reports: ${reports.length} (🔴 ${openCount} Open, ✅ ${fixedCount} Fixed)
+${doubleSeparator}
+
+`;
+
+        // Each report
+        reports.forEach((r, index) => {
+            const date = new Date(r.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const status = r.resolved ? '✅ FIXED' : '🔴 OPEN';
+            const name = r.name || 'Anonymous';
+            const movie = r.movieTitle || 'General Report';
+            const message = r.message || 'No message provided';
+
+            content += `${separator}
+[#${index + 1}] ${movie}
+${separator}
+Reporter:  ${name}
+Status:    ${status}
+Date:      ${date}
+
+Message:
+${message}
+
+`;
+        });
+
+        // Footer
+        content += `${doubleSeparator}
+  END OF REPORT
+${doubleSeparator}
+`;
+
+        // 3. Return Plain Text File
+        return new NextResponse(content, {
             status: 200,
             headers: {
-                'Content-Type': 'text/csv',
-                'Content-Disposition': `attachment; filename="reports-${new Date().toISOString().split('T')[0]}.csv"`
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Content-Disposition': `attachment; filename="reports-${new Date().toISOString().split('T')[0]}.txt"`
             }
         });
 
@@ -44,3 +87,4 @@ export async function GET(req) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
