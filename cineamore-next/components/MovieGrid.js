@@ -52,7 +52,7 @@ export default function MovieGrid({
 
         if (genre && genre !== 'all') params.set('genre', genre);
         if (search && search.trim()) params.set('q', search.trim());
-        if (sort && sort !== 'newest') params.set('sort', sort);
+        if (sort && sort !== 'year-desc') params.set('sort', sort);
         if (page > 1) params.set('page', page.toString());
 
         const queryString = params.toString();
@@ -118,8 +118,8 @@ export default function MovieGrid({
 
     return (
         <div className="w-full">
-            {/* Controls Bar - Unified Layout */}
-            <div className="flex flex-col xl:flex-row gap-4 mb-8 items-center justify-between bg-[rgba(255,255,255,0.02)] p-2 rounded-3xl border border-[var(--border)] backdrop-blur-xl shadow-lg">
+            {/* Controls Bar - Sticky & Unified Layout */}
+            <div className="sticky top-0 z-50 flex flex-col xl:flex-row gap-4 mb-8 items-center justify-between bg-[var(--bg)]/95 p-3 rounded-3xl border border-[var(--border)] backdrop-blur-2xl shadow-xl transition-all duration-300">
 
                 {/* Search Bar */}
                 <div className="w-full xl:w-auto xl:min-w-[300px]">
@@ -162,10 +162,10 @@ export default function MovieGrid({
                         onChange={handleSortChange}
                         className="h-[42px] px-4 rounded-full bg-[var(--card-bg)] border border-[var(--border)] text-sm font-semibold text-[var(--fg)] focus:border-[var(--accent)] outline-none cursor-pointer hover:brightness-110 transition-all"
                     >
-                        <option value="newest">Recently Added</option>
-                        <option value="oldest">Oldest Added</option>
-                        <option value="year-desc">Year: New → Old</option>
-                        <option value="year-asc">Year: Old → New</option>
+                        <option value="newest" className="bg-[var(--bg)] text-[var(--fg)]">Recently Added</option>
+                        <option value="oldest" className="bg-[var(--bg)] text-[var(--fg)]">Oldest Added</option>
+                        <option value="year-desc" className="bg-[var(--bg)] text-[var(--fg)]">Year: New → Old</option>
+                        <option value="year-asc" className="bg-[var(--bg)] text-[var(--fg)]">Year: Old → New</option>
                     </select>
                 </div>
             </div>
