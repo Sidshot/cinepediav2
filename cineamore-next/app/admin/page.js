@@ -44,7 +44,21 @@ export default async function AdminDashboard({ searchParams }) {
                 </div>
 
                 <div className="flex gap-4 items-center flex-wrap justify-end">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                        <a
+                            href="/admin/contributors"
+                            className="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-500 font-bold px-4 py-2 rounded-xl transition text-sm flex items-center gap-2"
+                            title="Manage Contributors"
+                        >
+                            <span>👥</span> Contributors
+                        </a>
+                        <a
+                            href="/admin/pending"
+                            className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 font-bold px-4 py-2 rounded-xl transition text-sm flex items-center gap-2"
+                            title="Review Pending Changes"
+                        >
+                            <span>📋</span> Pending
+                        </a>
                         <a
                             href="/api/export/requests"
                             target="_blank"

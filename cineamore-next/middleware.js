@@ -15,16 +15,34 @@ async function verifySession(token) {
 
 export async function middleware(request) {
     const { pathname } = request.nextUrl;
+    const sessionCookie = request.cookies.get('session')?.value;
+    const session = sessionCookie ? await verifySession(sessionCookie) : null;
 
-    // Only protect /admin routes
+    // ADMIN ROUTES: Only allow role: 'admin'
     if (pathname.startsWith('/admin')) {
-        const sessionCookie = request.cookies.get('session')?.value;
-        const session = sessionCookie ? await verifySession(sessionCookie) : null;
-
         if (!session || !session.user) {
             const loginUrl = new URL('/login', request.url);
             loginUrl.searchParams.set('callbackUrl', request.url);
             return NextResponse.redirect(loginUrl);
+        }
+
+        // Check for admin role (backward compatible: old sessions without role are admin)
+        if (session.role && session.role !== 'admin') {
+            return NextResponse.redirect(new URL('/contributor', request.url));
+        }
+    }
+
+    // CONTRIBUTOR ROUTES: Allow role: 'contributor' OR 'admin'
+    if (pathname.startsWith('/contributor')) {
+        if (!session || !session.user) {
+            const loginUrl = new URL('/login', request.url);
+            loginUrl.searchParams.set('callbackUrl', request.url);
+            return NextResponse.redirect(loginUrl);
+        }
+
+        // Must be contributor or admin
+        if (session.role !== 'contributor' && session.role !== 'admin') {
+            return NextResponse.redirect(new URL('/login', request.url));
         }
     }
 
@@ -32,5 +50,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/admin/:path*'],
+    matcher: ['/admin/:path*', '/contributor/:path*'],
 };

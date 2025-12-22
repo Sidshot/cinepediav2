@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { searchMovies, getMovieDetails } from '@/lib/tmdb';
 
-export default function MovieForm({ action, defaultValues = {} }) {
+export default function MovieForm({ action, defaultValues = {}, cancelUrl = '/admin' }) {
+    const router = useRouter();
     // State for Form Fields (Controlled to allow Auto-Fill)
     const [formData, setFormData] = useState({
         title: defaultValues.title || '',
@@ -108,7 +110,18 @@ export default function MovieForm({ action, defaultValues = {} }) {
             </div>
 
             {/* Main Form */}
-            <form action={action} className={`bg-[var(--card-bg)] p-8 rounded-3xl border border-[var(--border)] shadow-2xl backdrop-blur-md space-y-6 transition-opacity ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            <form
+                action={async (formData) => {
+                    const result = await action(formData);
+                    // If action returns success (contributor mode), redirect back
+                    if (result?.success) {
+                        router.push(cancelUrl);
+                    }
+                    // If action returns error, it will be handled by the form
+                    // Admin actions use redirect() directly
+                }}
+                className={`bg-[var(--card-bg)] p-8 rounded-3xl border border-[var(--border)] shadow-2xl backdrop-blur-md space-y-6 transition-opacity ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
+            >
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -233,7 +246,7 @@ export default function MovieForm({ action, defaultValues = {} }) {
                     >
                         {defaultValues.title ? 'Update Movie' : 'Add Movie'}
                     </button>
-                    <a href="/admin" className="h-12 px-6 flex items-center justify-center bg-white/5 hover:bg-white/10 text-[var(--fg)] font-bold rounded-xl transition">
+                    <a href={cancelUrl} className="h-12 px-6 flex items-center justify-center bg-white/5 hover:bg-white/10 text-[var(--fg)] font-bold rounded-xl transition">
                         Cancel
                     </a>
                 </div>

@@ -5,20 +5,28 @@ import { useState, useEffect } from 'react';
 /**
  * Promotional Banner for CineStats
  * - Shows until EXPIRY_DATE (40 days from Dec 20, 2025 = Jan 29, 2026)
- * - User can dismiss it (session only - reappears on reload)
+ * - User can dismiss it (session only - reappears when tab is closed/reopened)
+ * - User can choose "Don't show again this session" (uses sessionStorage)
+ * - Only shows on homepage, not admin/contributor routes
  * - Glossy iOS style matching site aesthetic
  */
 const EXPIRY_DATE = new Date('2026-01-29T23:59:59');
+const SESSION_KEY = 'promoBannerDismissed';
 
-export default function PromoBanner() {
+export default function PromoBanner({ showOnlyOnHome = true }) {
   const [isVisible, setIsVisible] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   useEffect(() => {
-    // Check if banner should show (only checks expiry - session-based dismissal)
+    // Check if banner should show
     const now = new Date();
     const isExpired = now > EXPIRY_DATE;
 
-    if (!isExpired) {
+    // Check session storage for "don't show again" preference
+    const wasDismissedForSession = typeof window !== 'undefined' &&
+      sessionStorage.getItem(SESSION_KEY) === 'true';
+
+    if (!isExpired && !wasDismissedForSession) {
       setIsVisible(true);
     }
   }, []);
@@ -26,16 +34,13 @@ export default function PromoBanner() {
   // Lock body scroll when banner is visible
   useEffect(() => {
     if (isVisible) {
-      // Save current scroll position and lock
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
     } else {
-      // Restore scrolling
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
     }
 
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
@@ -43,7 +48,10 @@ export default function PromoBanner() {
   }, [isVisible]);
 
   const handleDismiss = () => {
-    // Session-only dismissal - banner will reappear on page reload
+    // If "don't show again" is checked, save to sessionStorage
+    if (dontShowAgain) {
+      sessionStorage.setItem(SESSION_KEY, 'true');
+    }
     setIsVisible(false);
   };
 
@@ -105,6 +113,16 @@ export default function PromoBanner() {
             </svg>
           </a>
 
+          {/* Don't show again checkbox */}
+          <label className="promo-checkbox">
+            <input
+              type="checkbox"
+              checked={dontShowAgain}
+              onChange={(e) => setDontShowAgain(e.target.checked)}
+            />
+            <span>Don't show again this session</span>
+          </label>
+
           {/* Skip Link */}
           <button onClick={handleDismiss} className="promo-skip">
             Skip and browse films →
@@ -127,12 +145,8 @@ export default function PromoBanner() {
         }
 
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         .promo-banner-content {
@@ -230,12 +244,8 @@ export default function PromoBanner() {
         }
 
         @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
         }
 
         .promo-title {
@@ -289,9 +299,32 @@ export default function PromoBanner() {
           transform: translate(2px, -2px);
         }
 
+        .promo-checkbox {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin: 20px auto 0;
+          color: var(--muted);
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: color 0.2s ease;
+        }
+
+        .promo-checkbox:hover {
+          color: var(--fg);
+        }
+
+        .promo-checkbox input {
+          width: 16px;
+          height: 16px;
+          accent-color: var(--accent);
+          cursor: pointer;
+        }
+
         .promo-skip {
           display: block;
-          margin: 20px auto 0;
+          margin: 12px auto 0;
           background: none;
           border: none;
           color: var(--muted);

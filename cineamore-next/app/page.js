@@ -6,6 +6,7 @@ import Hero from '@/components/Hero';
 import ActionFABs from '@/components/ActionFABs';
 import { getProxyUrl } from '@/lib/image-proxy';
 import OptimizedPoster from '@/components/OptimizedPoster';
+import PromoBanner from '@/components/PromoBanner';
 
 // Pagination config
 const MOVIES_PER_PAGE = 48;
@@ -213,6 +214,9 @@ export default async function Home({ searchParams }) {
 
   return (
     <main className="min-h-screen p-8 pb-32 max-w-[1600px] mx-auto">
+      {/* Promo Banner - only on homepage first page without search */}
+      {currentPage === 1 && !searchQuery && !currentGenre && <PromoBanner />}
+
       {isOffline && (
         <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-200 text-center font-bold flex items-center justify-center gap-2">
           <span>⚠️</span>

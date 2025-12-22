@@ -1,15 +1,194 @@
 # CineAmore Session Memory
-**Last Updated:** 2025-12-18 18:40 IST (Bulk Import + Recently Added + Theme Fixes)
+**Last Updated:** 2025-12-22 15:20 IST (Contributor Role System)
 
 ## 🟢 Current Status
 *   **Active Branch:** `main`
 *   **Mode:** `DEPLOYED & LIVE`
 *   **Production URL:** https://cineamore.vercel.app
 *   **Database:** MongoDB Atlas (`cluster0.lallguq.mongodb.net/cinepedia`)
-*   **Pending:** 0 commits
-
+*   **Pending:** Pushing contributor system update
 
 ---
+
+## 📝 Session Log: 2025-12-22 (Contributor Role System)
+**Goal**: Implement contributor role with pending changes approval workflow.
+
+### ✅ Features Completed
+
+#### 1. Contributor Authentication System
+*   **Dual Login**: Admin (password only) vs Contributor (username + password)
+*   **Role-Based Routes**: `/admin/*` (admin only), `/contributor/*` (both roles)
+*   **API Route Login**: Uses `/api/auth/login` for reliable client-side auth
+*   **Files:**
+    *   `lib/auth.js` - Extended with contributor auth + role helpers
+    *   `middleware.js` - Role-based access control
+    *   `app/api/auth/login/route.js` - API route for login
+    *   `app/login/page.js` - Client-side login form
+
+#### 2. Contributor Management (Admin)
+*   **Route**: `/admin/contributors`
+*   **Features:**
+    *   Create contributor accounts
+    *   View/reset passwords (plaintext per requirement)
+    *   Toggle active status
+    *   Delete contributors
+*   **Files:**
+    *   `lib/contributorManagement.js` - CRUD actions
+    *   `app/admin/contributors/page.js` + `ContributorList.js`
+
+#### 3. Pending Changes Workflow
+*   **Contributors submit**: Add/edit/delete → stored as `PendingChange`
+*   **Admins review**: `/admin/pending` → Approve/Reject/Discard
+*   **Diff View**: Side-by-side comparison for updates
+*   **Bulk Actions**: Approve/reject multiple at once
+*   **Files:**
+    *   `models/PendingChange.js` - Pending change schema
+    *   `lib/contributorActions.js` - Create pending changes
+    *   `lib/adminApprovalActions.js` - Approve/reject/bulk
+    *   `app/admin/pending/page.js` + `PendingList.js`
+    *   `app/admin/pending/[id]/page.js` + `PendingDetail.js`
+
+#### 4. Contributor Dashboard
+*   **Route**: `/contributor`
+*   **Tabs**: Pending / Approved / Rejected
+*   **Shows**: Submission status, admin notes for rejections
+*   **Files:**
+    *   `app/contributor/page.js` - Dashboard
+    *   `app/contributor/add/page.js` - Add movie form
+    *   `app/contributor/edit/[id]/page.js` - Edit movie form
+
+#### 5. First-Login Onboarding Guide
+*   **Trigger**: `hasSeenGuide` field on `Contributor` model
+*   **Content**: FAQ tiles (how to add, edit, status guide, tips)
+*   **Files:**
+    *   `models/Contributor.js` - Added `hasSeenGuide` field
+    *   `lib/guideActions.js` - Mark guide as seen
+    *   `components/ContributorGuide.js` - Onboarding component
+
+#### 6. Promo Banner Enhancement
+*   **"Don't show again this session"**: Uses `sessionStorage`
+*   **Homepage only**: Moved from layout to `app/page.js`
+*   **Files:**
+    *   `components/PromoBanner.js` - Updated with checkbox
+    *   `app/layout.js` - Removed PromoBanner
+    *   `app/page.js` - Added PromoBanner conditionally
+
+### 📁 New Files Created
+```
+models/
+├── Contributor.js
+└── PendingChange.js
+
+lib/
+├── contributorActions.js
+├── contributorManagement.js
+├── adminApprovalActions.js
+└── guideActions.js
+
+app/api/auth/login/
+└── route.js
+
+app/contributor/
+├── page.js
+├── add/page.js
+└── edit/[id]/page.js
+
+app/admin/contributors/
+├── page.js
+└── ContributorList.js
+
+app/admin/pending/
+├── page.js
+├── PendingList.js
+└── [id]/
+    ├── page.js
+    └── PendingDetail.js
+
+components/
+└── ContributorGuide.js
+```
+
+### 📁 Modified Files
+*   `lib/auth.js` - Dual login, role helpers
+*   `middleware.js` - Role-based access
+*   `app/login/page.js` - Client-side form
+*   `app/admin/page.js` - Added Contributors/Pending links
+*   `app/page.js` - Added PromoBanner for homepage only
+*   `app/layout.js` - Removed PromoBanner
+*   `components/MovieForm.js` - Added `cancelUrl` prop
+*   `components/PromoBanner.js` - Added "don't show again"
+
+### ⚠️ Technical Notes
+1.  **Server Actions Issue**: Login via server action had issues; switched to API route  
+2.  **Password Storage**: Plaintext as per user requirement for admin visibility
+3.  **Session**: JWT-based, 24hr expiry
+
+---
+
+## 📝 Session Log: 2025-12-20 (CineStats Promotional Banner)
+**Goal**: Add promotional banner for CineStats year-end Letterboxd analytics tool.
+
+### ✅ Features Completed
+
+#### 1. Jottacloud Scraper (`extract_links.py`)
+*   **Problem**: Jottacloud pages are JavaScript SPAs - simple HTTP requests return empty `<div id="root">`
+*   **Solution**: Built Playwright-based scraper that uses headless Chromium to render pages
+*   **Tech Stack**: Python + Playwright + Pandas
+*   **Output**: Extracted **1,760 movie files** from 28 alphabetical folders
+*   **Files Created:**
+    *   `extract_links.py` - Main Playwright scraper
+    *   `movies_master_list.csv` - Raw extracted data
+    *   `clean_extracted_data.py` - Data cleanup script
+
+#### 2. Data Cleanup Pipeline
+*   **Script**: `clean_extracted_data.py`
+*   **Features:**
+    *   Extracts movie titles from filenames
+    *   Removes quality tags: `ENG SUBS`, `[HD]`, `4K`, `1080p`, etc.
+    *   Extracts year from filename patterns: `(1999)`, `[1999]`, etc.
+    *   Generates CineAmore-compatible JSON format
+*   **Output:**
+    *   `movies_for_import.json` - Full cleaned dataset (1,758 unique movies)
+    *   `movies_cleaned.csv` - Reference CSV
+    *   `movies_batch_1.json` through `movies_batch_4.json` - Split files (440 each) for 500-item import limit
+
+#### 3. Import Progress UI Enhancement
+*   **Modified:** `app/admin/import/page.js`
+*   **Problem**: Import screen just showed "Please wait..." with no details
+*   **Solution**: Added live progress during import:
+    *   Progress bar with percentage
+    *   Counter: "X / Y movies"
+    *   Current movie name being imported
+    *   Scrolling activity log (last 10 imports) with status icons:
+        *   ✓ Success (green)
+        *   ⊘ Skipped (yellow)
+        *   ✗ Error (red)
+*   **Commit**: `f123679` - "feat(admin): Add live progress display to bulk import"
+
+### 📁 Files Created (Not Committed - Data Files)
+```
+movies jon w alphabet order.xlsx   # Source Excel with Jottacloud links
+movies_master_list.csv             # Raw scraped data
+movies_for_import.json             # Full cleaned dataset
+movies_batch_1.json                # Batch 1 (440 movies)
+movies_batch_2.json                # Batch 2 (440 movies)
+movies_batch_3.json                # Batch 3 (440 movies)
+movies_batch_4.json                # Batch 4 (438 movies)
+movies_cleaned.csv                 # Reference CSV
+extract_links.py                   # Playwright scraper
+clean_extracted_data.py            # Cleanup script
+debug_page.html                    # Debug output (empty SPA page)
+debug_rendered.html                # Debug output (rendered page)
+```
+
+### ⚠️ Lessons Learned
+1.  **Jottacloud is a SPA** - Cannot scrape with simple `requests.get()`, needs browser automation
+2.  **Playwright > Selenium** - Modern, async, easier to install on Windows
+3.  **Filename cleanup is essential** - Raw filenames have `ENG SUBS`, `[HD]`, quality tags that confuse TMDB search
+4.  **Batch imports** - CineAmore has 500-item limit per import, must split large datasets
+
+---
+
 
 ## 📝 Session Log: 2025-12-18 (Bulk Import & UI Polish)
 **Goal**: Make bulk import foolproof, add Recently Added section, fix light/dark mode issues.
@@ -525,4 +704,33 @@ We paused feature development to harden the system against data corruption and o
 ## 🔑 Operational Invariants (New)
 *   **Images:** Always use `getProxyUrl` (never hotlink TMDB).
 *   **Imports:** Always check `bulkImport.js` logs if data looks weird.
-*   **Auth:** Admin rights are managed via `lib/auth-next.js` / ENV.
+## 📝 Session Log: 2025-12-19 (Maintenance & Architecture)
+**Goal**: Resolve robust UI/UX bugs, improve observability, and architecture hardening.
+
+### ✅ Completed Updates
+1.  **Mobile UI Obstruction Fix**:
+    *   **Problem**: Floating Action Buttons (Request/Report) blocked pagination on mobile.
+    *   **Fix**: Added `pb-32` padding to `app/page.js` to ensure content scroll clearance.
+2.  **Observability Integration**:
+    *   **Feature**: Integrated Vercel **Speed Insights** (`@vercel/speed-insights`).
+    *   **Feature**: Added **Offline Mode Banner** to Homepage (`app/page.js`) to diagnose DB connection failures visually.
+3.  **Admin Empowerment**:
+    *   **Feature**: Added **"Poster URL"** field to `MovieForm.js`.
+    *   **Backend**: Updated `lib/actions.js` to handle manual poster override, putting control in user hands.
+4.  **Architectural Fix: Image Loading**:
+    *   **Bug**: `OptimizedPoster.js` kept "remembering" error state even after URL fix.
+    *   **Fix**: Added `useEffect` to reset state on prop change.
+    *   **Bug**: Homepage images timed out while Detail page worked.
+    *   **Fix**: Disabled Next.js Optimization (`unoptimized={true}`) for internal Proxy URLs, aligning Homepage logic with Detail Page logic (removing double-proxy overhead).
+
+### 📁 Files Changed
+*   `app/page.js` (Layout, Offline Banner)
+*   `app/layout.js` (Speed Insights)
+*   `components/OptimizedPoster.js` (State Reset, Optimization Bypass)
+*   `components/MovieForm.js` (Poster Input)
+*   `lib/actions.js` (Poster Save Logic)
+*   `next.config.mjs` (Verified image domains)
+
+### ⚠️ Lessons Learned
+*   **State "Stickiness"**: UI components with validation error states (like image 404s) must explicitly reset when their inputs change, otherwise they "lie" to the user.
+*   **Double Proxying**: `next/image` optimizing a local API route (`/api/image`) which proxies an external URL is redundant and prone to timeouts. Sometimes raw `<img>` (or unoptimized) is better for internal proxies.

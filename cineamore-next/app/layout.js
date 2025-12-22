@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
-import PromoBanner from "@/components/PromoBanner";
 import { Geist, Geist_Mono } from "next/font/google";
 import { auth } from "@/lib/auth-next";
 import { Analytics } from "@vercel/analytics/react";
@@ -45,7 +44,6 @@ export default async function RootLayout({ children }) {
         />
 
         <Header userMenu={<UserMenu />} isLoggedIn={isLoggedIn} />
-        <PromoBanner />
 
         <Analytics />
         <SpeedInsights />
