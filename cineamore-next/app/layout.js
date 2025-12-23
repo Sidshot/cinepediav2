@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
+import Footer from "@/components/Footer";
 import { Geist, Geist_Mono } from "next/font/google";
 import { auth } from "@/lib/auth-next";
 import { Analytics } from "@vercel/analytics/react";
@@ -47,7 +48,12 @@ export default async function RootLayout({ children }) {
 
         <Analytics />
         <SpeedInsights />
-        {children}
+        <div className="min-h-screen flex flex-col">
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer />
+        </div>
       </body>
     </html>
   );
