@@ -72,6 +72,40 @@ export async function GET(request) {
 
         if (!targetUrl) return new NextResponse('Link Not Found', { status: 404 });
 
+        // --- ENFORCE DOWNLOAD BEHAVIOR ---
+        try {
+            const urlObj = new URL(targetUrl);
+            const host = urlObj.hostname.toLowerCase();
+
+            // 1. Google Drive: Ensure export=download
+            if (host.includes('drive.google.com')) {
+                // If it's a file ID link, usually: /file/d/ID/view -> /file/d/ID/view?export=download (or better API link)
+                // But simplest fix for /view links:
+                if (!urlObj.searchParams.has('export')) {
+                    urlObj.searchParams.set('export', 'download');
+                    targetUrl = urlObj.toString();
+                }
+            }
+            // 2. Dropbox: Ensure dl=1
+            else if (host.includes('dropbox.com')) {
+                urlObj.searchParams.set('dl', '1');
+                targetUrl = urlObj.toString();
+            }
+            // 3. Jottacloud: Try universal dl=1 flag (works on many services for direct links)
+            else if (host.includes('jottacloud.com')) {
+                // For Jottacloud, if it's a direct file link (bin), it might respond to mode=download or just Content-Disposition headers.
+                // We will try appending dl=1 as a hint to the service/browser.
+                if (!urlObj.searchParams.has('dl')) {
+                    urlObj.searchParams.set('dl', '1');
+                    targetUrl = urlObj.toString();
+                }
+                // Also handling /shared/ links -> /download (if it's a folder share this might zip it, which is good)
+            }
+            // 4. Generic: Video files should try to download? Can't force without proxy.
+        } catch (e) {
+            // Invalid URL, ignore transformation
+        }
+
         // 4. The Magic Redirect
         return NextResponse.redirect(targetUrl, 307);
 
