@@ -124,7 +124,6 @@ export default async function AdminDashboard({ searchParams }) {
                                     <td className="p-4">
                                         <div className="font-bold text-[var(--fg)] flex items-center gap-2">
                                             {movie.title}
-                                            {/* Debug: Show actual state */}
                                             {movie.visibility?.state === 'quarantined' && (
                                                 <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-red-500/20 text-red-400 border border-red-500/30">
                                                     Quarantined
@@ -133,12 +132,6 @@ export default async function AdminDashboard({ searchParams }) {
                                             {movie.visibility?.state === 'hidden' && (
                                                 <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                                                     Hidden
-                                                </span>
-                                            )}
-                                            {/* Temporary debug badge */}
-                                            {!movie.visibility?.state && (
-                                                <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                                                    No State: {JSON.stringify(movie.visibility)}
                                                 </span>
                                             )}
                                         </div>
