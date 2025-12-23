@@ -18,15 +18,19 @@ export default async function AdminDashboard({ searchParams }) {
         );
     }
 
+
     await dbConnect();
     const params = await searchParams; // Next 15 await
     const query = params?.q || '';
 
+    // Helper to escape regex special characters
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
     // Search Logic (reuse from Home, or simplified)
     const filter = query ? {
         $or: [
-            { title: { $regex: query, $options: 'i' } },
-            { director: { $regex: query, $options: 'i' } },
+            { title: { $regex: escapeRegex(query), $options: 'i' } },
+            { director: { $regex: escapeRegex(query), $options: 'i' } },
             // Year check needs casting if numeric, regex works if string or via aggregation. 
             // For simplicity in Admin regex title/director is usually enough.
         ]
