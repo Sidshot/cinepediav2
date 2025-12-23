@@ -71,7 +71,7 @@ export default async function Home({ searchParams }) {
       // 2. Fetch Hero data (Only needed for Page 1/Default)
       if (currentPage === 1) {
         const heroSample = await Movie.aggregate([
-          { $match: { backdrop: { $exists: true, $ne: null, $ne: '' } } },
+          { $match: { hidden: { $ne: true }, backdrop: { $exists: true, $ne: null, $ne: '' } } },
           { $sample: { size: 10 } },
           { $project: { title: 1, year: 1, director: 1, backdrop: 1, poster: 1, __id: 1 } }
         ]);
@@ -82,7 +82,7 @@ export default async function Home({ searchParams }) {
         // --- DEFAULT VIEW STRATEGY ---
 
         // A. Recently Added (Last 20)
-        const recentMoviesDocs = await Movie.find({})
+        const recentMoviesDocs = await Movie.find({ hidden: { $ne: true } })
           .sort({ addedAt: -1 })
           .select('title year director poster __id addedAt downloadLinks')
           .limit(18)
@@ -92,7 +92,7 @@ export default async function Home({ searchParams }) {
         // B. Genre Sections (Parallel Fetch)
         // Fetch top 18 for each priority genre
         const genrePromises = HOME_GENRES.map(async (genre) => {
-          const movies = await Movie.find({ genre: genre })
+          const movies = await Movie.find({ genre: genre, hidden: { $ne: true } })
             .sort({ addedAt: -1 }) // Sort by new in that genre
             .select('title year director poster __id addedAt downloadLinks genre')
             .limit(18)
@@ -110,8 +110,8 @@ export default async function Home({ searchParams }) {
       } else {
         // --- FILTERED / PAGINATED VIEW STRATEGY ---
 
-        const query = {};
-        if (currentGenre && currentGenre !== 'all') {
+        const query = { hidden: { $ne: true } };
+        if (currentGenre && currentGenre !== 'all' && currentGenre !== 'newest') {
           query.genre = currentGenre;
         }
         if (searchQuery && searchQuery.trim()) {
@@ -249,7 +249,7 @@ export default async function Home({ searchParams }) {
             <GenreRow
               title="Recently Added"
               movies={recentlyAdded}
-              genreId="newest" // This maps to sort=newest in url
+              viewAllUrl="/?sort=newest"
             />
           )}
 

@@ -5,8 +5,11 @@ import Link from 'next/link';
 import OptimizedPoster from './OptimizedPoster';
 import AddToListButton from './AddToListButton';
 
-export default function GenreRow({ title, movies, genreId }) {
+export default function GenreRow({ title, movies, genreId, viewAllUrl }) {
     const scrollContainerRef = useRef(null);
+
+    // Determine the link target
+    const linkTarget = viewAllUrl || `/?genre=${encodeURIComponent(genreId)}`;
 
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
@@ -26,7 +29,7 @@ export default function GenreRow({ title, movies, genreId }) {
                     {title}
                 </h2>
                 <Link
-                    href={`/?genre=${encodeURIComponent(genreId)}`}
+                    href={linkTarget}
                     className="text-sm font-bold text-[var(--accent)] hover:text-white transition-colors bg-[var(--accent)]/10 px-4 py-2 rounded-full border border-[var(--accent)]/20 hover:bg-[var(--accent)]"
                 >
                     View All
