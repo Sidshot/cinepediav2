@@ -74,7 +74,13 @@ export async function middleware(request) {
 
     // 2. 🚦 RATE LIMITING (Skip for static assets)
     if (!pathname.startsWith('/_next') && !pathname.includes('.')) {
-        // 2a. ADMIN EXEMPTION: Skip rate limiting for logged-in admins
+        // 2a. IP WHITELIST: Always bypass rate limits for whitelisted IPs
+        const whitelistedIPs = (process.env.WHITELISTED_IPS || '').split(',').filter(Boolean);
+        if (whitelistedIPs.includes(ip)) {
+            return NextResponse.next();
+        }
+
+        // 2b. ADMIN SESSION EXEMPTION: Skip rate limiting for logged-in admins
         const sessionCookie = request.cookies.get('session')?.value;
         if (sessionCookie) {
             try {
@@ -89,7 +95,7 @@ export async function middleware(request) {
             }
         }
 
-        // 2b. Apply rate limits for non-admin users
+        // 2c. Apply rate limits for non-admin/non-whitelisted users
         let limiter;
 
         if (pathname.startsWith('/api/download')) limiter = getRateLimiter('download');
