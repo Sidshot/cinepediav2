@@ -14,6 +14,11 @@ export async function POST(request) {
     // For now, relies on middleware to have caught the worst offenders, 
     // but we double-check here if we want extra security (optional).
 
+    // 💀 KILL SWITCH IN CASE OF EMERGENCY
+    if (process.env.KILL_SWITCH_DOWNLOADS === 'true') {
+        return new NextResponse('Service Temporarily Unavailable (Eschelon Protocol)', { status: 503 });
+    }
+
     try {
         const body = await request.json();
         const { movieId, linkIndex } = body;

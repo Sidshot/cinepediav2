@@ -63,7 +63,7 @@ export async function middleware(request) {
         const secFetchSite = request.headers.get('sec-fetch-site');
 
         // Chrome claims usually require consistency
-        if (userAgent.includes('Chrome') && !userAgent.includes('Electron')) {
+        if (userAgent.includes('Chrome')) {
             // If Sec-Fetch-Site exists (modern browser feature) but Sec-CH-UA is missing -> Suspicious
             if (secFetchSite && !secChUa) {
                 return new NextResponse('Access Denied (Header Mismatch)', { status: 403 });

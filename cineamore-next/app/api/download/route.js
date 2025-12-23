@@ -30,6 +30,11 @@ export async function GET(request) {
     const token = searchParams.get('token');
     const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
 
+    // 💀 KILL SWITCH IN CASE OF EMERGENCY
+    if (process.env.KILL_SWITCH_DOWNLOADS === 'true') {
+        return new NextResponse('Service Temporarily Unavailable (Eschelon Protocol)', { status: 503 });
+    }
+
     if (!token) return new NextResponse('Missing Token', { status: 400 });
 
     // 1. Verify Token
