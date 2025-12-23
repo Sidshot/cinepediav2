@@ -54,7 +54,15 @@ export async function middleware(request) {
 
     // A. Basic UA Filter
     if (badBots.some(bot => userAgent.toLowerCase().includes(bot))) {
-        return new NextResponse('Access Denied', { status: 403 });
+        return new NextResponse(JSON.stringify({
+            error: 'Access Denied',
+            reason: 'Automated access detected',
+            message: 'Our security system has detected automated bot activity. If you believe this is an error, please contact support.',
+            userAgent: userAgent.substring(0, 50) + '...'
+        }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 
     // B. Header Coherence (Anti-Spoofing)
@@ -66,7 +74,15 @@ export async function middleware(request) {
         if (userAgent.includes('Chrome')) {
             // If Sec-Fetch-Site exists (modern browser feature) but Sec-CH-UA is missing -> Suspicious
             if (secFetchSite && !secChUa) {
-                return new NextResponse('Access Denied (Header Mismatch)', { status: 403 });
+                return new NextResponse(JSON.stringify({
+                    error: 'Access Denied',
+                    reason: 'Browser security check failed',
+                    message: 'Your browser sent inconsistent security headers. Please use an updated browser or disable browser extensions that might interfere with security headers.',
+                    details: 'Missing required Chrome security headers'
+                }), {
+                    status: 403,
+                    headers: { 'Content-Type': 'application/json' }
+                });
             }
         }
     }
@@ -105,9 +121,37 @@ export async function middleware(request) {
         res.headers.set('X-RateLimit-Remaining', remaining.toString());
 
         if (!success) {
-            return new NextResponse('Too Many Requests', {
+            const retryAfterSeconds = Math.ceil((reset - Date.now()) / 1000);
+            const retryAfterMinutes = Math.ceil(retryAfterSeconds / 60);
+
+            // Determine which limit was hit
+            let limitType = 'general';
+            let limitDescription = `${limit} requests per minute`;
+
+            if (pathname.startsWith('/api/download')) {
+                limitType = 'downloads';
+                limitDescription = '3 downloads per 15 minutes';
+            } else if (pathname === '/' || pathname.startsWith('/search')) {
+                limitType = 'browsing';
+                limitDescription = '10 page views per minute';
+            } else if (pathname.startsWith('/movie/')) {
+                limitType = 'movie details';
+                limitDescription = '30 movie pages per minute';
+            }
+
+            return new NextResponse(JSON.stringify({
+                error: 'Too Many Requests',
+                reason: `Rate limit exceeded for ${limitType}`,
+                message: `You've exceeded the limit of ${limitDescription}. Please wait before trying again.`,
+                limit: limit,
+                retryAfter: retryAfterSeconds,
+                retryIn: retryAfterMinutes > 1 ? `${retryAfterMinutes} minutes` : `${retryAfterSeconds} seconds`
+            }), {
                 status: 429,
-                headers: { 'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString() }
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Retry-After': retryAfterSeconds.toString()
+                }
             });
         }
     }
