@@ -5,7 +5,7 @@ import Movie from '@/models/Movie';
 
 /**
  * Admin-only endpoint to migrate legacy 'hidden' field to 'visibility' object
- * AND ensure all movies have a visibility field
+ * AND ensure all movies have a visibility field with proper state
  * 
  * Usage: POST to /api/admin/migrate-visibility
  * Requires: Admin authentication
@@ -36,12 +36,13 @@ export async function POST(request) {
         const bulkOps = [];
 
         for (const movie of allMovies) {
-            // Skip if already has proper visibility field
+            // Skip if already has proper visibility field with state
             if (movie.visibility && movie.visibility.state) {
                 alreadyMigrated++;
                 continue;
             }
 
+            // Use dot notation for nested MongoDB fields
             const update = {
                 $set: {}
             };
@@ -49,29 +50,23 @@ export async function POST(request) {
             // If has legacy hidden field, handle it
             if (movie.hidden !== undefined) {
                 if (movie.hidden === true) {
-                    update.$set.visibility = {
-                        state: 'quarantined',
-                        reason: 'Legacy hidden flag migration',
-                        updatedAt: new Date()
-                    };
+                    update.$set['visibility.state'] = 'quarantined';
+                    update.$set['visibility.reason'] = 'Legacy hidden flag migration';
+                    update.$set['visibility.updatedAt'] = new Date();
                     quarantined++;
                 } else {
-                    update.$set.visibility = {
-                        state: 'visible',
-                        reason: null,
-                        updatedAt: new Date()
-                    };
+                    update.$set['visibility.state'] = 'visible';
+                    update.$set['visibility.reason'] = null;
+                    update.$set['visibility.updatedAt'] = new Date();
                     visible++;
                 }
                 update.$unset = { hidden: "" };
             }
-            // No visibility field and no hidden field - add default visible
+            // No visibility.state field - add default visible
             else {
-                update.$set.visibility = {
-                    state: 'visible',
-                    reason: null,
-                    updatedAt: new Date()
-                };
+                update.$set['visibility.state'] = 'visible';
+                update.$set['visibility.reason'] = null;
+                update.$set['visibility.updatedAt'] = new Date();
                 visible++;
             }
 
@@ -106,7 +101,7 @@ export async function POST(request) {
         } else {
             return NextResponse.json({
                 success: true,
-                message: 'All movies already have visibility field',
+                message: 'All movies already have visibility.state field',
                 stats: {
                     totalMovies: allMovies.length,
                     alreadyMigrated
