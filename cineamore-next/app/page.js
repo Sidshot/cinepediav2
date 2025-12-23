@@ -13,7 +13,7 @@ import Link from 'next/link';
 const MOVIES_PER_PAGE = 48;
 const HOME_GENRES = ['Action', 'Adventure', 'Comedy', 'Crime', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Animation'];
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // ISR: Cache homepage for 60 seconds
 
 // Helper to serialize Mongoose docs
 const serializeMovie = (doc) => {
@@ -85,6 +85,7 @@ export default async function Home({ searchParams }) {
         const recentMoviesDocs = await Movie.find({ 'visibility.state': 'visible' })
           .sort({ addedAt: -1 })
           .select('title year director poster __id addedAt downloadLinks')
+          .slice('downloadLinks', 1) // OPTIMIZATION: Only fetch 1 link for grid detection
           .limit(18)
           .lean();
         recentlyAdded = recentMoviesDocs.map(serializeMovie);
@@ -95,6 +96,7 @@ export default async function Home({ searchParams }) {
           const movies = await Movie.find({ genre: genre, 'visibility.state': 'visible' })
             .sort({ addedAt: -1 }) // Sort by new in that genre
             .select('title year director poster __id addedAt downloadLinks genre')
+            .slice('downloadLinks', 1) // OPTIMIZATION
             .limit(18)
             .lean();
           return {
@@ -140,6 +142,7 @@ export default async function Home({ searchParams }) {
 
         const moviesDocs = await Movie.find(query)
           .select('title year director ratingSum ratingCount __id addedAt letterboxd backdrop poster downloadLinks dl drive genre original')
+          .slice('downloadLinks', 1) // OPTIMIZATION
           .sort(sortObj)
           .skip(skip)
           .limit(MOVIES_PER_PAGE)
