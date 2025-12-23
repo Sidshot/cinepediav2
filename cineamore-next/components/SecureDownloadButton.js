@@ -24,8 +24,14 @@ export default function SecureDownloadButton({
             });
 
             if (!res.ok) {
-                const msg = await res.text();
-                alert(`Download blocked: ${msg}`);
+                const text = await res.text();
+                let message = text;
+                try {
+                    const json = JSON.parse(text);
+                    if (json.message) message = json.message;
+                } catch (e) { /* ignore JSON parse error */ }
+
+                alert(`Download blocked: ${message}`);
                 setIsLoading(false);
                 return;
             }

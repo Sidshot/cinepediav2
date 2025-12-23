@@ -13,7 +13,7 @@ function getRateLimiter(type) {
 
         // Tune limits based on abuse patterns (Very Liberal)
         switch (type) {
-            case 'download': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '15 m'), Analytics: true, prefix: 'rl_dl' }); // 10 per 15m
+            case 'download': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, '15 m'), Analytics: true, prefix: 'rl_dl' }); // 100 per 15m
             case 'api': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 m'), Analytics: true, prefix: 'rl_api' }); // 200 per 1m
             case 'listing': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, '1 m'), Analytics: true, prefix: 'rl_list' }); // 100 per 1m
             case 'detail': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 m'), Analytics: true, prefix: 'rl_mov' }); // 200 per 1m
