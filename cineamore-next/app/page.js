@@ -94,7 +94,7 @@ export default async function Home({ searchParams }) {
         // Fetch top 18 for each priority genre
         const genrePromises = HOME_GENRES.map(async (genre) => {
           const movies = await Movie.find({ genre: genre, 'visibility.state': 'visible' })
-            .sort({ addedAt: -1 }) // Sort by new in that genre
+            .sort({ year: -1, addedAt: -1 }) // Sort by Year Newest -> Oldest
             .select('title year director poster __id addedAt downloadLinks genre')
             .slice('downloadLinks', 1) // OPTIMIZATION
             .limit(18)
