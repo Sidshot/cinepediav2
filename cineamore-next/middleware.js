@@ -11,13 +11,13 @@ function getRateLimiter(type) {
     if (process.env.UPSTASH_REDIS_REST_URL) {
         const redis = Redis.fromEnv();
 
-        // Tune limits based on abuse patterns (Balanced for UX)
+        // Tune limits based on abuse patterns (Very Liberal)
         switch (type) {
-            case 'download': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, '15 m'), Analytics: true, prefix: 'rl_dl' }); // 5 per 15m
-            case 'api': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 m'), Analytics: true, prefix: 'rl_api' }); // 60 per 1m
-            case 'listing': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '1 m'), Analytics: true, prefix: 'rl_list' }); // 30 per 1m
-            case 'detail': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 m'), Analytics: true, prefix: 'rl_mov' }); // 60 per 1m
-            default: return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, '1 m'), Analytics: true, prefix: 'rl_gen' });
+            case 'download': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '15 m'), Analytics: true, prefix: 'rl_dl' }); // 10 per 15m
+            case 'api': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 m'), Analytics: true, prefix: 'rl_api' }); // 200 per 1m
+            case 'listing': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, '1 m'), Analytics: true, prefix: 'rl_list' }); // 100 per 1m
+            case 'detail': return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 m'), Analytics: true, prefix: 'rl_mov' }); // 200 per 1m
+            default: return new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 m'), Analytics: true, prefix: 'rl_gen' });
         }
     }
 
@@ -76,6 +76,12 @@ export async function middleware(request) {
     if (!pathname.startsWith('/_next') && !pathname.includes('.')) {
         // 2a. IP WHITELIST: Always bypass rate limits for whitelisted IPs
         const whitelistedIPs = (process.env.WHITELISTED_IPS || '').split(',').filter(Boolean);
+
+        // Debug logging (remove after confirming it works)
+        if (whitelistedIPs.length > 0) {
+            console.log(`[Rate Limit] IP: ${ip}, Whitelisted IPs: ${whitelistedIPs.join(', ')}, Match: ${whitelistedIPs.includes(ip)}`);
+        }
+
         if (whitelistedIPs.includes(ip)) {
             return NextResponse.next();
         }
