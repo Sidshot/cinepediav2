@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🎬 CineAmore (Next.js Application)
 
-## Getting Started
+The modern frontend and API layer for CinePedia, built with **Next.js 14 App Router**.
 
-First, run the development server:
+## 🛠️ Tech Stack
+-   **Framework**: Next.js 14
+-   **Database**: MongoDB (Mongoose)
+-   **Styling**: Tailwind CSS
+-   **Auth**: NextAuth.js (v5 Beta)
+-   **Cache**: ISR (Incremental Static Regeneration) + Vercel Data Cache
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Getting Started
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+2.  **Environment Variables**:
+    Create `.env.local` with:
+    ```env
+    MONGODB_URI=mongodb+srv://...
+    NEXTAUTH_SECRET=your_secret_key
+    TMDB_API_KEY=your_key (optional, for enrichment)
+    KILL_SWITCH_DOWNLOADS=false
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
 
-## Learn More
+## 📂 Key Directory Structure
+-   `app/`: App Router pages and API routes.
+-   `components/`: Reusable React components (UI).
+-   `lib/`: Utility functions (DB connection, Auth, Helpers).
+-   `models/`: Mongoose Schemas (Movie, User, List).
+-   `scripts/`: Operational scripts (indexes, minor fixes).
 
-To learn more about Next.js, take a look at the following resources:
+## ⚠️ Important Notes
+-   **ISR Caching**: Homepage caches for 60s. Changes might not appear instantly.
+-   **Download Logic**: handled in `app/api/download`.
+-   **Auth**: Currently configured for Credentials/Google (see `lib/auth-next.js`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📦 Deployment
+Deployed on **Vercel**.
+Standard build command: `next build`.
+Output: `.next` directory.
