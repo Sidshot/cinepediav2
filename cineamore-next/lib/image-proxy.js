@@ -5,7 +5,7 @@
  * @returns {string} - The local proxy URL or the original if invalid.
  */
 export function getProxyUrl(url) {
-    if (!url) return '';
+    if (!url || typeof url !== 'string') return '';
     if (url.startsWith('/')) return url; // Already local
     if (url.includes('cineamore.vercel.app')) return url; // Already self
 
