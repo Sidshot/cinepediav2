@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import Movie from '@/models/Movie';
 
@@ -13,8 +13,8 @@ import Movie from '@/models/Movie';
 export async function POST(request) {
     try {
         // 1. Check Authentication
-        const session = await auth();
-        if (!session?.user?.isAdmin) {
+        const session = await getSession();
+        if (!session || session.role !== 'admin') {
             return NextResponse.json(
                 { error: 'Unauthorized. Admin access required.' },
                 { status: 403 }
