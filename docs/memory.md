@@ -1,12 +1,56 @@
 # CineAmore Session Memory
-**Last Updated:** 2025-12-24 16:55 IST (Series Mode + TMDB Caching)
+**Last Updated:** 2025-12-24 18:07 IST (Series Mode Complete + What's New Page)
 
 ## 🟢 Current Status
 *   **Active Branch:** `main`
 *   **Mode:** `DEPLOYED & LIVE`
 *   **Production URL:** https://cineamore.vercel.app
 *   **Database:** MongoDB Atlas (`cluster0.lallguq.mongodb.net/cinepedia`)
-*   **Pending:** Series Mode feature testing
+*   **Completed:** Series Mode fully implemented and tested
+
+---
+
+## 📝 Session Log: 2025-12-24 (Series Mode + What's New Page)
+**Goal:** Complete Series Mode implementation with genre rows and create a What's New page for user announcements.
+
+### ✅ Features Completed
+
+#### 1. Series Mode Enhancements
+*   **Genre Rows with View All:** Created `SeriesGenreRow.js` component with horizontal scrolling, scroll arrows, and "View All" buttons linking to `/series/genre/[id]`.
+*   **SeriesGrid Refactored:** Renamed functionality to `SeriesHero` - now only handles hero section, search bar, and genre pills (no longer duplicates content).
+*   **Series Page Updated:** `app/series/page.js` now fetches and displays Trending, Popular, Top Rated, and 4 genre-specific rows.
+*   **Orange Theme:** All Series Mode components use orange-600 (Reddit-style) accent color.
+
+#### 2. Global Sticky Search Bar (CRITICAL)
+*   **Component:** `components/GlobalStickySearch.js`
+*   **Location:** Added to `app/layout.js` (appears on EVERY page)
+*   **Behavior:** Appears when user scrolls past 100px, mode-aware (yellow for films, orange for series)
+*   **Documented:** Added to memory.md as critical feature that must not be removed
+
+#### 3. What's New Page
+*   **Route:** `/whats-new`
+*   **Content:** 4 feature cards (Series Mode, Global Search, Genre Discovery, Streaming) with expandable how-to guides
+*   **FAQs:** 6 accordion-style FAQ items
+*   **Design:** Gradient hero, glassmorphism cards, CTA buttons to Films/Series
+
+### 📁 Files Created This Session
+```
+cineamore-next/components/SeriesGenreRow.js
+cineamore-next/components/GlobalStickySearch.js
+cineamore-next/app/whats-new/page.js
+```
+
+### 📁 Files Modified This Session
+```
+cineamore-next/app/series/page.js (refactored to use SeriesHero + SeriesGenreRow)
+cineamore-next/components/SeriesGrid.js (refactored to SeriesHero functionality)
+cineamore-next/app/layout.js (added GlobalStickySearch)
+docs/memory.md (added critical feature documentation)
+```
+
+### 🚀 Commits Pushed
+1. `2e6e9dd` - Add Series Mode with genre rows, global sticky search, and orange theme
+2. (pending) - feat: Add What's New page with feature highlights and FAQs
 
 ---
 
