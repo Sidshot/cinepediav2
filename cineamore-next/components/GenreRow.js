@@ -73,12 +73,21 @@ export default function GenreRow({ title, movies, genreId, viewAllUrl }) {
                                     height={300}
                                     className="w-full h-full object-cover"
                                 />
+
+                                {/* Rating Badge - Always Visible */}
+                                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md border border-white/20 px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg z-10">
+                                    <span className="text-yellow-400 text-xs">★</span>
+                                    <span className="text-white text-xs font-bold">
+                                        {movie.tmdbRating && movie.tmdbRating > 0 ? movie.tmdbRating.toFixed(1) : 'NR'}
+                                    </span>
+                                </div>
+
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-end p-3">
                                     <span className="text-white font-bold text-sm line-clamp-2">{movie.title}</span>
                                 </div>
 
                                 {/* Quick Add Button */}
-                                <div className="absolute top-2 right-2 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                <div className="absolute top-2 right-2 opacity-0 group-hover/card:opacity-100 transition-opacity z-10">
                                     <AddToListButton movieId={movie._id || movie.__id} movieTitle={movie.title} variant="icon" />
                                 </div>
                             </Link>

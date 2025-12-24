@@ -258,6 +258,14 @@ export default function MovieGrid({
                                             <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                                         </Link>
 
+                                        {/* TMDB Rating Badge - Top Left - Always Visible */}
+                                        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md border border-white/20 px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg z-10">
+                                            <span className="text-yellow-400 text-xs">★</span>
+                                            <span className="text-white text-xs font-bold">
+                                                {movie.tmdbRating && movie.tmdbRating > 0 ? movie.tmdbRating.toFixed(1) : 'NR'}
+                                            </span>
+                                        </div>
+
                                         {/* Save Button - Top Right - Always Visible */}
                                         <div className="absolute top-3 right-3 z-10">
                                             <AddToListButton movieId={movie._id || movie.__id} movieTitle={movie.title} variant="prominent" />
