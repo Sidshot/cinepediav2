@@ -50,7 +50,8 @@
 *   **Accent Headers**: Added bold vertical accent bars to all section headers to match the competitor's premium look.
 
 ### 🚨 Emergency Fixes
-*   **Site Crash Resolved**: Fixed a critical import error in `lib/trending.js` where it was trying to import a non-existent `dbConnect` file. Pointed it to the correct `lib/mongodb.js`. This restored site availability.
+*   **Site Crash Resolved (Import)**: Fixed a critical import error in `lib/trending.js`.
+*   **Site Crash Resolved (ReferenceError)**: Fixed a runtime crash in `app/page.js` where `trendingMovies` was not defined. Added missing imports and wrapped the fetch logic in a `try/catch` block for resilience. Since the `tmdbRating` data is missing, this fail-safe is crucial.
 
 ### 🧹 Cleanup
 *   Removed temporary chaos trigger (`?test_maintenance=true`) from Middleware.

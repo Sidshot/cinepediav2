@@ -8,6 +8,8 @@ import ActionFABs from '@/components/ActionFABs';
 import OptimizedPoster from '@/components/OptimizedPoster';
 import PromoBanner from '@/components/PromoBanner';
 import Link from 'next/link';
+import { getDailyTrending } from '@/lib/trending';
+import TrendingRow from '@/components/TrendingRow';
 
 // Pagination config
 const MOVIES_PER_PAGE = 48;
@@ -55,10 +57,18 @@ export default async function Home({ searchParams }) {
   let recentlyAdded = [];
   let genreRowsData = []; // Array of { title, movies }
   let isOffline = false;
+  let trendingMovies = []; // Safe init
 
   try {
     if (process.env.MONGODB_URI) {
       await dbConnect();
+
+      // 0. Fetch Daily Trending (Top 10) - Fail Safe
+      try {
+        trendingMovies = await getDailyTrending();
+      } catch (e) {
+        console.error("Trending Fetch failed:", e);
+      }
 
       // 1. Fetch Global Data (Genres) - Needed for both views
       const genreAgg = await Movie.aggregate([
