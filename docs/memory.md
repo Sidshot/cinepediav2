@@ -31,7 +31,11 @@
 ### 🎨 UI/UX Refinements
 *   **Sticky Search**: Decoupled Search Bar from Genres. Search is now sticky and transforms to a "Minimalist" mode (transparent -> solid/blur) on scroll.
 *   **Fluid Genres**: Genre tiles now scroll naturally with the page content, clearing up screen real estate.
-*   **Theater Mode**: Enhanced `StreamingPlayer` with a "Theater Glow" effect and integrated header for a native feel.
+*   **Theater Mode**: Enhanced `StreamingPlayer` with a "Theater Glow" effect, minimalist glass header, and removed clutter text.
+
+### 📱 Mobile Optimization
+*   **Touch Feedback**: Added global `active:scale-96` state to buttons and links for better touch response.
+*   **Mobile Streaming**: Added `playsinline` and `webkit-playsinline` to player iframe to fix mobile playback issues.
 
 ### 🧹 Cleanup
 *   Removed temporary chaos trigger (`?test_maintenance=true`) from Middleware.

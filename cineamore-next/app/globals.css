@@ -48,6 +48,13 @@ body {
   min-height: 100vh;
 }
 
+/* Global Touch Feedback */
+a:active, button:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
 /* Utilities */
 .glass {
   backdrop-filter: blur(20px) saturate(160%);
