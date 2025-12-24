@@ -16,6 +16,10 @@
     *   **Display**: Return a clean, dark-mode HTML "Site Under Maintenance" page with a link to Twitter (`@cineamore_app`).
     *   **Security**: Prevents leaking internal paths/logic to visitors.
 
+### 🧹 Cleanup
+*   Removed temporary chaos trigger (`?test_maintenance=true`) from Middleware.
+*   Updated Maintenance Page with correct contact info (X: `__Sithlord__`, Email: `indocurry@proton.me`).
+
 ---
 
 ## 📝 Session Log: 2025-12-24 (Circuit Breaker Implementation)

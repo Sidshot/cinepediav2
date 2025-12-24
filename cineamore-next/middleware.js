@@ -39,13 +39,7 @@ function getRateLimiter(type) {
  */
 export async function middleware(request) {
     try {
-        const { pathname, searchParams } = request.nextUrl;
-
-        // 🚨 CHAOS TRIGGER (FOR VERIFICATION ONLY)
-        if (searchParams.get('test_maintenance') === 'true') {
-            throw new Error('Manual Maintenance Test Triggered');
-        }
-
+        const { pathname } = request.nextUrl;
         const ip = request.ip || '127.0.0.1';
         const userAgent = request.headers.get('user-agent') || '';
 
