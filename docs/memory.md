@@ -47,6 +47,11 @@
 *   **Hero Section**: Updated "Play" button to a **White Gradient** style and "More Info" to a cleaner Glassmorphism style for higher contrast.
 *   **Accent Headers**: Added bold vertical accent bars to all section headers to match the competitor's premium look.
 
+*   **Accent Headers**: Added bold vertical accent bars to all section headers to match the competitor's premium look.
+
+### 🚨 Emergency Fixes
+*   **Site Crash Resolved**: Fixed a critical import error in `lib/trending.js` where it was trying to import a non-existent `dbConnect` file. Pointed it to the correct `lib/mongodb.js`. This restored site availability.
+
 ### 🧹 Cleanup
 *   Removed temporary chaos trigger (`?test_maintenance=true`) from Middleware.
 *   Updated Maintenance Page with correct contact info (X: `__Sithlord__`, Email: `indocurry@proton.me`).

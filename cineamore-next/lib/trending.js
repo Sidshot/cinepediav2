@@ -1,4 +1,4 @@
-import dbConnect from './dbConnect';
+import dbConnect from './mongodb';
 import Movie from '@/models/Movie';
 
 // Simple seeded random generator based on current date string
