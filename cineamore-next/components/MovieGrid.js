@@ -131,23 +131,34 @@ export default function MovieGrid({
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
+    // Scroll Observer for Minimalist Search Bar
+    const [isScrolled, setIsScrolled] = useState(false);
+    useEffect(() => {
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
         <div className="w-full">
-            {/* Controls Bar - Sticky & Unified Layout */}
-            <div className={`sticky top-0 z-50 flex flex-col gap-4 mb-8 bg-[var(--bg)]/95 p-3 rounded-3xl border border-[var(--border)] backdrop-blur-2xl shadow-xl transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[var(--accent)]/50' : ''}`}>
-
-                {/* Search Bar - Always Visible */}
-                <div className="w-full flex items-center justify-between gap-4">
-                    <div className="flex-1">
+            {/* STICKY SEARCH BAR - Transforms on Scroll */}
+            <div className={`
+                sticky top-0 z-50 flex flex-col gap-4 mb-4 p-3 rounded-b-3xl transition-all duration-300
+                ${isScrolled
+                    ? 'bg-[var(--bg)]/95 shadow-xl border-b border-[var(--border)] backdrop-blur-xl pt-2 pb-3 mb-6' // Minimalist "Stuck" State
+                    : 'bg-transparent pt-4 pb-0' // Default State
+                }
+            `}>
+                <div className={`w-full flex items-center justify-between gap-4 max-w-4xl mx-auto transition-all duration-300 ${isScrolled ? 'scale-95' : 'scale-100'}`}>
+                    <div className="flex-1 shadow-2xl rounded-2xl">
                         <SearchBar
                             onSearch={handleSearch}
                             defaultValue={currentSearch}
                             onFocus={() => setIsSearchFocused(true)}
-                        // We don't blur immediately to allow clicking on genres
                         />
                     </div>
 
-                    {/* Mobile Toggle (Chevron) - Visible only on mobile when focused to allow collapsing */}
+                    {/* Mobile Toggle (Chevron) */}
                     <button
                         onClick={() => setIsSearchFocused(!isSearchFocused)}
                         className={`md:hidden p-2 rounded-full bg-[var(--card-bg)] border border-[var(--border)] text-[var(--muted)] transition-transform ${isSearchFocused ? 'rotate-180' : ''}`}
@@ -155,55 +166,54 @@ export default function MovieGrid({
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                     </button>
                 </div>
+            </div>
 
-                {/* Filters & Sort - Hidden on mobile unless focused, always visible on desktop */}
-                <div className={`
-                    flex-col xl:flex-row gap-4 items-center justify-between w-full
-                    ${isSearchFocused ? 'flex' : 'hidden md:flex'}
-                `}>
-
-                    {/* Genre Filter Tiles - Centered & Flexible */}
-                    {sortedGenres.length > 0 && (
-                        <div className="flex-1 flex flex-wrap justify-center gap-2 px-4 overflow-hidden">
-                            <button
-                                onClick={() => handleGenreClick('all')}
-                                className={`genre-tile ${!currentGenre ? 'active' : ''}`}
-                            >
-                                All
-                            </button>
-                            {visibleGenres.map(genre => (
-                                <button
-                                    key={genre}
-                                    onClick={() => handleGenreClick(genre)}
-                                    className={`genre-tile ${currentGenre === genre ? 'active' : ''}`}
-                                >
-                                    {genre}
-                                </button>
-                            ))}
-                            {hasMoreGenres && (
-                                <button
-                                    onClick={() => setShowAllGenres(!showAllGenres)}
-                                    className="genre-tile more-btn"
-                                >
-                                    {showAllGenres ? '−' : `+`}
-                                </button>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Sort Dropdown */}
-                    <div className="flex gap-2 w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 justify-end">
-                        <select
-                            value={currentSort}
-                            onChange={handleSortChange}
-                            className="h-[42px] px-4 rounded-full bg-[var(--card-bg)] border border-[var(--border)] text-sm font-semibold text-[var(--fg)] focus:border-[var(--accent)] outline-none cursor-pointer hover:brightness-110 transition-all w-full md:w-auto"
+            {/* FILTERS & SORT - Scrolls Away (Not Sticky) */}
+            <div className={`
+                flex-col xl:flex-row gap-4 items-center justify-between w-full mb-8 px-2
+                ${isSearchFocused ? 'flex' : 'hidden md:flex'}
+            `}>
+                {/* Genre Filter Tiles - Centered & Flexible */}
+                {sortedGenres.length > 0 && (
+                    <div className="flex-1 flex flex-wrap justify-center gap-2 px-4 overflow-hidden">
+                        <button
+                            onClick={() => handleGenreClick('all')}
+                            className={`genre-tile ${!currentGenre ? 'active' : ''}`}
                         >
-                            <option value="newest" className="bg-[var(--bg)] text-[var(--fg)]">Recently Added</option>
-                            <option value="oldest" className="bg-[var(--bg)] text-[var(--fg)]">Oldest Added</option>
-                            <option value="year-desc" className="bg-[var(--bg)] text-[var(--fg)]">Year: New → Old</option>
-                            <option value="year-asc" className="bg-[var(--bg)] text-[var(--fg)]">Year: Old → New</option>
-                        </select>
+                            All
+                        </button>
+                        {visibleGenres.map(genre => (
+                            <button
+                                key={genre}
+                                onClick={() => handleGenreClick(genre)}
+                                className={`genre-tile ${currentGenre === genre ? 'active' : ''}`}
+                            >
+                                {genre}
+                            </button>
+                        ))}
+                        {hasMoreGenres && (
+                            <button
+                                onClick={() => setShowAllGenres(!showAllGenres)}
+                                className="genre-tile more-btn"
+                            >
+                                {showAllGenres ? '−' : `+`}
+                            </button>
+                        )}
                     </div>
+                )}
+
+                {/* Sort Dropdown */}
+                <div className="flex gap-2 w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 justify-end">
+                    <select
+                        value={currentSort}
+                        onChange={handleSortChange}
+                        className="h-[42px] px-4 rounded-full bg-[var(--card-bg)] border border-[var(--border)] text-sm font-semibold text-[var(--fg)] focus:border-[var(--accent)] outline-none cursor-pointer hover:brightness-110 transition-all w-full md:w-auto"
+                    >
+                        <option value="newest" className="bg-[var(--bg)] text-[var(--fg)]">Recently Added</option>
+                        <option value="oldest" className="bg-[var(--bg)] text-[var(--fg)]">Oldest Added</option>
+                        <option value="year-desc" className="bg-[var(--bg)] text-[var(--fg)]">Year: New → Old</option>
+                        <option value="year-asc" className="bg-[var(--bg)] text-[var(--fg)]">Year: Old → New</option>
+                    </select>
                 </div>
             </div>
 

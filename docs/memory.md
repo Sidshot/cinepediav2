@@ -28,6 +28,11 @@
 *   **Component**: Created `<StreamingPlayer />` with Glassmorphism UI and loading states.
 *   **Status**: Deployed and Verified.
 
+### 🎨 UI/UX Refinements
+*   **Sticky Search**: Decoupled Search Bar from Genres. Search is now sticky and transforms to a "Minimalist" mode (transparent -> solid/blur) on scroll.
+*   **Fluid Genres**: Genre tiles now scroll naturally with the page content, clearing up screen real estate.
+*   **Theater Mode**: Enhanced `StreamingPlayer` with a "Theater Glow" effect and integrated header for a native feel.
+
 ### 🧹 Cleanup
 *   Removed temporary chaos trigger (`?test_maintenance=true`) from Middleware.
 *   Updated Maintenance Page with correct contact info (X: `__Sithlord__`, Email: `indocurry@proton.me`).
