@@ -138,7 +138,10 @@ export async function middleware(request) {
             <div class="container">
                 <h1>Site Under Maintenance</h1>
                 <p>We are currently performing scheduled maintenance to improve your experience. We'll be back shortly.</p>
-                <a href="https://twitter.com/cineamore_app" target="_blank" class="btn">Contact us on Twitter</a>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://x.com/__Sithlord__" target="_blank" class="btn">Contact on X</a>
+                    <a href="mailto:indocurry@proton.me" class="btn">Email Support</a>
+                </div>
             </div>
         </body>
         </html>
