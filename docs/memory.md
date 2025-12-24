@@ -10,6 +10,23 @@
 
 ---
 
+## 📝 Session Log: 2025-12-24 (Circuit Breaker Implementation)
+**Goal**: Resolve "Upstash Max Requests Limit Exceeded" error crashing the site.
+
+### 🧪 Diagnosis
+*   **Issue**: The previous deployment fixed the Edge Runtime imports but revealed a deeper operational failure: The specific error was `UpstashError: ERR max requests limit exceeded`.
+*   **Impact**: Because `middleware.js` awaited the Rate Limiter result, a failure in Upstash (Quota/Downtime) caused the entire site to return a JSON error structure (caught by our new try/catch).
+
+### 🛠️ Circuit Breaker Fix
+*   **Strategy**: "Fail Open" (Fail Safe).
+*   **Implementation**: Wrapped the specific `limiter.limit(ip)` call in a dedicated `try/catch`.
+*   **Behavior**:
+    *   **Success**: Application enforces rate limits.
+    *   **Quota Exceeded/Error**: Application **logs warning** (`Circuit Breaker Activated`) and **allows the request**.
+*   **Philosophy**: Infrastructure quotas should never block legitimate users from accessing the site.
+
+---
+
 ## 📝 Session Log: 2025-12-24 (Surgical Architecture Fix)
 **Goal**: Permanently resolve Edge Runtime 500 Errors by enforcing strict code separation.
 

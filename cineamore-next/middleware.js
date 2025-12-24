@@ -72,16 +72,25 @@ export async function middleware(request) {
                 else if (pathname.startsWith('/movie/')) limiter = getRateLimiter('detail');
                 else limiter = getRateLimiter('default');
 
-                const { success, limit, remaining, reset } = await limiter.limit(ip);
+                try {
+                    const { success, limit, remaining, reset } = await limiter.limit(ip);
 
-                const res = NextResponse.next();
-                res.headers.set('X-RateLimit-Limit', limit.toString());
-                res.headers.set('X-RateLimit-Remaining', remaining.toString());
+                    const res = NextResponse.next();
+                    res.headers.set('X-RateLimit-Limit', limit.toString());
+                    res.headers.set('X-RateLimit-Remaining', remaining.toString());
 
-                if (!success) {
-                    return new NextResponse(JSON.stringify({ error: 'Too Many Requests', retryAfter: Math.ceil((reset - Date.now()) / 1000) }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+                    if (!success) {
+                        const retryAfterSeconds = Math.ceil((reset - Date.now()) / 1000);
+                        return new NextResponse(JSON.stringify({ error: 'Too Many Requests', retryAfter: retryAfterSeconds }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': retryAfterSeconds.toString() } });
+                    }
+                    console.log(`[RateLimit] Allowed ${ip} (Rem: ${remaining})`);
+
+                    return res;
+                } catch (e) {
+                    console.warn('[RateLimit] Circuit Breaker Activated:', e.message);
+                    // FAIL OPEN: Allow request if rate limiter fails
+                    return NextResponse.next();
                 }
-                return res;
             }
         }
 
