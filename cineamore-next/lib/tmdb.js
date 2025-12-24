@@ -55,3 +55,28 @@ export async function getMovieDetails(tmdbId) {
         return { error: 'Details failed' };
     }
 }
+
+/**
+ * Get TMDB Rating (vote_average) for a movie by title and year
+ * Returns the rating (0-10) or null if not found
+ */
+export async function getTMDBRating(title, year = null) {
+    if (!API_KEY) return null;
+    if (!title) return null;
+
+    try {
+        const yearParam = year ? `&year=${year}` : '';
+        const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(title)}${yearParam}&include_adult=false`);
+        if (!res.ok) return null;
+
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+            // Return the vote_average of the first (best) match
+            return data.results[0].vote_average || 0;
+        }
+        return null;
+    } catch (e) {
+        console.error('TMDB Rating Error:', e);
+        return null;
+    }
+}

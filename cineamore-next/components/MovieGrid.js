@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import SearchBar from './SearchBar';
+import UniversalSearch from './UniversalSearch';
 import OptimizedPoster from './OptimizedPoster';
 import AddToListButton from './AddToListButton';
 
@@ -151,10 +151,9 @@ export default function MovieGrid({
             `}>
                 <div className={`w-full flex items-center justify-between gap-4 max-w-4xl mx-auto transition-all duration-300 ${isScrolled ? 'scale-95' : 'scale-100'}`}>
                     <div className="flex-1 shadow-2xl rounded-2xl">
-                        <SearchBar
+                        <UniversalSearch
+                            initialQuery={currentSearch}
                             onSearch={handleSearch}
-                            defaultValue={currentSearch}
-                            onFocus={() => setIsSearchFocused(true)}
                         />
                     </div>
 

@@ -20,7 +20,7 @@ export const revalidate = 60; // ISR: Cache homepage for 60 seconds
 // Helper to serialize Mongoose docs
 const serializeMovie = (doc) => {
   const d = { ...doc };
-  if (d._id) d._id = d._id.toString();
+  if (d._id) d._id = d._id.toString?.() || String(d._id);
   // Safe date serialization
   if (d.addedAt && typeof d.addedAt.toISOString === 'function') {
     d.addedAt = d.addedAt.toISOString();
@@ -28,11 +28,13 @@ const serializeMovie = (doc) => {
     d.addedAt = new Date(d.addedAt).toISOString();
   }
 
+  // Explicitly serialize downloadLinks to avoid ObjectId/Date issues
   if (d.downloadLinks && Array.isArray(d.downloadLinks)) {
     d.downloadLinks = d.downloadLinks.map(link => ({
-      ...link,
-      _id: link._id ? link._id.toString() : undefined,
-      addedAt: link.addedAt ? link.addedAt.toISOString() : undefined
+      label: link.label || 'Download',
+      url: link.url || '',
+      _id: link._id ? (link._id.toString?.() || String(link._id)) : undefined,
+      addedAt: link.addedAt ? (link.addedAt.toISOString?.() || new Date(link.addedAt).toISOString()) : undefined
     }));
   }
   return d;
@@ -65,7 +67,8 @@ export default async function Home({ searchParams }) {
 
       // 0. Fetch Daily Trending (Top 10) - Fail Safe
       try {
-        trendingMovies = await getDailyTrending();
+        const rawTrending = await getDailyTrending();
+        trendingMovies = rawTrending.map(serializeMovie);
       } catch (e) {
         console.error("Trending Fetch failed:", e);
       }

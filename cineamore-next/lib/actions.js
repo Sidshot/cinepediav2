@@ -7,7 +7,8 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import mongoose from 'mongoose';
 import logger from '@/lib/logger';
-import { getSession } from '@/lib/auth';
+import { getSession, isAdmin } from '@/lib/auth';
+import { getTMDBRating } from '@/lib/tmdb';
 
 // Validation Schema
 const MovieSchema = z.object({
@@ -26,6 +27,9 @@ const MovieSchema = z.object({
 });
 
 export async function createMovie(formData) {
+    if (!await isAdmin()) {
+        throw new Error("Unauthorized: Admin access required");
+    }
     await dbConnect();
 
     const rawData = {
@@ -66,6 +70,15 @@ export async function createMovie(formData) {
     // For backward compatibility, we assign __id = _id string if not provided
     const _id = new mongoose.Types.ObjectId();
 
+    // Auto-fetch TMDB Rating
+    let tmdbRating = 0;
+    try {
+        const rating = await getTMDBRating(movieData.title, movieData.year);
+        if (rating !== null) tmdbRating = rating;
+    } catch (e) {
+        console.warn('Failed to fetch TMDB rating:', e.message);
+    }
+
     try {
         await Movie.create({
             _id,
@@ -73,6 +86,7 @@ export async function createMovie(formData) {
             ...movieData,
             genre: genreArray,
             downloadLinks: parsedLinks,
+            tmdbRating,
             addedAt: new Date()
         });
 
@@ -88,6 +102,9 @@ export async function createMovie(formData) {
 }
 
 export async function updateMovie(id, formData) {
+    if (!await isAdmin()) {
+        throw new Error("Unauthorized: Admin access required");
+    }
     await dbConnect();
 
     const rawData = {
@@ -143,6 +160,9 @@ export async function updateMovie(id, formData) {
 }
 
 export async function deleteMovie(id) {
+    if (!await isAdmin()) {
+        throw new Error("Unauthorized: Admin access required");
+    }
     await dbConnect();
     const movie = await Movie.findByIdAndDelete(id);
     const session = await getSession();
