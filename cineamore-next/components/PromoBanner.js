@@ -101,7 +101,7 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
             </div>
             <div className="promo-tip coming-soon">
               <span className="tip-icon">📖</span>
-              <span>A detailed guide on setting up ad-blockers is <strong>coming soon!</strong></span>
+              <span>To have an ad-free experience, you must <a href="https://sidshot.github.io/adblock-guide/" target="_blank" rel="noopener noreferrer" className="adblock-link">click here</a></span>
             </div>
           </div>
 
@@ -138,9 +138,9 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(0, 0, 0, 0.85);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
           animation: fadeIn 0.4s ease-out;
         }
 
@@ -216,8 +216,8 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
         .promo-glow {
           position: absolute;
           border-radius: 50%;
-          filter: blur(70px);
-          opacity: 0.3;
+          filter: blur(50px);
+          opacity: 0.15;
           pointer-events: none;
         }
 
@@ -284,17 +284,30 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           align-items: flex-start;
           gap: 12px;
           padding: 12px 16px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 12px;
           font-size: 0.88rem;
           color: rgba(255, 255, 255, 0.9);
           line-height: 1.5;
         }
 
+        .adblock-link {
+          color: #f59e0b;
+          font-weight: 700;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          transition: all 0.2s ease;
+        }
+
+        .adblock-link:hover {
+          color: #fbbf24;
+          text-decoration-thickness: 2px;
+        }
+
         .promo-tip.coming-soon {
-          background: rgba(245, 158, 11, 0.15);
-          border-color: rgba(245, 158, 11, 0.35);
+          background: rgba(245, 158, 11, 0.1);
+          border-color: rgba(245, 158, 11, 0.25);
         }
 
         .promo-tip strong {
