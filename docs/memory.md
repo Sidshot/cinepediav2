@@ -1,12 +1,207 @@
 # CineAmore Session Memory
-**Last Updated:** 2025-12-24 18:07 IST (Series Mode Complete + What's New Page)
+**Last Updated:** 2025-12-26 19:49 IST (Multi-Provider Streaming Feature)
 
 ## 🟢 Current Status
 *   **Active Branch:** `main`
 *   **Mode:** `DEPLOYED & LIVE`
 *   **Production URL:** https://cineamore.vercel.app
 *   **Database:** MongoDB Atlas (`cluster0.lallguq.mongodb.net/cinepedia`)
-*   **Completed:** Series Mode fully implemented and tested
+*   **Completed:** Series Mode, Anime Mode, Universal Search, Multi-Provider Streaming (10 embed sources)
+
+---
+
+## 🎯 PRIORITY TODO LIST (DON'T FORGET!)
+
+### 🔥 HIGH PRIORITY
+
+#### 1. Custom Video Player (Enable When Ready)
+**Status:** ✅ Infrastructure COMPLETE, ships DISABLED
+
+**To Enable:**
+```env
+NEXT_PUBLIC_CUSTOM_PLAYER_ENABLED=true
+NEXT_PUBLIC_CUSTOM_PLAYER_ROLLOUT=10
+```
+
+**What's Built:**
+- Playback Orchestrator (10-point decision engine)
+- Provider Health Tracker (auto-demote/promote)
+- Auto-Rollout Manager (self-healing, no manual checks needed)
+- API endpoints: `/api/stream/health`, `/api/playback/stats`
+- Vercel cron for hourly auto-adjustment
+- ✅ Alerting (`lib/alerting.js`) - Discord, Telegram, Resend email
+
+**What's NOT Built Yet:**
+- [ ] Actual HLS extraction logic in `/api/stream/resolve`
+- [ ] Video.js player component
+
+**Alerting ENV Variables:**
+```env
+ALERT_WEBHOOK=https://discord.com/api/webhooks/...  # or Telegram bot URL
+ADMIN_EMAIL=your@email.com
+RESEND_API_KEY=re_xxxxx  # optional, for email
+```
+
+#### 2. AI Recommendations ("Because You Watched")
+**Status:** ❌ Not started
+**FMHY Score:** +2 points
+- Track watched genres in localStorage/DB
+- Show personalized row on homepage
+- Effort: 4-6 hours
+
+#### 3. Auto-Next Episode for ALL Providers
+**Status:** 🟡 Only Alpha (VidKing) supports it
+**FMHY Score:** +2 points
+- Add `?autonext=1` params where supported
+- Effort: 2 hours
+
+### 📋 MEDIUM PRIORITY
+
+#### 4. Continue Watching Row Enhancement
+- [ ] Fetch from MongoDB for logged-in users (currently localStorage only)
+- [ ] Merge localStorage + DB progress
+
+#### 5. Watch History Sync Testing
+- [ ] Test cross-device sync for logged-in users
+- [ ] Verify progress saves correctly
+
+### 📌 LOW PRIORITY / NICE TO HAVE
+
+#### 6. Quality Selector in Custom Player
+- Only after custom player is stable
+- Video.js has built-in support
+
+#### 7. Subtitles Support
+- Only after custom player is stable
+- Depends on provider support
+
+---
+
+---
+
+## 📝 Session Log: 2025-12-26 (Multi-Provider Streaming - 10 Embed Sources)
+**Goal:** Add provider dropdown to movie and series players with 10 embed sources, masked with Greek alphabet names.
+
+### ✅ Features Completed
+
+#### 1. Multi-Provider Architecture
+*   **NEW FILE:** `lib/streamingProviders.js` - Central provider registry with 10 sources:
+    *   **Alpha** (VidKing) - Default provider, supports auto-play, next episode, progress tracking
+    *   **Beta** (2embed.cc) - Path-based embed
+    *   **Gamma** (HNEmbed) - Query param based
+    *   **Delta** (SuperEmbed) - Query param based
+    *   **Epsilon** (moviesapi.club) - Path-based
+    *   **Zeta** (vidsrc.me) - Query param based
+    *   **Eta** (vidsrc.xyz) - Path-based
+    *   **Theta** (embed.su) - Path-based
+    *   **Iota** (smashy.stream) - Path-based
+    *   **Kappa** (autoembed.cc) - Path-based
+*   **Helper Functions:**
+    *   `constructEmbedUrl(providerId, tmdbId)` - Smart URL builder for movies
+    *   `constructTVEmbedUrl(providerId, tmdbId, season, episode)` - TV URL builder with input validation
+    *   `getProviderById(id)` - Provider lookup
+
+#### 2. Movie Player Integration
+*   **MODIFIED:** `components/StreamingPlayer.js`
+*   **Features:**
+    *   Provider dropdown with masked names (Alpha-Kappa)
+    *   VidKing progress tracking maintained (for resume feature)
+    *   Glassmorphism UI matching site aesthetic
+    *   Yellow accent (film mode)
+    *   Full-screen player sizing (`calc(100vh - 200px)`)
+
+#### 3. Series Player Integration
+*   **MODIFIED:** `components/SeriesStreamingPlayer.js`
+*   **Features:**
+    *   Same provider dropdown as movies
+    *   Provider selection persists across episode changes (UX improvement)
+    *   VidKing resume feature maintained
+    *   Orange accent (series mode)
+
+#### 4. TMDB API Error Suppression
+*   **MODIFIED:** `lib/tmdb.js`
+*   **Fix:** Removed noisy `console.error()` calls from 4 functions:
+    *   `getTrendingSeries()` - Silent fail
+    *   `getPopularSeries()` - Silent fail
+    *   `getTopRatedSeries()` - Silent fail
+    *   `getSeriesByGenre()` - Silent fail
+*   **Reason:** Console spam in development when TMDB API key not set
+
+### 🐛 Bugs Fixed (11 total)
+
+| # | Bug | File | Fix |
+|---|-----|------|-----|
+| 1 | Stray debug comment | `StreamingPlayer.js` | Removed leftover comment |
+| 2 | Missing input validation | `streamingProviders.js` | Added `!season \|\| !episode` check |
+| 3 | Memory leak from setTimeout | `StreamingPlayer.js` | Removed auto-switch feature |
+| 4 | CPU waste from interval | `StreamingPlayer.js` | Removed auto-switch feature |
+| 5 | Provider resets on episode change | `SeriesStreamingPlayer.js` | Removed `setActiveProviderId('alpha')` |
+| 6 | Beta TV URL construction | `streamingProviders.js` | Smart `/movie` → `/tv` replacement |
+| 7 | Auto-switch complexity | Both players | Removed entirely per user request |
+| 8 | TMDB Trending error | `lib/tmdb.js` | Silent failure |
+| 9 | TMDB Popular error | `lib/tmdb.js` | Silent failure |
+| 10 | TMDB Top Rated error | `lib/tmdb.js` | Silent failure |
+| 11 | TMDB Genre error | `lib/tmdb.js` | Silent failure |
+
+### 📁 Files Created
+```
+cineamore-next/lib/streamingProviders.js
+cineamore-next/app/test-player/page.js (for testing only)
+cineamore-next/implementation_plan.md (temporary)
+```
+
+### 📁 Files Modified
+| File | Changes |
+|------|---------|
+| `components/StreamingPlayer.js` | Added dropdown, removed auto-switch, kept progress tracking |
+| `components/SeriesStreamingPlayer.js` | Added dropdown, fixed provider persistence |
+| `lib/tmdb.js` | Silenced 4 API error logs |
+
+### 🚀 Commits Pushed
+*   `912ddf7` - feat: Add multi-provider streaming with 10 embed sources
+
+### ⚠️ Implementation Notes
+1.  **Auto-Switch Removed:** User prefers manual control via dropdown
+2.  **Provider Masking:** Greek alphabet names hide actual sources
+3.  **URL Types:** Supports both path (`/123`) and query (`?tmdb=123`) params
+4.  **TV Support:** All 10 providers work for both movies and series
+5.  **Provider Persistence:** User's choice saved across episode navigation
+6.  **Silent Failures:** TMDB API errors no longer flood console
+
+### 🎯 User Benefits
+*   **More Options:** 10 providers instead of 1 (VidKing only)
+*   **Better Control:** Manual switching, no surprises
+*   **Cleaner Console:** No error spam during development
+*   **Better UX:** Provider choice persists across episodes
+*   **Production Ready:** All bugs fixed, code simplified
+
+---
+
+## 📝 Session Log: 2025-12-25 (PromoBanner Adblock Guide Link)
+**Goal:** Update PromoBanner text and reduce glassmorphism effects.
+
+### ✅ Changes Completed
+
+#### 1. Adblock Guide Link
+*   **Changed Text:** "A detailed guide on setting up ad-blockers is coming soon!" → "To have an ad-free experience, you must click here"
+*   **Added Link:** Embedded `https://sidshot.github.io/adblock-guide/` with styled clickable link (amber color, underline, hover effect)
+
+#### 2. Reduced Glassmorphism Effects
+*   **Overlay blur:** `12px` → `6px`
+*   **Overlay opacity:** `0.85` → `0.8`
+*   **Glow blur:** `70px` → `50px`
+*   **Glow opacity:** `0.3` → `0.15`
+*   **Tip boxes background:** `0.08` → `0.05`
+*   **Tip boxes border:** `0.15` → `0.1`
+*   **Coming-soon highlight:** `0.15/0.35` → `0.1/0.25`
+
+### 📁 Files Modified
+```
+cineamore-next/components/PromoBanner.js
+```
+
+### 🚀 Commits Pushed
+*   `5a456a5` - Update PromoBanner: Add adblock guide link and reduce glassmorphism
 
 ---
 
