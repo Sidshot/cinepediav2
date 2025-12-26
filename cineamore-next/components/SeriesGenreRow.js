@@ -90,13 +90,7 @@ function SeriesCard({ series, index }) {
             {/* Fixed Badges */}
             <div className="absolute top-2 left-2 z-50 pointer-events-none">
                 <div
-                    className="px-2 py-1 rounded-full flex items-center gap-1 shadow-lg"
-                    style={{
-                        backdropFilter: 'blur(8px)',
-                        WebkitBackdropFilter: 'blur(8px)',
-                        background: 'rgba(0, 0, 0, 0.6)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}
+                    className="px-2 py-1 rounded-full flex items-center gap-1 shadow-lg bg-black/70 border border-white/10"
                 >
                     <span className="text-yellow-400 text-xs">★</span>
                     <span className="text-white text-xs font-bold">
@@ -109,21 +103,17 @@ function SeriesCard({ series, index }) {
                 STREAM
             </div>
 
-            {/* Premium Glass Slab Structure */}
+            {/* Simplified Glass - NO BLUR */}
             <div className="relative">
-                {/* Back Glass Slab */}
+                {/* Back Shadow - solid only */}
                 <div
                     className="absolute inset-0 rounded-2xl"
                     style={{
-                        transform: 'translate(-10px, -12px) translateZ(0)',
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))',
-                        backdropFilter: 'blur(12px)',
-                        WebkitBackdropFilter: 'blur(12px)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        opacity: 0.25,
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
-                        clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px)',
-                        willChange: 'transform'
+                        transform: 'translate(-8px, -8px) translateZ(0)',
+                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03))',
+                        opacity: 0.4,
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                        clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px)'
                     }}
                 ></div>
 
@@ -152,18 +142,14 @@ function SeriesCard({ series, index }) {
                     {/* Poster Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-15"></div>
 
-                    {/* Front Glass Slab */}
+                    {/* Simple Glass Overlay - NO BLUR */}
                     <div
                         className="absolute inset-0 rounded-2xl pointer-events-none z-20"
                         style={{
-                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08))',
-                            backdropFilter: 'blur(8px)',
-                            WebkitBackdropFilter: 'blur(8px)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            opacity: 0.35,
-                            boxShadow: 'inset -1px -1px 2px rgba(255, 255, 255, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.1), 0 4px 16px rgba(0, 0, 0, 0.2)',
-                            clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px)',
-                            transform: 'translateZ(0)'
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04))',
+                            opacity: 0.5,
+                            boxShadow: 'inset -1px -1px 2px rgba(255, 255, 255, 0.15), inset 1px 1px 2px rgba(255, 255, 255, 0.1)',
+                            clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px)'
                         }}
                     ></div>
 
@@ -171,7 +157,7 @@ function SeriesCard({ series, index }) {
                     <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.2 }}
                         className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 z-25"
                     >
                         <span className="text-white font-medium text-sm line-clamp-2">{series.name}</span>
