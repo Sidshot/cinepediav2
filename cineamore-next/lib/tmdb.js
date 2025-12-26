@@ -99,7 +99,7 @@ export async function getTrendingSeries() {
         const data = await res.json();
         return data.results || [];
     } catch (e) {
-        console.error('TMDB Trending Series Error:', e);
+        // Silently fail - common in development when API key is not set
         return [];
     }
 }
@@ -118,7 +118,7 @@ export async function getPopularSeries() {
         const data = await res.json();
         return data.results || [];
     } catch (e) {
-        console.error('TMDB Popular Series Error:', e);
+        // Silently fail - common in development when API key is not set
         return [];
     }
 }
@@ -137,7 +137,7 @@ export async function getTopRatedSeries() {
         const data = await res.json();
         return data.results || [];
     } catch (e) {
-        console.error('TMDB Top Rated Series Error:', e);
+        // Silently fail - common in development when API key is not set
         return [];
     }
 }
@@ -147,16 +147,18 @@ export async function getTopRatedSeries() {
  */
 export async function getSeriesByGenre(genreId, page = 1) {
     if (!API_KEY) return [];
+    if (!genreId) return [];
 
     try {
         const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc&page=${page}`, {
-            next: { revalidate: 3600 } // Cache for 1 hour
+            next: { revalidate: 3600 }, // Cache for 1 hour
+            signal: AbortSignal.timeout(5000) // 5 second timeout
         });
         if (!res.ok) return [];
         const data = await res.json();
         return data.results || [];
     } catch (e) {
-        console.error('TMDB Series by Genre Error:', e);
+        // Silently fail - common in development when API key is not set
         return [];
     }
 }
