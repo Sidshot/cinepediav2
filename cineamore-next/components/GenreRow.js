@@ -88,7 +88,7 @@ function GenreRow({ title, movies, genreId, viewAllUrl }) {
                                 >
                                     <span className="text-yellow-400 text-xs">★</span>
                                     <span className="text-white text-xs font-bold">
-                                        {movie.tmdbRating && movie.tmdbRating > 0 ? movie.tmdbRating.toFixed(1) : 'NR'}
+                                        {movie.vote_average ? movie.vote_average.toFixed(1) : (movie.tmdbRating && movie.tmdbRating > 0 ? movie.tmdbRating.toFixed(1) : 'NR')}
                                     </span>
                                 </div>
                             </div>
