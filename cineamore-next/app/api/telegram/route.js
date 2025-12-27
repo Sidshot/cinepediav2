@@ -8,6 +8,17 @@ export async function POST(req) {
     try {
         const update = await req.json();
 
+        // DEBUG: Log all incoming updates
+        console.log('[Telegram Webhook] Received update:', JSON.stringify(update, null, 2));
+
+        // 0. Handle /ping command (DEBUG)
+        if (update.message?.text === '/ping') {
+            const chatId = update.message.chat.id;
+            console.log('[Telegram] Responding to /ping in chat:', chatId);
+            await sendMessage(chatId, '🏓 <b>Pong!</b> The bot is alive and connected.');
+            return NextResponse.json({ ok: true });
+        }
+
         // 1. Handle New Chat Members (WELCOME)
         if (update.message?.new_chat_members) {
             const chatId = update.message.chat.id;
