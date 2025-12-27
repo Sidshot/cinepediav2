@@ -17,13 +17,14 @@ export async function POST(req) {
             const chatId = message.chat.id;
             const userId = message.from?.id;
             const rawText = message.text.trim();
-            // Extract command without @botname suffix (e.g., /ping@Cineamore_bot -> /ping)
-            const text = rawText.split('@')[0].toLowerCase();
+            // Handle @botname - remove it from start or end of message
+            // Examples: "@Cineamore_bot hello" -> "hello", "/ping@Cineamore_bot" -> "/ping"
+            const cleanText = rawText.replace(/@\w+/gi, '').trim().toLowerCase();
             const isPrivate = message.chat.type === 'private';
             const isAdmin = userId === ADMIN_ID;
 
             // ---------- /ping (Anyone) ----------
-            if (text === '/ping') {
+            if (cleanText === '/ping') {
                 await sendMessage(chatId, '🏓 <b>Pong!</b> The bot is alive.');
                 return NextResponse.json({ ok: true });
             }
@@ -31,7 +32,7 @@ export async function POST(req) {
             // ============ PUBLIC COMMANDS (Anyone in Group) ============
 
             // ---------- /random - Get a random movie ----------
-            if (text === '/random' && (!isPrivate || isAdmin)) {
+            if (cleanText === '/random' && (!isPrivate || isAdmin)) {
                 try {
                     const { default: dbConnect } = await import('@/lib/mongodb');
                     const mongoose = await import('mongoose');
@@ -60,7 +61,7 @@ ${movie.plot ? movie.plot.substring(0, 120) + '...' : ''}
             }
 
             // ---------- /site - Link to website ----------
-            if (text === '/site' || text === '/website') {
+            if (cleanText === '/site' || text === '/website') {
                 await sendMessage(chatId, `
 🌐 <b>CineAmore</b>
 
@@ -72,7 +73,7 @@ Your gateway to unlimited Movies, Series & Anime!
             }
 
             // ---------- /download - How to download ----------
-            if (text === '/download') {
+            if (cleanText === '/download') {
                 await sendMessage(chatId, `
 📥 <b>How to Download</b>
 
@@ -87,7 +88,7 @@ Your gateway to unlimited Movies, Series & Anime!
             }
 
             // ---------- /stream - How to stream ----------
-            if (text === '/stream') {
+            if (cleanText === '/stream') {
                 await sendMessage(chatId, `
 📡 <b>How to Stream</b>
 
@@ -101,7 +102,7 @@ Your gateway to unlimited Movies, Series & Anime!
             }
 
             // ---------- /commands - Show public commands ----------
-            if (text === '/commands' && !isPrivate) {
+            if (cleanText === '/commands' && !isPrivate) {
                 await sendMessage(chatId, `
 🤖 <b>Available Commands</b>
 
@@ -118,7 +119,7 @@ Your gateway to unlimited Movies, Series & Anime!
             }
 
             // ---------- /search [query] - Search movies ----------
-            if (text.startsWith('/search')) {
+            if (cleanText.startsWith('/search')) {
                 const query = rawText.replace(/\/search(@\w+)?/i, '').trim();
                 if (!query) {
                     await sendMessage(chatId, '🔍 <b>Usage:</b> /search Movie Title\n\nExample: /search Inception');
@@ -233,7 +234,7 @@ Type /commands to see what I can do! 🎬
             }
 
             // ---------- /help (Admin DM only) ----------
-            if (text === '/help' && isPrivate && isAdmin) {
+            if (cleanText === '/help' && isPrivate && isAdmin) {
                 const helpText = `
 🤖 <b>CineAmore Bot Admin Panel</b>
 
@@ -254,7 +255,7 @@ Type /commands to see what I can do! 🎬
             }
 
             // ---------- /status (Admin DM only) ----------
-            if (text === '/status' && isPrivate && isAdmin) {
+            if (cleanText === '/status' && isPrivate && isAdmin) {
                 const statusText = `
 📊 <b>Bot Status</b>
 
@@ -272,7 +273,7 @@ Type /commands to see what I can do! 🎬
             }
 
             // ---------- /post_now (Admin - Posts to GROUP) ----------
-            if (text === '/post_now' && isAdmin) {
+            if (cleanText === '/post_now' && isAdmin) {
                 const targetChatId = process.env.TELEGRAM_CHAT_ID;
                 if (!targetChatId) {
                     await sendMessage(chatId, '❌ <b>Error:</b> TELEGRAM_CHAT_ID not configured.');
@@ -293,7 +294,7 @@ Type /commands to see what I can do! 🎬
             }
 
             // ---------- /post_here (Admin DM - Posts to current chat for testing) ----------
-            if (text === '/post_here' && isPrivate && isAdmin) {
+            if (cleanText === '/post_here' && isPrivate && isAdmin) {
                 await sendMessage(chatId, '⏳ <b>Posting test recommendations here...</b>');
 
                 const { postDailyRecommendations } = await import('@/lib/daily-recs');
@@ -308,7 +309,7 @@ Type /commands to see what I can do! 🎬
             }
 
             // ---------- Unknown command in Admin DM ----------
-            if (isPrivate && isAdmin && text.startsWith('/')) {
+            if (isPrivate && isAdmin && cleanText.startsWith('/')) {
                 await sendMessage(chatId, '❓ Unknown command. Type /help for available commands.');
                 return NextResponse.json({ ok: true });
             }
