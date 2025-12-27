@@ -19,6 +19,33 @@ export async function POST(req) {
             return NextResponse.json({ ok: true });
         }
 
+        // 0.5 Handle /post_now command (ADMIN - Trigger Daily Recs)
+        if (update.message?.text === '/post_now') {
+            const chatId = update.message.chat.id;
+            console.log('[Telegram] Admin triggered /post_now in chat:', chatId);
+
+            // Acknowledge the command
+            await sendMessage(chatId, '⏳ <b>Posting daily recommendations...</b>');
+
+            // Call the cron endpoint internally
+            try {
+                const baseUrl = process.env.VERCEL_URL
+                    ? `https://${process.env.VERCEL_URL}`
+                    : 'http://localhost:3000';
+                const res = await fetch(`${baseUrl}/api/cron/daily`);
+                const data = await res.json();
+
+                if (data.ok) {
+                    await sendMessage(chatId, '✅ <b>Daily recommendations posted!</b>');
+                } else {
+                    await sendMessage(chatId, '❌ <b>Failed:</b> ' + (data.error || 'Unknown error'));
+                }
+            } catch (e) {
+                await sendMessage(chatId, '❌ <b>Error:</b> ' + e.message);
+            }
+            return NextResponse.json({ ok: true });
+        }
+
         // 1. Handle New Chat Members (WELCOME)
         if (update.message?.new_chat_members) {
             const chatId = update.message.chat.id;
