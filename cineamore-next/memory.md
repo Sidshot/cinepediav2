@@ -116,17 +116,29 @@
 4. `213fecf` - 🐛 Fix: Actually include tmdbRating in database query
 5. `be03523` - ⚠️ Add prominent adblocker warning to streaming pages
 
-### Key Learnings
-- **Backdrop-filter blur is a performance killer** - Even 8-12px blur causes major frame drops during scroll
-- **iOS Safari hates AnimatePresence** - Always test navigation on iPad/iPhone
-- **Database select queries matter** - If field not selected, it won't exist in response
-- **Solid gradients can look 95% as good as blur** with 10x better performance
-- **Platform detection essential** for production apps targeting iOS
+## ­ƒÜ¿ INFRASTRUCTURE RESILIENCE (WORD OF GOD)
 
-### Future Considerations
-- Can extend PremiumGlassCard to MovieGrid and SeriesGrid components
-- Consider lazy loading for genre rows to improve initial page load
-- Monitor iOS Safari compatibility with future Framer Motion updates
+> **"Infrastructure quotas MUST NEVER crash the application."**
+
+This is a **non-negotiable rule** for CineAmore:
+
+### 1. Fail Open Policy
+Any auxiliary service (Rate Limiting, Analytics, Image Proxy, etc.) must be implemented with a **"Fail Open"** strategy.
+-   **If Redis fails:** The user gets in. (Log the error, but do not block request).
+-   **If API Limit reached:** The user gets in. (Service degrades gracefully, e.g. no rate limiting, but site works).
+-   **If Image Proxy fails:** Fallback to direct URL.
+
+### 2. Quota Management
+-   **Analytics:** Do not enable high-frequency analytics (like Upstash per-request tracking) on free tiers.
+-   **Circuit Breakers:** All external calls (DB, Redis, API) must be wrapped in `try/catch` blocks that handle timeouts and outages silently or with user-friendly fallbacks.
+
+### 3. Critical vs Non-Critical
+-   **Critical:** Database Connection (MongoDB). If this fails, show Maintenance Page.
+-   **Non-Critical:** Rate Limiting (Upstash), Image Optimization, Analytics. If these fail, **IGNORE AND PROCEED**.
+
+**Verified Fix (2025-12-27):**
+-   Patched `lib/ratelimit.js` to swallow Upstash errors and return success.
+-   Patched `middleware.js` to disable analytics to save bandwidth.
 
 ---
 
