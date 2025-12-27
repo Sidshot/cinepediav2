@@ -16,7 +16,9 @@ export async function POST(req) {
         if (message?.text) {
             const chatId = message.chat.id;
             const userId = message.from?.id;
-            const text = message.text.trim();
+            const rawText = message.text.trim();
+            // Extract command without @botname suffix (e.g., /ping@Cineamore_bot -> /ping)
+            const text = rawText.split('@')[0].toLowerCase();
             const isPrivate = message.chat.type === 'private';
             const isAdmin = userId === ADMIN_ID;
 
