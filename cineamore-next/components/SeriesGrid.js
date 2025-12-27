@@ -110,7 +110,7 @@ export default function SeriesHero({ heroSeries = null }) {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
                         placeholder="Search any series..."
-                        className="w-full px-5 py-3.5 pl-12 rounded-2xl bg-white/5 border border-white/10 text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all backdrop-blur-md"
+                        className="w-full px-5 py-3.5 pl-12 rounded-2xl bg-[#0a0a0a]/80 border border-white/10 text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
                     <svg
                         className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]"

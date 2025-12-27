@@ -52,7 +52,7 @@ export default function SeriesSearch({ initialQuery = '' }) {
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => hasResults && setShowDropdown(true)}
                     placeholder="Search TV series..."
-                    className="w-full px-5 py-3.5 pl-12 rounded-2xl bg-white/5 border border-orange-600/30 text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-orange-600 focus:border-transparent transition-all backdrop-blur-md"
+                    className="w-full px-5 py-3.5 pl-12 rounded-2xl bg-[#0a0a0a]/80 border border-orange-600/30 text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-orange-600 focus:border-transparent"
                 />
                 <svg
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400"

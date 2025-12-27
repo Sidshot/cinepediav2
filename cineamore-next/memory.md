@@ -25,6 +25,11 @@
     3.  **Visibility Guarantee**: Removed opacity transition in `OptimizedPoster.js` to prevent "invisible image" bugs if `onLoad` fails.
 -   **Result**: Posters load almost instantly on refresh.
 
+#### 3. INP (Input Latency) Fix
+-   **Problem**: Search bar input blocked UI for ~200ms on typing (INP violation).
+-   **Root Cause**: Expensive `backdrop-blur-md`, `box-shadow`, and `transition-all` on the input element causing heavy GPU repaints on every keystroke.
+-   **Solution**: Replaced blur effects with solid high-alpha colors (`bg-[#0a0a0a]/80`) in `UniversalSearch`, `SeriesSearch`, and `SeriesGrid`.
+
 ### Technical Details
 **Files Modified**:
 -   `app/page.js` - Implemented `getCached...` functions
