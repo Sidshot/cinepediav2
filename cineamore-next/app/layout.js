@@ -19,6 +19,35 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata = {
+  title: {
+    template: '%s | CineAmore',
+    default: 'CineAmore - The Ultimate Film Catalogue',
+  },
+  description: 'Explore thousands of movies, create lists, and track your watching habits with CineAmore.',
+  keywords: ['movies', 'film', 'catalogue', 'streaming', 'cinema', 'reviews'],
+  authors: [{ name: 'CineAmore Team' }],
+  creator: 'CineAmore',
+  publisher: 'CineAmore',
+  openGraph: {
+    title: 'CineAmore',
+    description: 'The Ultimate Film Catalogue',
+    url: 'https://cineamore.vercel.app',
+    siteName: 'CineAmore',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CineAmore',
+    description: 'The Ultimate Film Catalogue',
+    creator: '@cineamore_app',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
+};
+
 export default async function RootLayout({ children }) {
   const session = await auth();
   const isLoggedIn = !!session?.user;
