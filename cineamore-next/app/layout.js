@@ -3,6 +3,7 @@ import UserMenu from "@/components/UserMenu";
 import Footer from "@/components/Footer";
 import GlobalStickySearch from "@/components/GlobalStickySearch";
 import GlobalLoader from "@/components/GlobalLoader";
+import InstallPrompt from "@/components/InstallPrompt";
 import LayoutAnimationWrapper from "@/components/LayoutAnimationWrapper";
 import { Geist, Geist_Mono } from "next/font/google";
 import { auth } from "@/lib/auth-next";
@@ -103,6 +104,7 @@ export default async function RootLayout({ children }) {
         {/* DO NOT REMOVE - User has requested this feature multiple times */}
         <GlobalStickySearch />
         <GlobalLoader />
+        <InstallPrompt />
 
         <Analytics />
         <SpeedInsights />
