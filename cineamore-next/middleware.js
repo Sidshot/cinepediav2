@@ -73,7 +73,11 @@ export async function middleware(request) {
                 else limiter = getRateLimiter('default');
 
                 try {
-                    const { success, limit, remaining, reset } = await limiter.limit(ip);
+                    // Timeout Wrapper: Fail open if Redis takes > 2000ms
+                    const { success, limit, remaining, reset } = await Promise.race([
+                        limiter.limit(ip),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("RateLimit Timeout")), 2000))
+                    ]);
 
                     const res = NextResponse.next();
                     res.headers.set('X-RateLimit-Limit', limit.toString());

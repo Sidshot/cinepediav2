@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/pre-deploy.mjs && next build",
+    "build": "next build",
+    "prepare": "node scripts/install-hooks.mjs",
+    "predeploy": "node scripts/pre-deploy.mjs",
+    "deploy": "npm run predeploy && vercel deploy",
     "start": "next start",
     "lint": "eslint"
   },

@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+import fs from "fs";
+
+function fail(msg) {
+  console.error("\n❌ PRE-COMMIT BLOCKED\n" + msg + "\n");
+  process.exit(1);
+}
+
+const TASK_FILE = "docs/TASK.md";
+
+if (!fs.existsSync(TASK_FILE)) {
+  fail("Missing docs/TASK.md");
+}
+
+const content = fs.readFileSync(TASK_FILE, "utf8");
+
+const REQUIRED = [
+  "Task Type:",
+  "Runtime:",
+  "Critical Dependencies:",
+  "Failure Modes:",
+  "Data Impact:",
+  "Performance Impact:",
+  "Security Impact:",
+  "INVARIANTS_READ: YES",
+  "CHECKLIST_COMPLETE: YES"
+];
+
+for (const r of REQUIRED) {
+  if (!content.includes(r)) {
+    fail(`TASK.md missing: ${r}`);
+  }
+}
+
+console.log("✅ Pre-commit passed");

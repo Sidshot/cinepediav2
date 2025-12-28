@@ -1,37 +1,47 @@
-import dotenv from 'dotenv';
-import { spawn } from 'child_process';
 
-console.log('\x1b[36m%s\x1b[0m', '\n🛡️  CineAmore Deployment Guardrails Initiated...');
+import fs from "fs";
+import dotenv from "dotenv";
 
-// 1. Environment Variable Check
-console.log('🔍 Checking Environment Variables...');
-// Load .env.local explicitly
-dotenv.config({ path: '.env.local' });
+if (fs.existsSync(".env.local")) {
+    dotenv.config({ path: ".env.local" });
+}
+dotenv.config();
 
-const requiredEnv = ['MONGODB_URI', 'TMDB_API_KEY', 'AUTH_SECRET'];
+import { execSync } from "child_process";
 
-const missingEnv = requiredEnv.filter(key => !process.env[key]);
-if (missingEnv.length > 0) {
-    console.error('\x1b[31m%s\x1b[0m', `❌ CRITICAL: Missing environment variables: ${missingEnv.join(', ')}`);
+function fail(msg) {
+    console.error("\n🚨 PRE-DEPLOY BLOCKED\n" + msg + "\n");
     process.exit(1);
 }
-console.log('\x1b[32m%s\x1b[0m', '✅ Environment OK.');
 
-// 2. Database Invariant Audit
-console.log('\n🔍 Running Database Audit (scripts/audit-db.mjs)...');
+const REQUIRED_ENVS = [
+    "MONGODB_URI",
+    "TMDB_API_KEY",
+    "AUTH_SECRET"
+];
 
-const audit = spawn('node', ['scripts/audit-db.mjs'], {
-    stdio: 'inherit',
-    shell: true
-});
-
-audit.on('close', (code) => {
-    if (code === 0) {
-        console.log('\x1b[32m%s\x1b[0m', '\n✅ Guardrails Passed. Proceeding to build...');
-        process.exit(0);
-    } else {
-        console.error('\x1b[31m%s\x1b[0m', '\n❌ CRITICAL: Database Audit Failed. Deployment Aborted.');
-        console.error('   Fix invariants before building.');
-        process.exit(1);
+for (const env of REQUIRED_ENVS) {
+    if (!process.env[env]) {
+        fail(`Missing env var: ${env}`);
     }
-});
+}
+
+try {
+    execSync("npm run build", { stdio: "inherit" });
+} catch {
+    fail("Build failed");
+}
+
+try {
+    execSync("node scripts/audit-db.mjs", { stdio: "inherit" });
+} catch {
+    fail("Database invariant check failed");
+}
+
+try {
+    execSync("node scripts/check-homepage-bounds.mjs", { stdio: "inherit" });
+} catch {
+    fail("Homepage query unbounded");
+}
+
+console.log("✅ Pre-deploy passed");

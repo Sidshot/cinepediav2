@@ -13,7 +13,6 @@ import Movie from '@/models/Movie';
 export async function POST(request) {
     try {
         // 1. Check Authentication
-        // 1. Check Authentication (Standardized)
         const { isAdmin } = await import('@/lib/auth');
         if (!await isAdmin()) {
             return NextResponse.json(
@@ -25,18 +24,26 @@ export async function POST(request) {
         // 2. Connect to DB
         await dbConnect();
 
-        // 3. Get all movies and check what needs migration
-        console.log('🔍 Starting visibility migration...');
-        const allMovies = await Movie.find({});
-        console.log(`📊 Found ${allMovies.length} total movies`);
+        // 3. Get all movies via cursor for Memory Safety (Stream, don't load all)
+        console.log('🔍 Starting visibility migration (Streaming Mode)...');
 
+        // Count first for stats (fast)
+        const totalCount = await Movie.countDocuments({});
+        console.log(`📊 Found ${totalCount} total movies`);
+
+        let processed = 0;
         let quarantined = 0;
         let visible = 0;
         let alreadyMigrated = 0;
-
         const bulkOps = [];
+        const BATCH_SIZE = 1000;
 
-        for (const movie of allMovies) {
+        // Use cursor to iterate without flooding RAM
+        const cursor = Movie.find({}).cursor();
+
+        for (let movie = await cursor.next(); movie != null; movie = await cursor.next()) {
+            processed++;
+
             // Skip if already has proper visibility field with state
             if (movie.visibility && movie.visibility.state) {
                 alreadyMigrated++;
@@ -77,38 +84,33 @@ export async function POST(request) {
                     update: update
                 }
             });
+
+            // Execute in batches to keep memory low
+            if (bulkOps.length >= BATCH_SIZE) {
+                await Movie.bulkWrite(bulkOps);
+                bulkOps.length = 0; // Clear array
+                console.log(`...processed ${processed}/${totalCount}`);
+            }
         }
 
+        // Process remaining batch
         if (bulkOps.length > 0) {
-            console.log(`🚀 Executing ${bulkOps.length} updates...`);
-            const result = await Movie.bulkWrite(bulkOps);
-            console.log('✅ Migration Complete');
-
-            return NextResponse.json({
-                success: true,
-                message: 'Migration completed successfully',
-                stats: {
-                    totalMovies: allMovies.length,
-                    migrated: bulkOps.length,
-                    quarantined,
-                    visible,
-                    alreadyMigrated,
-                    bulkWriteResult: {
-                        modifiedCount: result.modifiedCount,
-                        matchedCount: result.matchedCount
-                    }
-                }
-            });
-        } else {
-            return NextResponse.json({
-                success: true,
-                message: 'All movies already have visibility.state field',
-                stats: {
-                    totalMovies: allMovies.length,
-                    alreadyMigrated
-                }
-            });
+            await Movie.bulkWrite(bulkOps);
         }
+
+        console.log('✅ Migration Complete');
+
+        return NextResponse.json({
+            success: true,
+            message: 'Migration completed successfully',
+            stats: {
+                totalMovies: totalCount,
+                processed: processed,
+                quarantined,
+                visible,
+                alreadyMigrated
+            }
+        });
 
     } catch (error) {
         console.error('❌ Migration Error:', error);
