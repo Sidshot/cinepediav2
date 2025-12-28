@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import GlobalStickySearch from "@/components/GlobalStickySearch";
 import GlobalLoader from "@/components/GlobalLoader";
 import InstallPrompt from "@/components/InstallPrompt";
+import SWUpdater from "@/components/SWUpdater";
 import LayoutAnimationWrapper from "@/components/LayoutAnimationWrapper";
 import { Geist, Geist_Mono } from "next/font/google";
 import { auth } from "@/lib/auth-next";
@@ -105,6 +106,7 @@ export default async function RootLayout({ children }) {
         <GlobalStickySearch />
         <GlobalLoader />
         <InstallPrompt />
+        <SWUpdater />
 
         <Analytics />
         <SpeedInsights />
