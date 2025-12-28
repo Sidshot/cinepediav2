@@ -30,6 +30,13 @@ export const metadata = {
   authors: [{ name: 'CineAmore Team' }],
   creator: 'CineAmore',
   publisher: 'CineAmore',
+  manifest: '/manifest.json',
+  themeColor: '#8B0000',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'CineAmore',
+  },
   openGraph: {
     title: 'CineAmore',
     description: 'The Ultimate Film Catalogue',
@@ -46,6 +53,7 @@ export const metadata = {
   },
   icons: {
     icon: '/favicon.ico',
+    apple: '/icons/apple-touch-icon.png',
   },
 };
 
@@ -63,12 +71,18 @@ export default async function RootLayout({ children }) {
             __html: `
               (function() {
                 try {
+                  // Theme initialization
                   const saved = localStorage.getItem('theme');
                   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   if (saved === 'dark' || (!saved && prefersDark)) {
                     document.documentElement.setAttribute('data-theme', 'dark');
                   } else {
                     document.documentElement.setAttribute('data-theme', 'light');
+                  }
+                  
+                  // PWA Service Worker Registration
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js').catch(function() {});
                   }
                 } catch (e) {}
               })();
