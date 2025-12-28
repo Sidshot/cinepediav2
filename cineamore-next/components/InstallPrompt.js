@@ -72,7 +72,7 @@ export default function InstallPrompt() {
     if (isInstalled || !showPrompt || !deferredPrompt) return null;
 
     return (
-        <div className="fixed bottom-24 md:bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom duration-500">
+        <div className="fixed bottom-24 md:bottom-4 left-4 right-4 z-[9999] animate-in slide-in-from-bottom duration-500">
             <div className="bg-gradient-to-r from-[#1a1a1a] to-[#2a1a1a] border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center gap-4">
                     {/* Icon */}
