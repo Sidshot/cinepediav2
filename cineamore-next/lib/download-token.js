@@ -3,9 +3,7 @@ import { SignJWT, jwtVerify } from 'jose';
 
 const secretKey = process.env.DOWNLOAD_SECRET || process.env.JWT_SECRET;
 if (!secretKey) {
-    if (process.env.NODE_ENV === 'production') {
-        throw new Error('DOWNLOAD_SECRET or JWT_SECRET env variable is missing');
-    }
+    console.warn('⚠️ DOWNLOAD_SECRET or JWT_SECRET missing! Downloads will fail.');
 }
 const finalKey = secretKey || 'dev-fallback-secret-key';
 const key = new TextEncoder().encode(finalKey);
