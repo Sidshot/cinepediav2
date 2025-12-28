@@ -61,7 +61,7 @@ ${movie.plot ? movie.plot.substring(0, 120) + '...' : ''}
             }
 
             // ---------- /site - Link to website ----------
-            if (cleanText === '/site' || text === '/website') {
+            if (cleanText === '/site' || cleanText === '/website') {
                 await sendMessage(chatId, `
 🌐 <b>CineAmore</b>
 
