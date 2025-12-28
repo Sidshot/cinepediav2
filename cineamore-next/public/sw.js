@@ -1,10 +1,9 @@
-// CineAmore Service Worker v2
-// Optimized for blazing fast PWA performance
+// CineAmore Service Worker v3
+// Fixed: Only serve cached HTML for navigation requests (fixes RSC/JSON bug)
 
-const CACHE_NAME = 'cineamore-v2';
-const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes in ms
+const CACHE_NAME = 'cineamore-v3';
 
-// Pages to prefetch and cache aggressively
+// Pages to prefetch and cache for offline access
 const PRIORITY_PAGES = ['/', '/series', '/anime'];
 const STATIC_ASSETS = [
     '/manifest.json',
@@ -22,7 +21,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Activate: Clean old caches
+// Activate: Clean old caches immediately
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -36,26 +35,30 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch: Stale-while-revalidate for pages, network-first for API
+// Fetch Strategy
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Skip non-GET requests and cross-origin
-    if (event.request.method !== 'GET') return;
-    if (url.origin !== location.origin) return;
+    // 1. Only handle GET requests from our origin
+    if (event.request.method !== 'GET' || url.origin !== location.origin) return;
 
-    // API calls: Always fetch fresh
+    // 2. API calls: Network Only
     if (url.pathname.startsWith('/api/')) {
         return;
     }
 
-    // Priority pages: Stale-while-revalidate (instant + background refresh)
-    if (PRIORITY_PAGES.includes(url.pathname)) {
+    // 3. Navigation Requests (HTML): Stale-while-revalidate
+    // CRITICAL FIX: Only serve cached HTML if it's a navigation request.
+    // This prevents serving HTML for Next.js RSC/JSON requests.
+    const isNavigation = event.request.mode === 'navigate';
+    const isRSC = event.request.headers.get('RSC') === '1';
+
+    if (isNavigation && !isRSC) { // strict navigation check
         event.respondWith(
             caches.open(CACHE_NAME).then(async (cache) => {
                 const cachedResponse = await cache.match(event.request);
 
-                // Fetch fresh in background
+                // Fetch fresh in background to update cache
                 const fetchPromise = fetch(event.request).then((networkResponse) => {
                     if (networkResponse.ok) {
                         cache.put(event.request, networkResponse.clone());
@@ -63,25 +66,27 @@ self.addEventListener('fetch', (event) => {
                     return networkResponse;
                 }).catch(() => cachedResponse);
 
-                // Return cached immediately, or wait for network
+                // Return cached response immediately if available, else wait for network
                 return cachedResponse || fetchPromise;
             })
         );
         return;
     }
 
-    // Everything else: Network-first with cache fallback
+    // 4. Static Assets (Images, JS, CSS): Cache First
     event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                if (response.ok) {
-                    const responseClone = response.clone();
+        caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) return cachedResponse;
+
+            return fetch(event.request).then((networkResponse) => {
+                if (networkResponse.ok) {
+                    const responseClone = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseClone);
                     });
                 }
-                return response;
-            })
-            .catch(() => caches.match(event.request))
+                return networkResponse;
+            });
+        })
     );
 });

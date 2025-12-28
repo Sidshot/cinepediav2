@@ -38,9 +38,6 @@ export default function ContentModeToggle() {
     const handleToggle = (newMode) => {
         if (newMode === mode) return;
 
-        // Trigger Loading UI immediately
-        window.dispatchEvent(new Event('start-loading'));
-
         setMode(newMode);
         localStorage.setItem('contentMode', newMode);
 
