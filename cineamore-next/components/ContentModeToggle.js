@@ -28,7 +28,12 @@ export default function ContentModeToggle() {
                 setMode('films');
             }
         }
-    }, [pathname]);
+
+        // PERFORMANCE: Prefetch all routes on mount for instant switching
+        router.prefetch('/');
+        router.prefetch('/series');
+        router.prefetch('/anime');
+    }, [pathname, router]);
 
     const handleToggle = (newMode) => {
         if (newMode === mode) return;
