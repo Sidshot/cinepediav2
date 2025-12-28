@@ -1,7 +1,7 @@
 import { getTrendingAnime, getPopularAnime, getTopRatedAnime, getAnimeByGenre } from '@/lib/tmdb';
 import { ANIME_GENRES } from '@/lib/anime-genres';
 import AnimeHero from '@/components/AnimeHero';
-import AnimeClientContent from '@/components/AnimeClientContent';
+import AnimeGenreRow from '@/components/AnimeGenreRow';
 
 // ISR: Cache page for 2 minutes
 export const revalidate = 120;
@@ -54,13 +54,34 @@ export default async function AnimePage() {
             {/* Hero + Search + Genre Pills */}
             <AnimeHero heroSeries={heroSeries} />
 
-            {/* Client-side cached content for instant switching */}
-            <AnimeClientContent
-                serverTrending={trending}
-                serverPopular={popular}
-                serverTopRated={topRated}
-                serverGenreRows={genreRows}
-            />
+            {/* Genre Rows with View All */}
+            <div className="mt-4">
+                <AnimeGenreRow
+                    title="Trending This Week"
+                    genreId={null}
+                    series={trending}
+                />
+                <AnimeGenreRow
+                    title="Popular Anime"
+                    genreId={null}
+                    series={popular}
+                />
+                <AnimeGenreRow
+                    title="Top Rated"
+                    genreId={null}
+                    series={topRated}
+                />
+
+                {/* Genre-specific rows with View All buttons */}
+                {genreRows.map((row, i) => (
+                    <AnimeGenreRow
+                        key={row.genreId || i}
+                        title={row.title}
+                        genreId={row.genreId}
+                        series={row.series}
+                    />
+                ))}
+            </div>
 
             {/* Notice */}
             <div className="text-center py-8 text-[var(--muted)] text-sm">

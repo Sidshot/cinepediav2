@@ -1,7 +1,7 @@
 import { getTrendingSeries, getPopularSeries, getTopRatedSeries, getSeriesByGenre } from '@/lib/tmdb';
 import { TV_GENRES } from '@/lib/tv-genres';
 import SeriesHero from '@/components/SeriesGrid';
-import SeriesClientContent from '@/components/SeriesClientContent';
+import SeriesGenreRow from '@/components/SeriesGenreRow';
 
 // ISR: Cache page for 2 minutes
 export const revalidate = 120;
@@ -54,13 +54,34 @@ export default async function SeriesPage() {
             {/* Hero + Search + Genre Pills */}
             <SeriesHero heroSeries={heroSeries} />
 
-            {/* Client-side cached content for instant switching */}
-            <SeriesClientContent
-                serverTrending={trending}
-                serverPopular={popular}
-                serverTopRated={topRated}
-                serverGenreRows={genreRows}
-            />
+            {/* Genre Rows with View All */}
+            <div className="mt-4">
+                <SeriesGenreRow
+                    title="Trending This Week"
+                    genreId={null}
+                    series={trending}
+                />
+                <SeriesGenreRow
+                    title="Popular Series"
+                    genreId={null}
+                    series={popular}
+                />
+                <SeriesGenreRow
+                    title="Top Rated"
+                    genreId={null}
+                    series={topRated}
+                />
+
+                {/* Genre-specific rows with View All buttons */}
+                {genreRows.map((row, i) => (
+                    <SeriesGenreRow
+                        key={row.genreId || i}
+                        title={row.title}
+                        genreId={row.genreId}
+                        series={row.series}
+                    />
+                ))}
+            </div>
 
             {/* Notice */}
             <div className="text-center py-8 text-[var(--muted)] text-sm">
