@@ -7,7 +7,9 @@ import InstallPrompt from "@/components/InstallPrompt";
 import SWUpdater from "@/components/SWUpdater";
 import LayoutAnimationWrapper from "@/components/LayoutAnimationWrapper";
 import { Geist, Geist_Mono } from "next/font/google";
-import { auth } from "@/lib/auth-next";
+import Link from "next/link";
+import NavLinks from "@/components/NavLinks";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -22,6 +24,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  themeColor: '#8B0000',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+};
+
 export const metadata = {
   title: {
     template: '%s | CineAmore',
@@ -33,7 +44,6 @@ export const metadata = {
   creator: 'CineAmore',
   publisher: 'CineAmore',
   manifest: '/manifest.json',
-  themeColor: '#8B0000',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -57,18 +67,10 @@ export const metadata = {
     icon: '/favicon.ico',
     apple: '/icons/apple-touch-icon.png',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
 };
 
-export default async function RootLayout({ children }) {
-  const session = await auth();
-  const isLoggedIn = !!session?.user;
+export default function RootLayout({ children }) {
+  // session check removed for performance (TTFB optimization)
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -80,7 +82,6 @@ export default async function RootLayout({ children }) {
             __html: `
               (function() {
                 try {
-                  // Theme initialization
                   const saved = localStorage.getItem('theme');
                   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   if (saved === 'dark' || (!saved && prefersDark)) {
@@ -89,7 +90,6 @@ export default async function RootLayout({ children }) {
                     document.documentElement.setAttribute('data-theme', 'light');
                   }
                   
-                  // PWA Service Worker Registration
                   if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register('/sw.js').catch(function() {});
                   }
@@ -99,7 +99,18 @@ export default async function RootLayout({ children }) {
           }}
         />
 
-        <Header userMenu={<UserMenu />} isLoggedIn={isLoggedIn} />
+        <Header
+          userMenu={
+            <Suspense fallback={<div className="w-9 h-9 rounded-full bg-white/5 animate-pulse" />}>
+              <UserMenu />
+            </Suspense>
+          }
+          navLinks={
+            <Suspense fallback={<nav className="hidden md:flex items-center gap-6 opacity-0"><div className="h-4 w-12 bg-white/5 rounded" /></nav>}>
+              <NavLinks />
+            </Suspense>
+          }
+        />
 
         {/* GLOBAL STICKY SEARCH - Appears when scrolling on ALL pages */}
         {/* DO NOT REMOVE - User has requested this feature multiple times */}
@@ -113,7 +124,9 @@ export default async function RootLayout({ children }) {
         <div className="min-h-screen flex flex-col">
           <div className="flex-1">
             <LayoutAnimationWrapper>
-              {children}
+              <Suspense fallback={null}>
+                {children}
+              </Suspense>
             </LayoutAnimationWrapper>
           </div>
           <Footer />

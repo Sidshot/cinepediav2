@@ -3,7 +3,12 @@ import { auth } from "@/lib/auth-next"
 import { handleSignIn, handleSignOut } from "@/lib/auth-actions"
 
 export default async function UserMenu() {
-    const session = await auth()
+    let session = null;
+    try {
+        session = await auth()
+    } catch (e) {
+        // Fail gracefully during build
+    }
 
     if (session?.user) {
         return (

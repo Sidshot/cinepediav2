@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 export default function GlobalLoader() {
     const pathname = usePathname();
-    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
 
     // Delay threshold in ms. 
@@ -19,7 +18,7 @@ export default function GlobalLoader() {
         // Stop loading immediately when path changes (navigation complete)
         if (timerRef.current) clearTimeout(timerRef.current);
         setIsLoading(false);
-    }, [pathname, searchParams]);
+    }, [pathname]);
 
     useEffect(() => {
         const handleStart = () => {

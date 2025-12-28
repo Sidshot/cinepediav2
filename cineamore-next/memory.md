@@ -1299,3 +1299,28 @@ cineamore-next/app/api/telegram/route.js (Webhook Handler)
 cineamore-next/app/api/cron/daily/route.js (Daily Recommendation Cron)
 cineamore-next/vercel.json (Cron Schedule)
 ```
+
+## Telegram Bot Session - December 28, 2025
+
+### Completed Features
+- [x] Bot webhook setup and working
+- [x] /ping command
+- [x] /random command (random movie from DB)
+- [x] /search [title] command
+- [x] /site, /download, /stream, /commands
+- [x] Daily auto-post at 10:00 UTC (Movie, Series, Anime)
+- [x] Welcome message for new members
+- [x] Admin DM controls (/help, /status, /post_now, /post_here)
+- [x] Admin ID: 5342146552
+- [x] @mention handling in groups
+- [x] Natural language triggers
+
+### Pending/To Test Tomorrow
+- [ ] Test @Cineamore_bot natural language in group
+- [ ] Verify welcome message for NEW members
+- [ ] Test daily cron at 3:30 PM IST
+
+### Files Modified
+- app/api/telegram/route.js
+- lib/daily-recs.js
+- docs/TELEGRAM_BOT_FAQ.md

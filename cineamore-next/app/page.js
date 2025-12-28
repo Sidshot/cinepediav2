@@ -21,7 +21,7 @@ import {
 const MOVIES_PER_PAGE = 48;
 const HOME_GENRES = ['Action', 'Adventure', 'Comedy', 'Crime', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Animation'];
 
-export const revalidate = 60; // ISR: Cache homepage for 60 seconds
+export const revalidate = 3600; // ISR: Cache homepage for 1 hour
 
 // Helper to serialize Mongoose docs
 const serializeMovie = (doc) => {
@@ -47,7 +47,19 @@ const serializeMovie = (doc) => {
 };
 
 // Server Component
-export default async function Home({ searchParams }) {
+// Suspense Wrapper to handle searchParams in Static/ISR mode
+import { Suspense } from 'react';
+import GlobalLoader from '@/components/GlobalLoader';
+
+export default function HomeWrapper(props) {
+  return (
+    <Suspense fallback={<GlobalLoader />}>
+      <Home {...props} />
+    </Suspense>
+  );
+}
+
+async function Home({ searchParams }) {
   const params = await searchParams;
   const currentPage = Math.max(1, parseInt(params?.page) || 1);
   const currentGenre = params?.genre || null;

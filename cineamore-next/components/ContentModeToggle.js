@@ -1,12 +1,11 @@
 'use client';
 
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function ContentModeToggle() {
     const router = useRouter();
     const pathname = usePathname();
-    const searchParams = useSearchParams();
 
     // Determine current mode from URL or localStorage
     const [mode, setMode] = useState('films');
@@ -41,12 +40,15 @@ export default function ContentModeToggle() {
         setMode(newMode);
         localStorage.setItem('contentMode', newMode);
 
+        // Use Hard Navigation (window.location) instead of router.push
+        // This ensures a fresh document load, preventing the 'Stuck' state on mobile/PWA
+        // The user confirmed "manual refresh works", so we automate that.
         if (newMode === 'series') {
-            router.push('/series');
+            window.location.href = '/series';
         } else if (newMode === 'anime') {
-            router.push('/anime');
+            window.location.href = '/anime';
         } else {
-            router.push('/');
+            window.location.href = '/';
         }
     };
 

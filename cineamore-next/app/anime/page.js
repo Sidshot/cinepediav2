@@ -3,8 +3,8 @@ import { ANIME_GENRES } from '@/lib/anime-genres';
 import AnimeHero from '@/components/AnimeHero';
 import AnimeGenreRow from '@/components/AnimeGenreRow';
 
-// ISR: Cache page for 2 minutes
-export const revalidate = 120;
+// ISR: Cache page for 1 hour
+export const revalidate = 3600;
 
 export default async function AnimePage() {
     // Fetch anime data with safe fallbacks

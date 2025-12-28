@@ -3,8 +3,8 @@ import { TV_GENRES } from '@/lib/tv-genres';
 import SeriesHero from '@/components/SeriesGrid';
 import SeriesGenreRow from '@/components/SeriesGenreRow';
 
-// ISR: Cache page for 2 minutes
-export const revalidate = 120;
+// ISR: Cache page for 1 hour
+export const revalidate = 3600;
 
 export default async function SeriesPage() {
     // Fetch series data with safe fallbacks

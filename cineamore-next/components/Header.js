@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 import ContentModeToggle from './ContentModeToggle';
 
-export default function Header({ userMenu, isLoggedIn }) {
+export default function Header({ userMenu, navLinks }) {
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -50,22 +50,7 @@ export default function Header({ userMenu, isLoggedIn }) {
                     </div>
 
                     {/* Center Navigation */}
-                    <nav className="hidden md:flex items-center gap-6">
-                        <Link
-                            href="/"
-                            className="text-sm font-medium text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
-                        >
-                            Browse
-                        </Link>
-                        {isLoggedIn && (
-                            <Link
-                                href="/lists"
-                                className="text-sm font-medium text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
-                            >
-                                My Lists
-                            </Link>
-                        )}
-                    </nav>
+                    {navLinks}
 
                     {/* Right Controls */}
                     <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
