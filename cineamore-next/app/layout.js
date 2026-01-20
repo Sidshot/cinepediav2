@@ -10,8 +10,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
 import { Suspense } from "react";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -99,6 +98,21 @@ export default function RootLayout({ children }) {
           }}
         />
 
+        {/* Google Analytics 4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-N2R9HBGZLL"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-N2R9HBGZLL');
+          `}
+        </Script>
+
         <Header
           userMenu={
             <Suspense fallback={<div className="w-9 h-9 rounded-full bg-white/5 animate-pulse" />}>
@@ -119,8 +133,6 @@ export default function RootLayout({ children }) {
         <InstallPrompt />
         <SWUpdater />
 
-        <Analytics />
-        <SpeedInsights />
         <div className="min-h-screen flex flex-col">
           <div className="flex-1">
             <LayoutAnimationWrapper>
