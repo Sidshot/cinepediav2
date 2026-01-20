@@ -110,7 +110,20 @@ export async function middleware(request) {
             if (pathname.startsWith('/contributor') && session.role !== 'contributor') return NextResponse.redirect(new URL('/admin', request.url));
         }
 
-        return NextResponse.next();
+        // 4. 🚀 CACHE HEADERS (QUOTA FIX: Aggressive caching for public pages)
+        // If we haven't returned yet, this is a successful request
+        const response = NextResponse.next();
+
+        // Apply cache headers to public pages (Home, Movie Details, Search, etc.)
+        // Exclude API, Admin, Contributor, and Auth routes
+        if (!pathname.startsWith('/api') &&
+            !pathname.startsWith('/admin') &&
+            !pathname.startsWith('/contributor') &&
+            !pathname.startsWith('/login')) {
+            response.headers.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+        }
+
+        return response;
 
     } catch (error) {
         console.error('CRITICAL MIDDLEWARE ERROR:', error);

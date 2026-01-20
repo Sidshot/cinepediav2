@@ -1,9 +1,10 @@
 
 import { SignJWT, jwtVerify } from 'jose';
 
-const secretKey = process.env.DOWNLOAD_SECRET || process.env.JWT_SECRET;
+const secretKey = process.env.DOWNLOAD_SECRET || process.env.AUTH_SECRET || process.env.JWT_SECRET;
+
 if (!secretKey) {
-    console.warn('⚠️ DOWNLOAD_SECRET or JWT_SECRET missing! Downloads will fail.');
+    console.warn('⚠️ DOWNLOAD_SECRET, AUTH_SECRET or JWT_SECRET missing! Downloads will fail.');
 }
 const finalKey = secretKey || 'dev-fallback-secret-key';
 const key = new TextEncoder().encode(finalKey);

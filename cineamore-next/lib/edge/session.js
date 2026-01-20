@@ -11,9 +11,9 @@
  */
 import { SignJWT, jwtVerify } from 'jose';
 
-const secretKey = process.env.JWT_SECRET;
+const secretKey = process.env.AUTH_SECRET || process.env.JWT_SECRET;
 if (!secretKey) {
-    console.warn('⚠️ JWT_SECRET env variable is missing! Auth may fail.');
+    console.warn('⚠️ AUTH_SECRET or JWT_SECRET env variable is missing! Auth may fail.');
     // Fallback to allow build to complete - essential for deploying fixes
 }
 const finalKey = secretKey || 'dev-secret-key-do-not-use-in-prod';
