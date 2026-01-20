@@ -1,5 +1,11 @@
 # CinePedia (CineAmore)
 
+> [!CAUTION]
+> **DEPRECATED / ARCHIVED**
+> This monolithic version (V1) is no longer maintained.
+> The project has migrated to **V2 (Next.js)** hosted on Vercel.
+> **New Site:** [cinepediav2.vercel.app](https://cinepediav2.vercel.app/)
+
 A personal film archive dashboard built as a Node.js monolith. It features a glossy, glassmorphism UI, robust search/filtering, and a dual-role authentication system (Admin/Guest).
 
 ## 🚀 Quick Start
