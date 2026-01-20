@@ -260,19 +260,19 @@ export default async function MoviePage({ params }) {
 export const dynamicParams = true;
 
 // ISR: Revalidate popular movie pages every hour
-export const revalidate = 3600; // 1 hour in seconds
+export const revalidate = 86400; // QUOTA FIX: 24 hours
 
 async function fetchWikipediaSummary(title, year) {
     try {
         const query = `${title} ${year || ''} film`;
         const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json`;
-        const searchRes = await fetch(searchUrl, { next: { revalidate: 3600 } }); // Cache for 1 hour
+        const searchRes = await fetch(searchUrl, { next: { revalidate: 86400 } }); // QUOTA FIX: 24 hours
         const searchData = await searchRes.json();
 
         if (searchData.query?.search?.length > 0) {
             const pageId = searchData.query.search[0].pageid;
             const extractUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=10&explaintext&pageids=${pageId}&format=json`;
-            const extractRes = await fetch(extractUrl, { next: { revalidate: 3600 } });
+            const extractRes = await fetch(extractUrl, { next: { revalidate: 86400 } }); // QUOTA FIX
             const extractData = await extractRes.json();
             return extractData.query?.pages?.[pageId]?.extract;
         }

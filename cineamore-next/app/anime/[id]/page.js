@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import SeriesStreamingPlayer from '@/components/SeriesStreamingPlayer';
 
 // ISR: Revalidate pages every hour
-export const revalidate = 3600;
+export const revalidate = 86400; // QUOTA FIX: 24 hours
 
 export default async function AnimeDetailPage({ params, searchParams }) {
     const { id } = await params;

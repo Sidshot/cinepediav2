@@ -4,7 +4,7 @@ import SeriesHero from '@/components/SeriesGrid';
 import SeriesGenreRow from '@/components/SeriesGenreRow';
 
 // ISR: Cache page for 1 hour
-export const revalidate = 3600;
+export const revalidate = 86400; // QUOTA FIX: 24 hours
 
 export default async function SeriesPage() {
     // Fetch series data with safe fallbacks

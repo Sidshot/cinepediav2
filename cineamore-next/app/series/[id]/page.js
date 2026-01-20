@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import SeriesStreamingPlayer from '@/components/SeriesStreamingPlayer';
 
 // ISR: Revalidate series pages every hour for fresh data
-export const revalidate = 3600; // 1 hour
+export const revalidate = 86400; // QUOTA FIX: 24 hours
 
 export default async function SeriesDetailPage({ params, searchParams }) {
     const { id } = await params;

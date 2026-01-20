@@ -4,7 +4,7 @@ import AnimeHero from '@/components/AnimeHero';
 import AnimeGenreRow from '@/components/AnimeGenreRow';
 
 // ISR: Cache page for 1 hour
-export const revalidate = 3600;
+export const revalidate = 86400; // QUOTA FIX: 24 hours
 
 export default async function AnimePage() {
     // Fetch anime data with safe fallbacks

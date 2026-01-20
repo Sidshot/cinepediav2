@@ -21,7 +21,7 @@ import {
 const MOVIES_PER_PAGE = 48;
 const HOME_GENRES = ['Action', 'Adventure', 'Comedy', 'Crime', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Animation'];
 
-export const revalidate = 3600; // ISR: Cache homepage for 1 hour
+export const revalidate = 86400; // QUOTA FIX: ISR - Cache homepage for 24 hours
 
 // Helper to serialize Mongoose docs
 const serializeMovie = (doc) => {

@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    // Enable remote image optimization for these domains
+    // QUOTA FIX: Disable Vercel image optimization to save bandwidth
+    unoptimized: true,
+    // Remote patterns kept for reference (not used when unoptimized: true)
     remotePatterns: [
       {
         protocol: 'https',

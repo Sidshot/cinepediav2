@@ -49,8 +49,8 @@ export async function middleware(request) {
             return new NextResponse(JSON.stringify({ error: 'Access Denied', message: 'Bot detected.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
         }
 
-        // 2. 🚦 RATE LIMITING (Skip internal/static)
-        if (!pathname.startsWith('/_next') && !pathname.includes('.')) {
+        // 2. 🚦 RATE LIMITING (QUOTA FIX: Only rate limit API routes to save Upstash calls)
+        if (pathname.startsWith('/api') && !pathname.includes('.')) {
             // Whitelist Check
             const whitelistedIPs = (process.env.WHITELISTED_IPS || '').split(',').filter(Boolean);
             if (whitelistedIPs.includes(ip)) return NextResponse.next();
