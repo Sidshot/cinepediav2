@@ -1,308 +1,184 @@
-<!doctype html>
-<html lang="en" data-theme="dark">
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>CineAmore · Infinite Cinema</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>We've Moved! · CineAmore V2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030303;
+            --card: #121212;
+            --accent: #FFD700; /* Gold */
+            --accent-glow: rgba(255, 215, 0, 0.4);
+            --text: #EDEDED;
+            --text-muted: #888888;
+        }
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&family=Outfit:wght@700&display=swap"
-    rel="stylesheet">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;500;600&display=swap"
-    rel="stylesheet">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/ratings.css">
-  <link rel="stylesheet" href="css/tips.css">
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background Glow */
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            top: -10%;
+            right: -10%;
+            z-index: -1;
+            filter: blur(80px);
+        }
+        .glow-2 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+            bottom: -10%;
+            left: -10%;
+            z-index: -1;
+            filter: blur(80px);
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #FFF 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: var(--accent);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        p.desc {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--accent);
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 18px 48px;
+            border-radius: 99px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 40px var(--accent-glow);
+            background: #FFE44D;
+        }
+
+        .timer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            h1 { font-size: 2.5rem; }
+            .container { padding: 30px 20px; border: none; background: transparent; box-shadow: none; }
+        }
+    </style>
 </head>
-
-
 <body>
 
-  <!-- MIGRATION OVERLAY (Added by Admin) -->
-  <div
-    style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99999;display:flex;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:sans-serif;text-align:center;padding:20px;">
-    <h1 style="font-size:3rem;margin-bottom:1rem;">We've Moved! 🚀</h1>
-    <p style="font-size:1.5rem;margin-bottom:2rem;max-width:600px;line-height:1.4;">
-      CineAmore has migrated to a new, faster home with more features.
-      <br><br>
-      Redirecting you in <span id="redir-timer">5</span> seconds...
-    </p>
-    <a href="https://cineamore.vercel.app"
-      style="background:#fff;color:#000;padding:15px 30px;border-radius:30px;text-decoration:none;font-weight:bold;font-size:1.2rem;transition:transform 0.2s; margin-bottom: 20px;">
-      Go to New Site Now
-    </a>
+    <div class="glow"></div>
+    <div class="glow-2"></div>
 
-    <a href="https://t.me/cineamore" target="_blank"
-      style="margin-top: 40px; display:flex;align-items:center;gap:12px;background:rgba(255, 59, 48, 0.15);border:2px solid #ff3b30;color:#ff3b30;padding:18px 40px;border-radius:50px;text-decoration:none;font-size:1.4rem;font-weight:700;transition:all 0.2s;box-shadow: 0 4px 20px rgba(255, 59, 48, 0.2);">
-      <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor;">
-        <path
-          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.4-1.08.39-.35-.01-1.03-.2-1.54-.35-.62-.18-1.12-.28-1.07-.59.02-.16.24-.31.65-.48 2.56-1.11 4.27-1.84 5.13-2.2 2.44-1.02 2.94-1.2 3.28-1.2.07 0 .24.01.35.1.09.07.12.17.13.25 0 .02.01.07 0 .1z" />
-      </svg>
-      Join Updates on Telegram
-    </a>
-    <script>
-      let count = 58;
-      const el = document.getElementById('redir-timer');
-      const interval = setInterval(() => {
-        count--;
-        if (el) el.innerText = count > 0 ? count : 0;
-        if (count <= 0) {
-          clearInterval(interval);
-          window.location.href = "https://cineamore.vercel.app";
-        }
-      }, 1000);
-      // Fallback
-      setTimeout(() => { window.location.href = "https://cineamore.vercel.app"; }, 59000);
-    </script>
-  </div>
-
-
-  <!-- Lock Screen Overlay (DISABLED) -->
-  <div id="lockScreen" style="display:none">
-    <!-- Step 1: Identity Selection -->
-    <div id="authStep1" class="lock-box">
-      <h2 class="lock-title">Who are you?</h2>
-      <div class="auth-tiles">
-        <button id="btnAdmin" class="auth-tile">
-          <span class="auth-emoji">😎</span>
-          <span class="auth-label">Admin</span>
-        </button>
-        <button id="btnGuest" class="auth-tile">
-          <span class="auth-emoji">👀</span>
-          <span class="auth-label">Guest</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 2: Password Input (Admin Only) -->
-    <div id="authStep2" class="lock-box hidden">
-      <h2 class="lock-title">Enter Password</h2>
-      <input type="password" id="lockInput" class="lock-input" placeholder="Password" autofocus>
-      <button id="lockBtn" class="lock-btn">Unlock</button>
-      <button id="backToAuth" class="btn-ghost"
-        style="margin-top:10px;width:100%;border:none;color:var(--muted);">Cancel</button>
-    </div>
-  </div>
-
-  <!-- Google Fonts: Inter (Body) & Dancing Script (Logo) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap"
-    rel="stylesheet">
-
-  <!-- App Loading Screen -->
-  <div id="app-loader">
-    <div class="loader-spinner"></div>
-  </div>
-
-  <header>
     <div class="container">
+        <div class="badge">V2 Upgrade</div>
+        <h1>We've Moved.</h1>
+        <p class="desc">
+            CineAmore has evolved. Experience our faster, smoother, and more powerful streaming platform.
+        </p>
 
-      <!-- Top Row: Message Me (Left) | Brand (Center) | Spacer (Right) -->
-      <div class="header-top" style="align-items: center;">
-        <a href="https://x.com/__Sithlord__" target="_blank" rel="noopener noreferrer" class="msg-me-link">
-          <svg class="ui-icon" viewBox="0 0 24 24" style="fill:currentColor;stroke:none;">
-            <path
-              d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-          </svg>
-          <span>Message Me</span>
+        <a href="https://cinepediav2.vercel.app/" class="btn">
+            Go to New Site 🚀
         </a>
 
-        <!-- Glossy Logo Wrapper -->
-        <a href="/" class="brand-center">
-          <div class="glossy-box glossy-logo">
-            CineAmore
-          </div>
-        </a>
-      </div>
-
-      <div class="header-spacer"></div>
-    </div>
-
-    <div class="controls-wrapper">
-      <!-- Search -->
-      <div class="control-group full-width" style="display:flex; justify-content:center;">
-        <label for="q" class="visually-hidden">Search</label>
-        <input id="q" type="search" placeholder="Search title / original title / director…" style="max-width:100%;">
-      </div>
-
-      <!-- Year Filter -->
-      <div class="control-group">
-        <label for="yearFilter" class="visually-hidden">Filter by Year</label>
-        <select id="yearFilter">
-          <option value="all">All Years</option>
-        </select>
-      </div>
-
-      <!-- Director Filter -->
-      <div class="control-group">
-        <label for="dirFilter" class="visually-hidden">Filter by Director</label>
-        <select id="dirFilter">
-          <option value="all">All Directors</option>
-        </select>
-      </div>
-
-      <!-- Link Filter -->
-      <div class="control-group">
-        <label for="missingFilter" class="visually-hidden">Filter by Links</label>
-        <select id="missingFilter">
-          <option value="all">Show: All</option>
-          <option value="both_links">Show: With both links</option>
-          <option value="missing_any">Show: Missing any link</option>
-          <option value="missing_letterboxd">Show: Missing Letterboxd</option>
-          <option value="missing_drive">Show: Missing Drive</option>
-          <option value="no_year">Show: No Year</option>
-        </select>
-      </div>
-
-      <!-- Sort -->
-      <div class="control-group">
-        <label for="sortFilter" class="visually-hidden">Sort</label>
-        <select id="sortFilter">
-          <option value="year_desc">Sort: Year ↓</option>
-          <option value="year_asc">Sort: Year ↑</option>
-          <option value="title_asc">Sort: Title A→Z</option>
-          <option value="original_asc">Sort: Original Title A→Z</option>
-          <option value="director_asc">Sort: Director A→Z</option>
-        </select>
-      </div>
-
-      <!-- Theme/Layout Toggles -->
-      <div class="control-group buttons-group" style="flex-direction: row; gap: 10px;">
-        <button id="themeToggle" class="btn-ghost" aria-label="Toggle dark/light theme">
-          <!-- Default Content (JS will update) -->
-          <svg class="ui-icon" viewBox="0 0 24 24">
-            <path
-              d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" />
-          </svg>
-          Dark
-        </button>
-        <div class="custom-toggle"
-          style="border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.03);gap:6px;width:100%;">
-          <input type="checkbox" id="comfortToggle"
-            style="width:auto;height:auto;box-shadow:none;border:none;background:transparent;padding:0;margin:0;">
-          <label for="comfortToggle"
-            style="font-size:0.9rem;font-weight:600;cursor:pointer;margin:0;color:var(--fg);">Comfort</label>
+        <div class="timer">
+            Redirecting in <span id="countdown">3</span>s...
         </div>
-        <button id="compactBtn" class="btn-ghost" aria-label="Toggle compact view"></button>
-        <button id="shuffleBtn" class="btn-ghost" aria-label="Shuffle Movie" title="Surprise Me! 🎲">
-          <!-- Dice Icon -->
-          <svg class="ui-icon" viewBox="0 0 24 24">
-            <path
-              d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.11 3.89,21 5,21H19C20.11,21 21,20.11 21,19V5C21,3.89 20.11,3 19,3M7,7.25A1.25,1.25 0 1,1 5.75,6A1.25,1.25 0 0,1 7,7.25M11,7.25A1.25,1.25 0 1,1 9.75,6A1.25,1.25 0 0,1 11,7.25M7,13.25A1.25,1.25 0 1,1 5.75,12A1.25,1.25 0 0,1 7,13.25M11,13.25A1.25,1.25 0 1,1 9.75,12A1.25,1.25 0 0,1 11,13.25M18.25,18A1.25,1.25 0 1,1 17,16.75A1.25,1.25 0 0,1 18.25,18M18.25,12A1.25,1.25 0 1,1 17,10.75A1.25,1.25 0 0,1 18.25,12M13,18A1.25,1.25 0 1,1 11.75,16.75A1.25,1.25 0 0,1 13,18Z" />
-          </svg>
-          <span style="display:inline-block; margin-left:4px;">Surprise Me</span>
-        </button>
-        <button id="resetBtn" class="btn-ghost" aria-label="Reset Filters" title="Reset all sorting & filters"></button>
-        <!-- Admin Tools -->
-        <button class="add-btn btn-ghost admin-only hidden" aria-label="Add Film">+ Add</button>
-        <button class="csv-btn btn-ghost admin-only hidden" aria-label="Import CSV">Import</button>
-      </div>
     </div>
 
-    <!-- Toolbar (Counters & Pagination) -->
-    <div class="toolbar">
-      <div class="counter"><span id="count">0</span> films</div>
-      <div class="pagination">
-        <button id="prev" class="page-btn">Prev</button>
-        <div id="pageInfo" class="counter"></div>
-        <button id="next" class="page-btn">Next</button>
-      </div>
-    </div>
-  </header>
+    <script>
+        // Auto Redirect Logic
+        const targetUrl = "https://cinepediav2.vercel.app/";
+        let seconds = 3;
+        const countSpan = document.getElementById('countdown');
 
-  <main class="container">
-    <!-- Hero Header -->
-    <div id="hero-section" class="hero hidden">
-      <!-- Injected via JS -->
-    </div>
-    <div id="grid" class="grid"></div>
+        const interval = setInterval(() => {
+            seconds--;
+            if (countSpan) countSpan.innerText = seconds;
+            if (seconds <= 0) {
+                clearInterval(interval);
+                window.location.href = targetUrl;
+            }
+        }, 1000);
 
-    <!-- Bottom Pagination -->
-    <div class="pagination-bottom-container">
-      <div class="pagination" id="paginationBottom">
-        <!-- Wired via JS -->
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    <div class="container">Built by IndoCurry. Use '/' to search.</div>
-  </footer>
-
-  <button id="scrollTopBtn" class="btn-ghost" aria-label="Scroll to top">
-    <svg class="ui-icon" viewBox="0 0 24 24">
-      <path d="M12 19V5M5 12l7-7 7 7" />
-    </svg>
-  </button>
-
-  <!-- Get CSV & Reports Floating Buttons (Admin) -->
-  <div class="admin-fab-group">
-    <button id="getCsvBtn" class="fab-mini hidden" aria-label="Download Requests" title="Get Requests CSV">
-      <svg class="ui-icon" viewBox="0 0 24 24" style="width:20px;height:20px;">
-        <path
-          d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
-      </svg>
-    </button>
-    <button id="getReportsBtn" class="fab-mini hidden" aria-label="Download Reports" title="Get Issues Report">
-      <svg class="ui-icon" viewBox="0 0 24 24" style="width:20px;height:20px;">
-        <path
-          d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V7h2v3z" />
-      </svg>
-    </button>
-  </div>
-
-  <!-- Big Floating Action Buttons -->
-  <div class="fab-container">
-    <!-- Report Issues Button -->
-    <button id="reportBtn" class="fab-main report-fab" aria-label="Report Issues">
-      <svg class="ui-icon" viewBox="0 0 24 24">
-        <path
-          d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V7h2v3z" />
-      </svg>
-      <span class="fab-label">Report Issue</span>
-    </button>
-
-    <!-- Request Film Button -->
-    <button id="requestBtn" class="fab-main request-fab" aria-label="Request Film">
-      <svg class="ui-icon" viewBox="0 0 24 24">
-        <path
-          d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,7H13V11H17V13H13V17H11V13H7V11H11V7Z" />
-      </svg>
-      <span class="fab-label">Request Film</span>
-    </button>
-  </div>
-
-  <!-- Report Modal (Hidden by Default) -->
-  <div id="reportModal" class="modal-overlay hidden">
-    <div class="glossy-modal">
-      <button id="closeReportBtn" class="close-btn">&times;</button>
-      <h2>Report an issue</h2>
-      <p class="modal-desc">Found a bug or missing film? Let us know.</p>
-
-      <div class="input-group">
-        <input type="text" id="reportName" class="glossy-input" placeholder="Your Name (Optional)">
-      </div>
-      <div class="input-group">
-        <textarea id="reportMsg" class="glossy-textarea" placeholder="Describe the issue..."></textarea>
-      </div>
-
-      <button id="submitReportBtn" class="glossy-btn">Send Report</button>
-    </div>
-  </div>
-
-  <!-- Logic (Versioned for Cache Busting) -->
-  <script src="js/app.js?v=6.0"></script>
-
+        // Backup
+        setTimeout(() => {
+            window.location.href = targetUrl;
+        }, 4000);
+    </script>
 </body>
-
 </html>
-```
