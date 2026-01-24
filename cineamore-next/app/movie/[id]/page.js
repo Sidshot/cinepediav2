@@ -97,11 +97,12 @@ export default async function MoviePage({ params }) {
 
     if (!movie) notFound();
 
-    // 3. Wikipedia Plot Fallback
-    if (!movie.plot || movie.plot === 'No plot summary available.') {
-        const wikiPlot = await fetchWikipediaSummary(movie.title, movie.year);
-        if (wikiPlot) movie.plot = wikiPlot;
-    }
+    // QUOTA FIX: Wikipedia fetch disabled to save CPU - rely on stored plots
+    // If movie has no plot, it will show default message
+    // if (!movie.plot || movie.plot === 'No plot summary available.') {
+    //     const wikiPlot = await fetchWikipediaSummary(movie.title, movie.year);
+    //     if (wikiPlot) movie.plot = wikiPlot;
+    // }
 
     // Parse Links
     // Backward compatibility for 'dl' and 'drive' fields

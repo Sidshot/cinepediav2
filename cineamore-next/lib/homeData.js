@@ -9,12 +9,12 @@ const serializeMovie = (doc) => {
     const d = { ...doc };
     if (d._id) d._id = d._id.toString?.() || String(d._id);
     if (d.__id) d.__id = String(d.__id); // Ensure legacy ID is string
-    
+
     // Safe date serialization
     if (d.addedAt) {
         try {
-            d.addedAt = typeof d.addedAt.toISOString === 'function' 
-                ? d.addedAt.toISOString() 
+            d.addedAt = typeof d.addedAt.toISOString === 'function'
+                ? d.addedAt.toISOString()
                 : new Date(d.addedAt).toISOString();
         } catch (e) {
             d.addedAt = null; // Fallback
@@ -45,7 +45,7 @@ export const getCachedGenres = unstable_cache(
         return genreAgg.map(g => g._id).filter(g => g && g !== 'Uncategorized');
     },
     ['home-genres'],
-    { revalidate: 3600 } // Cache for 1 hour
+    { revalidate: 86400 } // QUOTA FIX: Cache for 24 hours (match page ISR)
 );
 
 // 2. Cached Hero Movies
@@ -60,7 +60,7 @@ export const getCachedHeroMovies = unstable_cache(
         return heroSample.map(doc => ({ ...doc, _id: doc._id.toString() }));
     },
     ['home-hero'],
-    { revalidate: 300 } // Cache for 5 mins
+    { revalidate: 86400 } // QUOTA FIX: Cache for 24 hours
 );
 
 // 3. Cached Recently Added
@@ -76,7 +76,7 @@ export const getCachedRecentlyAdded = unstable_cache(
         return recentMoviesDocs.map(serializeMovie);
     },
     ['home-recent'],
-    { revalidate: 60 } // Cache for 1 minute
+    { revalidate: 86400 } // QUOTA FIX: Cache for 24 hours
 );
 
 // 4. Cached Trending (Wrapper around getDailyTrending)
@@ -86,7 +86,7 @@ export const getCachedTrending = unstable_cache(
         return rawTrending.map(serializeMovie);
     },
     ['home-trending'],
-    { revalidate: 3600 } // Cache for 1 hour
+    { revalidate: 86400 } // QUOTA FIX: Cache for 24 hours
 );
 
 // 5. Cached Genre Rows
@@ -100,7 +100,7 @@ export const getCachedGenreRows = unstable_cache(
                 .slice('downloadLinks', 1)
                 .limit(18)
                 .lean();
-            
+
             return {
                 title: genre,
                 movies: movies.map(serializeMovie)
@@ -111,5 +111,5 @@ export const getCachedGenreRows = unstable_cache(
         return rows.filter(row => row.movies.length > 0);
     },
     ['home-genre-rows'],
-    { revalidate: 3600 } // Cache for 1 hour
+    { revalidate: 86400 } // QUOTA FIX: Cache for 24 hours
 );

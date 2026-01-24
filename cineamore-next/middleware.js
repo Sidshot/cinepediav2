@@ -169,5 +169,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/', '/movie/:path*', '/api/:path*', '/admin/:path*', '/contributor/:path*', '/search'],
+    matcher: ['/api/:path*', '/admin/:path*', '/contributor/:path*'],
 };
