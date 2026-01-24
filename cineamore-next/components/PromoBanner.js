@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
  * - Once dismissed permanently, never shows again (localStorage)
  * - Glossy iOS style matching site aesthetic
  */
-const PERMANENT_KEY = 'donationNoticeDismissed';
+const PERMANENT_KEY = 'donationBannerV2_Jan2026'; // Versioned key - change to force all users to see new banner
 
 export default function PromoBanner({ showOnlyOnHome = true }) {
   const [isVisible, setIsVisible] = useState(false);
