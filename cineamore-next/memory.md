@@ -2,6 +2,99 @@
 
 ---
 
+## 🚨 CRITICAL: DEPLOYMENT CONFIGURATION (READ FIRST!)
+
+> **THIS IS THE MOST IMPORTANT SECTION. DO NOT PUSH TO THE WRONG REPO!**
+
+### Git Remote Configuration
+| Setting | Value |
+|---------|-------|
+| **Correct Remote** | `https://github.com/Sidshot/cinepediav2.git` |
+| **Branch** | `main` |
+| **Git Root** | `D:/CinePedia - IDL/CinePedia/` |
+| **Next.js App** | `D:/CinePedia - IDL/CinePedia/cineamore-next/` |
+
+### Vercel Configuration
+| Setting | Value |
+|---------|-------|
+| **Project** | `cinepediav2` |
+| **Connected Repo** | `https://github.com/Sidshot/cinepediav2` |
+| **Root Directory** | `cineamore-next` |
+| **Production URL** | `https://cinepediav2.vercel.app` |
+
+### ⚠️ Common Mistake to AVOID
+There are TWO repos on GitHub:
+- ❌ `https://github.com/Sidshot/CinePedia` (OLD - DO NOT USE)
+- ✅ `https://github.com/Sidshot/cinepediav2` (CORRECT - Vercel watches this)
+
+### Before Every Push
+```bash
+# Verify you're pushing to the correct remote
+git remote get-url origin
+# Should output: https://github.com/Sidshot/cinepediav2.git
+
+# If wrong, fix it:
+git remote set-url origin https://github.com/Sidshot/cinepediav2.git
+```
+
+### Deployment Checklist
+1. ✅ Verify remote is `cinepediav2` (not `CinePedia`)
+2. ✅ Run code locally and test
+3. ✅ Commit changes
+4. ✅ Push to `main`
+5. ✅ Wait for Vercel auto-deploy (or trigger manually if needed)
+
+---
+
+## 2026-01-20: Vercel Quota Optimization, Analytics Migration & V1 Decommissioning
+
+**Session Duration**: ~1 hour
+**Status**: ✅ Complete & Deployed
+**Final Deploy URL**: `https://cinepediav2.vercel.app` (Vercel) | `https://cineamore-ikz7.onrender.com` (V1 Redirect)
+
+### 🎯 Key Outcomes
+1.  **Vercel Quota Rescued**: Migrated to new account (`cinepediav2`), disabled costly image optimization (`unoptimized: true`), and implemented aggressive caching logic to survive the free tier.
+2.  **Free Analytics**: Removed Vercel Analytics (paid/quota) and successfully implemented **Google Analytics 4** (Visits) + **Microsoft Clarity** (Heatmaps/Recording) for unlimited free tracking.
+3.  **Legacy V1 Redirect**: Decommissioned the Render V1 site by replacing the frontend with a "We've Moved" splash page that auto-redirects to V2.
+4.  **Deployment Fixes**: Resolved "missing app directory" build error by correcting Vercel Root Directory settings to `cineamore-next`.
+
+### ⚡ Quota Optimizations Implemented
+1.  **Disabled Image Optimization**: `next.config.mjs` → `unoptimized: true`. Vercel's image optimization was the #1 quota killer.
+2.  **Aggressive ISR**: Increased `revalidate` from 1h to **24h/7d** for Homepage, Series, Anime, Movies, and static pages.
+3.  **Static Pages**: Refactored `login` and `whats-new` to be `force-static` Server Components, eliminating dynamic renders.
+4.  **Limit Middleware**: Restricted Rate Limiting logic to `/api/*` only, saving Edge Function requests on every page load.
+5.  **CDN Caching**: Added `Cache-Control: public, max-age=86400` headers to public resources via Middleware.
+6.  **Disabled Cron**: Neutered `/api/cron/daily` to stop daily Telegram spam/Function usage.
+
+### 🛠️ Analytics Setup
+*   **Google Analytics 4**: Tracking ID `G-N2R9HBGZLL`. Integrated via `next/script` in `layout.js`.
+*   **Microsoft Clarity**: Project ID `v4gmvfffl8`. Integrated for session replay.
+*   **Strategy**: Both load `afterInteractive` to prioritize TTFB.
+
+### 🐛 Troubleshooting Log
+| Issue | Root Cause | Fix |
+|-------|------------|-----|
+| `JWT_SECRET` missing build error | Vercel Env uses `AUTH_SECRET` | Updated `lib/edge/session.js` to fallback to `AUTH_SECRET`. |
+| "Recently Added" missing | MongoDB connection | Fixed `MONGODB_URI` connection string in new Vercel project. |
+| V1 Redirect Failed | Missing Server in V1 Repo | Created `server.js` and `package.json` in V1 root to enable Render build. |
+| V2 Build Failed | Wrong Root Directory | Updated Vercel Project Settings > Root Directory to `cineamore-next`. |
+| "Couldn't find app directory" | Vercel looking in Repo Root | Added `vercel-build` script alias (though Root Dir change was the real fix). |
+
+### 📂 Files Modified
+*   **Configuration**: `next.config.mjs`, `package.json`, `.gitignore`
+*   **Infrastructure**: `middleware.js`, `lib/edge/session.js`, `import.env`
+*   **Pages**: `app/page.js`, `app/login/*`, `app/whats-new/*`, `app/movie/[id]/page.js`
+*   **Layout**: `app/layout.js` (Analytics injection)
+*   [Legacy] `public/index.html` (Redirect page), `README.md` (Deprecation notice)
+
+### ⚠️ Critical Rule Updates
+> **"Free Tier Survival Mode"** is now active.
+> 1. **No Vercel Image Optimization** - Always use direct URLs or untransformed images.
+> 2. **No Rate Limiting on Frontends** - Only limit API routes.
+> 3. **Maximize Caching** - If it doesn't change hourly, cache it for a day.
+
+---
+
 ## 2025-12-27: Critical Performance & UX Overhaul
 
 **Session Duration**: ~1 hour
@@ -1472,3 +1565,5 @@ This system replaces all previous 'protocols'.
 3.  **INTERNALIZE** the constraints in those files before generating a single plan.
 
 *Failure to load these documents constitutes a protocol violation.*
+
+**Session Closed:** 12/28/2025 17:15:24
