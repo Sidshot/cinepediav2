@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TV_GENRES } from '@/lib/tv-genres';
 
@@ -13,11 +14,20 @@ const GENRE_PILLS = TV_GENRES;
  * by SeriesGenreRow components below.
  */
 export default function SeriesHero({ heroSeries = null }) {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showAllGenres, setShowAllGenres] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+
+    // Handle Enter key to navigate to search results page
+    const handleSearchSubmit = (e) => {
+        if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
+            router.push(`/series/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            setShowDropdown(false);
+        }
+    };
 
     // Debounced search
     useEffect(() => {
@@ -108,8 +118,9 @@ export default function SeriesHero({ heroSeries = null }) {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearchSubmit}
                         onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
-                        placeholder="Search any series..."
+                        placeholder="Search any series... (Press Enter)"
                         className="w-full px-5 py-3.5 pl-12 rounded-2xl bg-[#0a0a0a]/80 border border-white/10 text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
                     <svg
@@ -129,7 +140,7 @@ export default function SeriesHero({ heroSeries = null }) {
                     {/* Search Dropdown */}
                     {showDropdown && searchResults.length > 0 && (
                         <div
-                            className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1f] border-2 border-orange-500/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden max-h-[60vh] overflow-y-auto"
+                            className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1f] border-2 border-orange-500/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden max-h-[60vh] overflow-y-auto z-30"
                             onMouseDown={(e) => e.preventDefault()}
                         >
                             <div className="px-4 py-2 bg-orange-500/10 text-orange-400 text-xs font-bold uppercase tracking-wider">

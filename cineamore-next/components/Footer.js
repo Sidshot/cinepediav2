@@ -61,6 +61,15 @@ export default function Footer() {
 
                         {/* Minimal Navigation */}
                         <div className="flex items-center gap-8 text-sm font-bold tracking-wide">
+                            <a
+                                href="https://buymeacoffee.com/cineamore"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#FF4500] hover:text-[#FF6347] transition-all hover:scale-105 flex items-center gap-1"
+                            >
+                                <span>☕</span>
+                                <span>Support CineAmore</span>
+                            </a>
                             <button
                                 onClick={() => setActiveTab(activeTab === 'dmca' ? null : 'dmca')}
                                 className={`transition-all hover:scale-105 ${activeTab === 'dmca' ? 'text-[var(--accent)]' : 'text-[var(--muted)] hover:text-[var(--fg)]'}`}

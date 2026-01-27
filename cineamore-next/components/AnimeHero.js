@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ANIME_GENRES } from '@/lib/anime-genres';
 
@@ -12,11 +13,20 @@ const GENRE_PILLS = ANIME_GENRES;
  * search bar, and genre filters.
  */
 export default function AnimeHero({ heroSeries = null }) {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showAllGenres, setShowAllGenres] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+
+    // Handle Enter key to navigate to search results page
+    const handleSearchSubmit = (e) => {
+        if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
+            router.push(`/anime/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            setShowDropdown(false);
+        }
+    };
 
     // Debounced search
     useEffect(() => {
@@ -108,8 +118,9 @@ export default function AnimeHero({ heroSeries = null }) {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearchSubmit}
                         onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
-                        placeholder="Search anime..."
+                        placeholder="Search anime... (Press Enter)"
                         className="w-full px-5 py-3.5 pl-12 rounded-2xl bg-[#0a0a0a]/80 border border-white/10 text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     />
                     <svg

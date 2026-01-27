@@ -1,4 +1,4 @@
-# 🤖 Telegram Bot Manual
+![alt text](image.png)# 🤖 Telegram Bot Manual
 
 ## 🗣️ How Users "Talk" to the Bot
 Currently, the bot is designed to be **Proactive**, not **Reactive**.

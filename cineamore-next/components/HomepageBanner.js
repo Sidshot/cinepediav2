@@ -3,31 +3,41 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Donation Appeal Banner
- * - Asks users to support CineAmore with donations
+ * Homepage Support Banner
+ * - Asks users to support CineAmore via BuyMeACoffee
  * - Shows Twitter and Telegram links for updates
- * - User must wait 5 seconds before dismissing
- * - Once dismissed permanently, never shows again (localStorage)
+ * - 5 second countdown before X button appears
+ * - 10 second countdown before Access button appears
+ * - Shows once per browser session (uses sessionStorage)
+ * - Does NOT show on page reload (only on fresh session)
  * - Glossy iOS style matching site aesthetic
  */
-const PERMANENT_KEY = 'donationBannerV2_Jan2026'; // Versioned key - change to force all users to see new banner
+const STORAGE_KEY = 'supportBanner_dismissed';
 
-export default function PromoBanner({ showOnlyOnHome = true }) {
+export default function HomepageBanner() {
   const [isVisible, setIsVisible] = useState(false);
-  const [canDismiss, setCanDismiss] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
+  const [showAccessButton, setShowAccessButton] = useState(false);
   const [countdown, setCountdown] = useState(10);
 
+  // Check if banner should show (session-based logic)
+  // Uses sessionStorage: shows once per browser session (closes when browser/tab closes)
+  // Does NOT show on page reload within same session
   useEffect(() => {
-    // Check if banner should show
-    const isPermanentlyDismissed = typeof window !== 'undefined' &&
-      localStorage.getItem(PERMANENT_KEY) === 'true';
+    if (typeof window === 'undefined') return;
 
-    if (!isPermanentlyDismissed) {
-      setIsVisible(true);
+    // Check if already dismissed in this session
+    const dismissedInSession = sessionStorage.getItem(STORAGE_KEY);
+    if (dismissedInSession === 'true') {
+      setIsVisible(false);
+      return;
     }
+
+    // Show banner for this session
+    setIsVisible(true);
   }, []);
 
-  // 5-second countdown timer
+  // Countdown timer: 5s for X button, 10s for Access button
   useEffect(() => {
     if (!isVisible) return;
 
@@ -35,8 +45,12 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          setCanDismiss(true);
+          setShowAccessButton(true);
           return 0;
+        }
+        // Show close button after 5 seconds (when countdown reaches 5)
+        if (prev === 6) {
+          setShowCloseButton(true);
         }
         return prev - 1;
       });
@@ -62,46 +76,64 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
   }, [isVisible]);
 
   const handleDismiss = () => {
-    if (!canDismiss) return;
-    localStorage.setItem(PERMANENT_KEY, 'true');
+    // Mark as dismissed for this session only
+    sessionStorage.setItem(STORAGE_KEY, 'true');
     setIsVisible(false);
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="promo-banner-overlay">
-      <div className="promo-banner-content">
-        {/* Banner Content */}
-        <div className="promo-inner">
-          {/* Decorative Elements */}
-          <div className="promo-glow promo-glow-1" />
-          <div className="promo-glow promo-glow-2" />
+    <div className="banner-overlay">
+      <div className="banner-content">
+        {/* Close Button (appears after 5 seconds) */}
+        {showCloseButton && (
+          <button onClick={handleDismiss} className="banner-close-btn" aria-label="Close">
+            ×
+          </button>
+        )}
+
+        {/* Banner Inner Content */}
+        <div className="banner-inner">
+          {/* Decorative Glows */}
+          <div className="banner-glow banner-glow-1" />
+          <div className="banner-glow banner-glow-2" />
 
           {/* Icon */}
-          <div className="promo-icon">
-            💛🙏
+          <div className="banner-icon">
+            ☕💛
           </div>
 
           {/* Title */}
-          <h2 className="promo-title">
-            Support CineAmore 💛
+          <h2 className="banner-title">
+            Help Keep CineAmore Running
           </h2>
 
           {/* Main Message */}
-          <p className="promo-subtitle">
+          <p className="banner-subtitle">
             So far, CineAmore has been a <strong>hobby project</strong> run by a single person,
             with all costs covered out of pocket. As the site grows, it's becoming harder to
             keep up with <strong>rising expenses</strong>.
           </p>
-          <p className="promo-subtitle donation-appeal">
-            I kindly request you to <strong className="donate-highlight">DONATE</strong> anything
-            you can to keep this alive. Currently, the donation page is being set up.
+          <p className="banner-subtitle appeal-text">
+            If you're a <strong className="highlight">cinephile who downloads films</strong> from here,
+            please consider <strong className="highlight">buying me a coffee</strong> to keep this alive!
           </p>
 
+          {/* Buy Me A Coffee Button */}
+          <a
+            href="https://buymeacoffee.com/cineamore"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bmc-button"
+          >
+            <span className="bmc-icon">☕</span>
+            <span>Buy me a coffee</span>
+          </a>
+
           {/* Social Links Section */}
-          <div className="promo-tips">
-            <div className="promo-tip social-tip">
+          <div className="banner-tips">
+            <div className="banner-tip social-tip">
               <span className="tip-icon">📢</span>
               <span>
                 Follow on{' '}
@@ -113,10 +145,10 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
                 >
                   Twitter
                 </a>
-                {' '}for updates on donations!
+                {' '}for updates!
               </span>
             </div>
-            <div className="promo-tip social-tip telegram-tip">
+            <div className="banner-tip social-tip telegram-tip">
               <span className="tip-icon">💬</span>
               <span>
                 Join our{' '}
@@ -128,15 +160,15 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
                 >
                   Telegram Group
                 </a>
-                {' '}for instant access to admin and swift updates!
+                {' '}for instant access to admin!
               </span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="promo-actions">
-            {canDismiss ? (
-              <button onClick={handleDismiss} className="promo-btn-primary">
+          <div className="banner-actions">
+            {showAccessButton ? (
+              <button onClick={handleDismiss} className="banner-btn-primary">
                 <span>Access CineAmore</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +186,10 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
               </button>
             ) : (
               <p className="countdown-text">
-                Please read... Access in {countdown} second{countdown !== 1 ? 's' : ''}
+                {showCloseButton
+                  ? `Please read... ${countdown}s to continue`
+                  : `Please read... ${countdown}s remaining`
+                }
               </p>
             )}
           </div>
@@ -162,16 +197,16 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
       </div>
 
       <style jsx>{`
-        .promo-banner-overlay {
+        .banner-overlay {
           position: fixed;
           inset: 0;
           z-index: 9999;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(0, 0, 0, 0.8);
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
+          background: rgba(0, 0, 0, 0.85);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           animation: fadeIn 0.4s ease-out;
         }
 
@@ -180,11 +215,10 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           to { opacity: 1; }
         }
 
-        .promo-banner-content {
+        .banner-content {
           position: relative;
           max-width: 520px;
           width: 90%;
-          /* Solid dark background for maximum readability */
           background: linear-gradient(
             145deg,
             rgb(18, 18, 22) 0%,
@@ -214,7 +248,7 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           }
         }
 
-        .promo-close-btn {
+        .banner-close-btn {
           position: absolute;
           top: 16px;
           right: 16px;
@@ -223,52 +257,53 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           border-radius: 50%;
           border: 1px solid rgba(255, 255, 255, 0.2);
           background: rgba(255, 255, 255, 0.1);
-          color: var(--muted);
-          font-size: 14px;
+          color: var(--muted, #888);
+          font-size: 20px;
           cursor: pointer;
           transition: all 0.2s ease;
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 10;
+          animation: fadeIn 0.3s ease-out;
         }
 
-        .promo-close-btn:hover {
+        .banner-close-btn:hover {
           background: rgba(255, 255, 255, 0.2);
-          color: var(--fg);
+          color: var(--fg, #fff);
           transform: scale(1.1);
         }
 
-        .promo-inner {
+        .banner-inner {
           position: relative;
           z-index: 2;
         }
 
-        .promo-glow {
+        .banner-glow {
           position: absolute;
           border-radius: 50%;
           filter: blur(50px);
-          opacity: 0.15;
+          opacity: 0.2;
           pointer-events: none;
         }
 
-        .promo-glow-1 {
+        .banner-glow-1 {
           width: 200px;
           height: 200px;
-          background: #fbbf24; /* Gold donation color */
+          background: #FF813F; /* BMC Orange */
           top: -80px;
           left: -60px;
         }
 
-        .promo-glow-2 {
+        .banner-glow-2 {
           width: 180px;
           height: 180px;
-          background: #f472b6; /* Pink heart accent */
+          background: #FFDD00; /* BMC Yellow */
           bottom: -60px;
           right: -40px;
         }
 
-        .promo-icon {
+        .banner-icon {
           font-size: 48px;
           margin-bottom: 16px;
           animation: pulse 2s ease-in-out infinite;
@@ -276,43 +311,74 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
 
         @keyframes pulse {
           0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+          50% { transform: scale(1.08); }
         }
 
-        .promo-title {
+        .banner-title {
           font-size: 1.75rem;
           font-weight: 800;
-          color: var(--fg);
+          color: var(--fg, #fff);
           margin: 0 0 16px 0;
           letter-spacing: -0.5px;
-          background: linear-gradient(135deg, var(--fg) 0%, #f59e0b 100%);
+          background: linear-gradient(135deg, #fff 0%, #FF813F 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
 
-        .promo-subtitle {
+        .banner-subtitle {
           font-size: 0.95rem;
           color: rgba(255, 255, 255, 0.85);
           margin: 0 0 16px 0;
           line-height: 1.7;
         }
 
-        .promo-subtitle.donation-appeal {
+        .banner-subtitle.appeal-text {
           margin-bottom: 24px;
         }
 
-        .promo-subtitle strong {
-          color: var(--fg);
+        .banner-subtitle strong {
+          color: var(--fg, #fff);
         }
 
-        .donate-highlight {
-          color: #fbbf24 !important;
-          font-size: 1.1em;
-          text-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+        .highlight {
+          color: #FFDD00 !important;
+          text-shadow: 0 0 12px rgba(255, 221, 0, 0.4);
         }
 
-        .promo-tips {
+        .bmc-button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 14px 28px;
+          background: linear-gradient(135deg, #FFDD00 0%, #FF813F 100%);
+          color: #000;
+          font-weight: 700;
+          font-size: 1rem;
+          border: none;
+          border-radius: 99px;
+          cursor: pointer;
+          text-decoration: none;
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          box-shadow: 
+            0 8px 24px rgba(255, 129, 63, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          margin-bottom: 24px;
+        }
+
+        .bmc-button:hover {
+          transform: translateY(-3px) scale(1.03);
+          box-shadow: 
+            0 12px 32px rgba(255, 129, 63, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .bmc-icon {
+          font-size: 1.2rem;
+        }
+
+        .banner-tips {
           display: flex;
           flex-direction: column;
           gap: 12px;
@@ -320,7 +386,7 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           text-align: left;
         }
 
-        .promo-tip {
+        .banner-tip {
           display: flex;
           align-items: flex-start;
           gap: 12px;
@@ -363,18 +429,25 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           text-decoration: underline;
         }
 
-        .promo-tip.social-tip {
+        .banner-tip.social-tip {
           background: rgba(255, 255, 255, 0.05);
           border-color: rgba(255, 255, 255, 0.15);
         }
 
-        .promo-tip.telegram-tip {
+        .banner-tip.telegram-tip {
           background: rgba(0, 136, 204, 0.08);
           border-color: rgba(0, 136, 204, 0.2);
         }
 
-        .promo-tip strong {
-          color: var(--fg);
+        .tip-icon {
+          font-size: 1.2rem;
+          flex-shrink: 0;
+        }
+
+        .banner-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
 
         .countdown-text {
@@ -390,24 +463,13 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           50% { opacity: 1; }
         }
 
-        .tip-icon {
-          font-size: 1.2rem;
-          flex-shrink: 0;
-        }
-
-        .promo-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .promo-btn-primary {
+        .banner-btn-primary {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
           padding: 14px 28px;
-          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          background: linear-gradient(135deg, #FF813F 0%, #d97706 100%);
           color: #000;
           font-weight: 700;
           font-size: 0.95rem;
@@ -416,64 +478,46 @@ export default function PromoBanner({ showOnlyOnHome = true }) {
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
           box-shadow: 
-            0 8px 24px rgba(245, 158, 11, 0.35),
+            0 8px 24px rgba(255, 129, 63, 0.35),
             inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
-        .promo-btn-primary:hover {
+        .banner-btn-primary:hover {
           transform: translateY(-3px) scale(1.03);
           box-shadow: 
-            0 12px 32px rgba(245, 158, 11, 0.5),
+            0 12px 32px rgba(255, 129, 63, 0.5),
             inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
-        .promo-btn-primary svg {
+        .banner-btn-primary svg {
           transition: transform 0.2s ease;
         }
 
-        .promo-btn-primary:hover svg {
-          transform: scale(1.1);
-        }
-
-        .promo-btn-secondary {
-          display: block;
-          background: none;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: var(--muted);
-          font-size: 0.9rem;
-          font-weight: 600;
-          padding: 12px 24px;
-          border-radius: 99px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .promo-btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.3);
-          color: var(--fg);
+        .banner-btn-primary:hover svg {
+          transform: translateX(4px);
         }
 
         @media (max-width: 480px) {
-          .promo-banner-content {
+          .banner-content {
             padding: 32px 24px;
             margin: 16px;
           }
 
-          .promo-title {
+          .banner-title {
             font-size: 1.4rem;
           }
 
-          .promo-subtitle {
+          .banner-subtitle {
             font-size: 0.9rem;
           }
 
-          .promo-tip {
+          .banner-tip {
             font-size: 0.82rem;
             padding: 10px 12px;
           }
 
-          .promo-btn-primary {
+          .bmc-button,
+          .banner-btn-primary {
             padding: 12px 24px;
             font-size: 0.9rem;
           }

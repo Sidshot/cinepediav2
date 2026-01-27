@@ -6,7 +6,7 @@ import staticData from '@/lib/movies.json';
 import Hero from '@/components/Hero';
 import ActionFABs from '@/components/ActionFABs';
 import OptimizedPoster from '@/components/OptimizedPoster';
-import PromoBanner from '@/components/PromoBanner';
+import HomepageBanner from '@/components/HomepageBanner';
 import Link from 'next/link';
 import TrendingRow from '@/components/TrendingRow';
 import {
@@ -19,7 +19,11 @@ import {
 
 // Pagination config
 const MOVIES_PER_PAGE = 48;
-const HOME_GENRES = ['Action', 'Adventure', 'Comedy', 'Crime', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Animation'];
+const HOME_GENRES = [
+  'Action', 'Adventure', 'Comedy', 'Crime', 'Drama', 'Fantasy',
+  'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Animation',
+  'War', 'History', 'Music', 'Documentary', 'Family', 'Western', 'Sport', 'Biography'
+];
 
 export const revalidate = 86400; // QUOTA FIX: ISR - Cache homepage for 24 hours
 
@@ -194,8 +198,8 @@ async function Home({ searchParams }) {
 
   return (
     <main className="min-h-screen p-4 sm:p-8 pb-32 max-w-[1900px] mx-auto">
-      {/* Promo Banner */}
-      {isDefaultView && <PromoBanner />}
+      {/* Homepage Support Banner - Shows on every visit, reappears after 24 hours */}
+      <HomepageBanner />
 
       {isOffline && (
         <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-200 text-center font-bold flex items-center justify-center gap-2">

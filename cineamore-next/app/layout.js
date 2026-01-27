@@ -3,6 +3,7 @@ import UserMenu from "@/components/UserMenu";
 import Footer from "@/components/Footer";
 import GlobalStickySearch from "@/components/GlobalStickySearch";
 import GlobalLoader from "@/components/GlobalLoader";
+import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
 import InstallPrompt from "@/components/InstallPrompt";
 import SWUpdater from "@/components/SWUpdater";
 import LayoutAnimationWrapper from "@/components/LayoutAnimationWrapper";
@@ -143,6 +144,9 @@ export default function RootLayout({ children }) {
         <GlobalLoader />
         <InstallPrompt />
         <SWUpdater />
+
+        {/* BuyMeACoffee Floating Widget - Appears on ALL pages */}
+        <BuyMeCoffeeWidget />
 
         <div className="min-h-screen flex flex-col">
           <div className="flex-1">

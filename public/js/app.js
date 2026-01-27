@@ -256,16 +256,7 @@ function initLockScreen() {
         const password = input.value;
         if (!password) return;
 
-        // Client-side quick check for "2025" logic requested by user
-        if (password === '2025') {
-            state.userMode = 'admin';
-            state.adminPass = password;
-            unlockApp();
-            return;
-        }
-
         // Fallback to server check if needed (or just implement strict check here)
-        // Keeping server check for potential robustness if 2025 changes on server
         try {
             const res = await fetch('/api/auth', {
                 method: 'POST',

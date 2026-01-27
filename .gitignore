@@ -73,3 +73,7 @@ logs/
 /data
 /archive
 /maintenance
+
+# Secrets (Added to fix push rejection)
+cineamore-next/import.env
+import.env
