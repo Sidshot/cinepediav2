@@ -192,9 +192,6 @@ export default function SeriesStreamingPlayer({ tmdbId, title, season = 1, episo
                         ref={iframeRef}
                         src={embedUrl}
                         key={embedUrl}
-                        {...(currentProvider.supportsSandbox && {
-                            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation allow-presentation allow-orientation-lock"
-                        })}
                         referrerPolicy="no-referrer"
                         className={`w-full h-full transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                         frameBorder="0"
