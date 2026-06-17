@@ -80,42 +80,51 @@ function LoginContent() {
     // SITE GATE MODE — simplified, locked-down login
     if (isGateMode) {
         return (
-            <main className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-6">
-                <div className="w-full max-w-md bg-[#111111] p-8 rounded-3xl border border-white/10 shadow-2xl">
+            <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-6 relative overflow-hidden">
+                {/* Decorative background elements matching main site */}
+                <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[var(--accent)]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[var(--accent2)]/20 rounded-full blur-[100px] pointer-events-none"></div>
+
+                <div className="w-full max-w-lg card-gloss relative z-10">
                     <div className="text-center mb-8">
-                        <div className="text-4xl mb-4">🔒</div>
-                        <h1 className="text-2xl font-extrabold text-white mb-2">CineAmore</h1>
-                        <p className="text-gray-500 text-sm">This site is private. Enter credentials to continue.</p>
+                        <div className="text-5xl mb-4 text-[var(--accent)]">🔒</div>
+                        <h1 className="text-3xl font-extrabold text-[var(--fg)] mb-2">CineAmore is Private</h1>
+                    </div>
+
+                    {/* Admin Message */}
+                    <div className="mb-8 p-5 bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-2xl">
+                        <p className="text-sm text-[var(--fg)] leading-relaxed mb-3">
+                            <strong>A message from the Admin:</strong>
+                            <br />
+                            A huge thank you to everyone who has donated to the cause. I sincerely apologize for the inconvenience, but I had to make the site private. The maintenance and server costs were simply getting too hard to sustain for public traffic.
+                        </p>
+                        <p className="text-sm text-[var(--muted)]">
+                            If you need access, please drop me an email below.
+                        </p>
                     </div>
 
                     <form onSubmit={handleGateLogin} className="flex flex-col gap-5">
                         <div>
-                            <label className="block text-xs uppercase tracking-widest text-gray-500 font-bold mb-2">
-                                Username
-                            </label>
                             <input
                                 type="text"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                placeholder="Enter username"
+                                placeholder="Username"
                                 autoComplete="username"
                                 required
-                                className="w-full h-12 px-4 rounded-xl bg-black/40 border border-white/10 text-white focus:border-yellow-500 outline-none transition-all placeholder:text-gray-600"
+                                className="w-full h-12 px-5 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none transition-all placeholder-[var(--muted)]"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs uppercase tracking-widest text-gray-500 font-bold mb-2">
-                                Password
-                            </label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter password"
+                                placeholder="Password"
                                 autoComplete="current-password"
                                 required
-                                className="w-full h-12 px-4 rounded-xl bg-black/40 border border-white/10 text-white focus:border-yellow-500 outline-none transition-all placeholder:text-gray-600"
+                                className="w-full h-12 px-5 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none transition-all placeholder-[var(--muted)]"
                             />
                         </div>
 
@@ -128,23 +137,22 @@ function LoginContent() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="h-12 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)] hover:shadow-[0_0_30px_rgba(234,179,8,0.5)] disabled:opacity-50"
+                            className="h-12 mt-2 bg-[var(--accent)] hover:brightness-110 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(255,192,67,0.3)] hover:shadow-[0_0_30px_rgba(255,192,67,0.5)] disabled:opacity-50"
                         >
-                            {loading ? 'Verifying...' : 'Enter Site'}
+                            {loading ? 'Verifying...' : 'Unlock Site'}
                         </button>
                     </form>
 
                     {/* Contact for access */}
-                    <div className="mt-6 pt-5 border-t border-white/10 text-center">
-                        <p className="text-gray-500 text-xs mb-3">Don&apos;t have access?</p>
+                    <div className="mt-8 pt-6 border-t border-[var(--border)] text-center">
                         <a
                             href="mailto:indocurry@proton.me?subject=CineAmore%20Access%20Request&body=Hi%2C%20I%20would%20like%20to%20request%20access%20to%20CineAmore.%0A%0AMy%20name%3A%20%0AReason%3A%20"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 hover:text-white transition-all"
+                            className="inline-flex items-center gap-2 px-6 py-3 glossy-box text-sm hover:text-[var(--fg)] transition-all w-full justify-center"
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            Request Access
+                            Email Admin for Access
                         </a>
                     </div>
                 </div>
