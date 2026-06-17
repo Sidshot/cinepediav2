@@ -160,7 +160,12 @@ export async function middleware(request) {
             !pathname.startsWith('/admin') &&
             !pathname.startsWith('/contributor') &&
             !pathname.startsWith('/login')) {
-            response.headers.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+            if (siteLocked) {
+                // When site is locked, force revalidation so gate check always runs
+                response.headers.set('Cache-Control', 'no-store, must-revalidate');
+            } else {
+                response.headers.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+            }
         }
 
         return response;
