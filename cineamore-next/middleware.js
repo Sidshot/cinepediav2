@@ -43,6 +43,46 @@ export async function middleware(request) {
         const ip = request.ip || '127.0.0.1';
         const userAgent = request.headers.get('user-agent') || '';
 
+        // 0. 🔒 SITE GATE (Quota Protection)
+        // When SITE_LOCKED=true, ENTIRE site requires authentication via site_gate cookie.
+        // Credentials stored ONLY in env vars. Password NEVER in frontend code.
+        const siteLocked = process.env.SITE_LOCKED === 'true';
+
+        if (siteLocked) {
+            // Allow these paths WITHOUT gate (login page + login API + static assets)
+            const isGateExempt =
+                pathname === '/login' ||
+                pathname === '/api/auth/site-login' ||
+                pathname.startsWith('/_next/') ||
+                pathname.startsWith('/favicon') ||
+                pathname.endsWith('.ico') ||
+                pathname.endsWith('.png') ||
+                pathname.endsWith('.jpg') ||
+                pathname.endsWith('.svg') ||
+                pathname.endsWith('.css') ||
+                pathname.endsWith('.js');
+
+            if (!isGateExempt) {
+                // Check for valid site_gate cookie
+                const gateToken = request.cookies.get('site_gate')?.value;
+
+                if (!gateToken) {
+                    return NextResponse.redirect(new URL('/login?gate=true', request.url));
+                }
+
+                const gateSession = await decrypt(gateToken);
+
+                if (!gateSession || gateSession.type !== 'site_gate') {
+                    // Invalid/expired token — clear it and redirect
+                    const response = NextResponse.redirect(new URL('/login?gate=true', request.url));
+                    response.cookies.delete('site_gate');
+                    return response;
+                }
+
+                // Valid gate session — continue to normal middleware logic
+            }
+        }
+
         // 1. 🤖 BOT BLOCKER
         const badBots = ['curl', 'wget', 'python', 'scrapy', 'go-http-client', 'java'];
         if (badBots.some(bot => userAgent.toLowerCase().includes(bot))) {
@@ -169,5 +209,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/api/:path*', '/admin/:path*', '/contributor/:path*'],
+    matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
