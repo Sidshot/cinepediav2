@@ -1,16 +1,26 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { decrypt } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic'; // Ensure it's not cached
 
 export async function GET() {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session')?.value;
+    const session = sessionCookie ? await decrypt(sessionCookie) : null;
+
+    if (!session || session.role !== 'admin') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
     // 1. Check Env Vars
     const status = {
         env: {
-            TELEGRAM_BOT_TOKEN: token ? '✅ SET (Starts with ' + token.substring(0, 5) + '...)' : '❌ MISSING',
-            TELEGRAM_CHAT_ID: chatId ? '✅ SET (' + chatId + ')' : '❌ MISSING'
+            TELEGRAM_BOT_TOKEN: token ? 'SET' : 'MISSING',
+            TELEGRAM_CHAT_ID: chatId ? 'SET' : 'MISSING'
         },
         telegram_api: {
             webhook_info: null,

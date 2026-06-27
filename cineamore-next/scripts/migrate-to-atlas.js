@@ -7,8 +7,11 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 
-// Atlas connection string
-const ATLAS_URI = 'mongodb+srv://admin:mongoadmin@cluster0.lallguq.mongodb.net/cinepedia?retryWrites=true&w=majority&appName=Cluster0';
+const ATLAS_URI = process.env.MONGODB_URI;
+
+if (!ATLAS_URI) {
+    throw new Error('MONGODB_URI is required');
+}
 
 // Movie schema (simplified for import)
 const MovieSchema = new mongoose.Schema({}, { strict: false });
@@ -58,7 +61,7 @@ async function migrate() {
         }
 
         console.log(`\n🎉 SUCCESS! Migrated ${inserted} movies to Atlas!\n`);
-        console.log('You can now refresh https://cineamore.vercel.app to see your films.\n');
+        console.log('You can now refresh your configured production site to see your films.\n');
 
     } catch (error) {
         console.error('❌ Migration failed:', error.message);

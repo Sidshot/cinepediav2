@@ -10,7 +10,7 @@ The code is already pushed to `main`. Vercel will auto-deploy.
 ### Step 2: Run Production Migration
 
 #### Option A: Via Admin API (Recommended)
-1. Go to your production site: `https://cineamore.vercel.app/admin`
+1. Go to your production site: `https://cinepediav2.vercel.app/admin`
 2. Log in as admin
 3. Open browser console (F12)
 4. Run this command:

@@ -18,7 +18,7 @@ Type these in the group chat:
 ## ❓ FAQ
 
 ### Q: How do I download a movie?
-1. Go to [cineamore.vercel.app](https://cineamore.vercel.app)
+1. Go to [cinepediav2.vercel.app](https://cinepediav2.vercel.app)
 2. Search for your movie
 3. Open the movie page
 4. Scroll down to **Download Links**
@@ -61,10 +61,10 @@ The bot automatically posts:
 
 ## 🌐 Quick Links
 
-- **Website**: [cineamore.vercel.app](https://cineamore.vercel.app)
-- **Movies**: [cineamore.vercel.app](https://cineamore.vercel.app)
-- **Series**: [cineamore.vercel.app/series](https://cineamore.vercel.app/series)
-- **Anime**: [cineamore.vercel.app/anime](https://cineamore.vercel.app/anime)
+- **Website**: [cinepediav2.vercel.app](https://cinepediav2.vercel.app)
+- **Movies**: [cinepediav2.vercel.app](https://cinepediav2.vercel.app)
+- **Series**: [cinepediav2.vercel.app/series](https://cinepediav2.vercel.app/series)
+- **Anime**: [cinepediav2.vercel.app/anime](https://cinepediav2.vercel.app/anime)
 
 ---
 

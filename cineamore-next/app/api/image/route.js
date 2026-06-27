@@ -1,5 +1,18 @@
-
 import { NextResponse } from 'next/server';
+
+const ALLOWED_IMAGE_HOSTS = new Set([
+    'image.tmdb.org',
+    'www.themoviedb.org',
+    'themoviedb.org',
+    'tmdb.org',
+    'www.tmdb.org',
+]);
+
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+
+function isAllowedImageHost(hostname) {
+    return ALLOWED_IMAGE_HOSTS.has(hostname.toLowerCase());
+}
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
@@ -9,42 +22,51 @@ export async function GET(request) {
         return new NextResponse('Missing URL parameter', { status: 400 });
     }
 
+    let targetUrl;
     try {
-        // Security: Only allow TMDB images
-        const targetUrl = new URL(url);
-        if (!targetUrl.hostname.endsWith('themoviedb.org') && !targetUrl.hostname.endsWith('tmdb.org')) {
-            // Fallback for non-TMDB images (e.g. placeholder) or just allow them? 
-            // For strict hardening, we only proxy confirmed external sources or our own uploads.
-            // Given we backfilled from TMDB, this is safe. 
-            // If we want to be more permissive for future custom uploads, we can expand list.
-            // For now, strict is safe.
-        }
+        targetUrl = new URL(url);
+    } catch (error) {
+        return new NextResponse('Invalid URL parameter', { status: 400 });
+    }
 
-        const response = await fetch(url);
+    if (targetUrl.protocol !== 'https:' || !isAllowedImageHost(targetUrl.hostname)) {
+        return new NextResponse('Image host not allowed', { status: 403 });
+    }
+
+    try {
+        const response = await fetch(targetUrl.toString(), {
+            signal: AbortSignal.timeout(5000),
+            redirect: 'follow',
+        });
 
         if (!response.ok) {
-            return new NextResponse(`Failed to fetch image: ${response.statusText}`, { status: response.status });
+            return new NextResponse('Failed to fetch image', { status: response.status });
         }
 
-        const headers = new Headers(response.headers);
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.toLowerCase().startsWith('image/')) {
+            return new NextResponse('Upstream response is not an image', { status: 415 });
+        }
 
-        // CORRECTION: Next.js API routes on Vercel might strip headers, 
-        // usually we want to set our own aggressive cache.
+        const contentLength = Number(response.headers.get('content-length') || 0);
+        if (contentLength > MAX_IMAGE_BYTES) {
+            return new NextResponse('Image too large', { status: 413 });
+        }
+
+        const headers = new Headers();
         headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        headers.set('Content-Type', contentType);
 
-        // Forward content type
-        const contentType = headers.get('content-type');
-        if (contentType) {
-            headers.set('Content-Type', contentType);
+        if (contentLength > 0) {
+            headers.set('Content-Length', String(contentLength));
         }
 
         return new NextResponse(response.body, {
             status: 200,
-            headers: headers
+            headers,
         });
-
     } catch (error) {
         console.error('Image Proxy Error:', error);
-        return new NextResponse('Internal Server Error', { status: 500 });
+        return new NextResponse('Image fetch failed', { status: 502 });
     }
 }

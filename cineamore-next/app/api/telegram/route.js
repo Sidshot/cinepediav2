@@ -2,10 +2,23 @@ import { NextResponse } from 'next/server';
 import { sendMessage, sendPhoto } from '@/lib/telegram';
 
 // Admin User ID (only this user can use admin commands in DM)
-const ADMIN_ID = 5342146552;
+const ADMIN_ID = Number(process.env.TELEGRAM_ADMIN_ID || '5342146552');
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://cinepediav2.vercel.app').replace(/\/$/, '');
+
+function verifyTelegramSecret(req) {
+    const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (!expectedSecret) {
+        return process.env.NODE_ENV !== 'production';
+    }
+    return req.headers.get('x-telegram-bot-api-secret-token') === expectedSecret;
+}
 
 export async function POST(req) {
     try {
+        if (!verifyTelegramSecret(req)) {
+            return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+        }
+
         const update = await req.json();
         const message = update.message;
 
@@ -52,7 +65,7 @@ export async function POST(req) {
 
 ${movie.plot ? movie.plot.substring(0, 120) + '...' : ''}
 
-👉 https://cineamore.vercel.app/movie/${movieId}
+👉 ${SITE_URL}/movie/${movieId}
 `;
                             await sendPhoto(chatId, movie.posterUrl, caption);
                         } else {
@@ -71,7 +84,7 @@ ${movie.plot ? movie.plot.substring(0, 120) + '...' : ''}
 
 Your gateway to unlimited Movies, Series & Anime!
 
-👉 <a href="https://cineamore.vercel.app">cineamore.vercel.app</a>
+👉 <a href="${SITE_URL}">CineAmore</a>
 `);
                     return NextResponse.json({ ok: true });
                 }
@@ -86,7 +99,7 @@ Your gateway to unlimited Movies, Series & Anime!
 3. Click your preferred quality
 4. Done! 🎉
 
-👉 <a href="https://cineamore.vercel.app">Browse Movies</a>
+👉 <a href="${SITE_URL}">Browse Movies</a>
 `);
                     return NextResponse.json({ ok: true });
                 }
@@ -100,7 +113,7 @@ Your gateway to unlimited Movies, Series & Anime!
 2. Click the <b>Play</b> button on poster
 3. Choose a server & enjoy!
 
-👉 <a href="https://cineamore.vercel.app">Browse Content</a>
+👉 <a href="${SITE_URL}">Browse Content</a>
 `);
                     return NextResponse.json({ ok: true });
                 }
@@ -145,7 +158,7 @@ Your gateway to unlimited Movies, Series & Anime!
                             let resultText = `🔍 <b>Search Results for "${query}":</b>\n\n`;
                             movies.forEach((m, i) => {
                                 const movieId = m.__id || m._id.toString();
-                                resultText += `${i + 1}. <b>${m.title}</b> (${m.year || 'N/A'})\n👉 https://cineamore.vercel.app/movie/${movieId}\n\n`;
+                                resultText += `${i + 1}. <b>${m.title}</b> (${m.year || 'N/A'})\n👉 ${SITE_URL}/movie/${movieId}\n\n`;
                             });
                             await sendMessage(chatId, resultText);
                         } else {
@@ -199,7 +212,7 @@ Your gateway to unlimited Movies, Series & Anime!
 
 ${movie.plot ? movie.plot.substring(0, 120) + '...' : ''}
 
-👉 https://cineamore.vercel.app/movie/${movieId}
+👉 ${SITE_URL}/movie/${movieId}
 `;
                             await sendPhoto(chatId, movie.posterUrl, caption);
                         }
@@ -351,12 +364,12 @@ Your gateway to unlimited Movies, Series & Anime.
 
 👇 <b>Get Started:</b>
 `;
-                await sendPhoto(chatId, 'https://cineamore.vercel.app/og-image.png', welcomeText, {
+                await sendPhoto(chatId, `${SITE_URL}/og-image.png`, welcomeText, {
                     reply_markup: {
                         inline_keyboard: [
                             [
-                                { text: '🎬 Browse Films', url: 'https://cineamore.vercel.app/' },
-                                { text: '📺 Browse Series', url: 'https://cineamore.vercel.app/series' }
+                                { text: '🎬 Browse Films', url: `${SITE_URL}/` },
+                                { text: '📺 Browse Series', url: `${SITE_URL}/series` }
                             ],
                             [
                                 { text: '❓ How to Download', callback_data: 'guide_download' },

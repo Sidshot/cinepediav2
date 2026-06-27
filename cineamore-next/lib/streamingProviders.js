@@ -110,7 +110,7 @@ export function constructEmbedUrl(providerId, tmdbId) {
 
     // Special handling for VidKing params
     if (provider.type === 'vidking') {
-        url += '&color=fbbf24&autoPlay=true';
+        url += '?color=fbbf24&autoPlay=true';
     }
 
     return url;

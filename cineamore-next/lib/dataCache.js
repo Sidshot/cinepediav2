@@ -6,7 +6,7 @@
  * SECURITY NOTES:
  * - Only caches PUBLIC content data (movies, series, anime listings)
  * - NO user data, auth tokens, or sensitive info is ever cached
- * - localStorage is origin-scoped (only cineamore.vercel.app can access)
+ * - localStorage is origin-scoped (only the active CineAmore origin can access)
  * - Data is validated on read to prevent tampering
  * - TTL prevents stale data exploitation
  */

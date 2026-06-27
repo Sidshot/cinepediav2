@@ -4,7 +4,8 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic'; // No caching for search
 
 export default async function AnimeSearchPage({ searchParams }) {
-    const query = searchParams?.q || '';
+    const params = await searchParams;
+    const query = params?.q || '';
     let results = [];
 
     if (query.trim().length >= 2) {

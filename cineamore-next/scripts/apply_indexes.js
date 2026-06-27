@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 
 // DB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://admin:mongoadmin@cluster0.lallguq.mongodb.net/cinepedia?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI is required');
+}
 
 const MovieSchema = new mongoose.Schema({
     genre: { type: [String], index: true },

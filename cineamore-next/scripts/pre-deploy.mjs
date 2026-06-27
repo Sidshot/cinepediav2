@@ -17,7 +17,9 @@ function fail(msg) {
 const REQUIRED_ENVS = [
     "MONGODB_URI",
     "TMDB_API_KEY",
-    "AUTH_SECRET"
+    "AUTH_SECRET",
+    "ADMIN_PASSWORD",
+    "DOWNLOAD_SECRET"
 ];
 
 for (const env of REQUIRED_ENVS) {

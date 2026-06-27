@@ -3,8 +3,13 @@ import dbConnect from '@/lib/mongodb';
 import Contributor from '@/models/Contributor';
 import { encrypt } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import bcrypt from 'bcryptjs';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+function getAdminPassword() {
+    if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
+    if (process.env.NODE_ENV === 'production') return null;
+    return 'admin123';
+}
 
 export async function POST(request) {
     try {
@@ -19,7 +24,8 @@ export async function POST(request) {
 
         // ADMIN LOGIN: No username, just password
         if (!username || username.trim() === '') {
-            if (password === ADMIN_PASSWORD) {
+            const adminPassword = getAdminPassword();
+            if (adminPassword && password === adminPassword) {
                 const session = await encrypt({
                     user: 'admin',
                     role: 'admin',
@@ -47,11 +53,16 @@ export async function POST(request) {
 
         const contributor = await Contributor.findOne({
             username: cleanUsername,
-            password: password,
             isActive: true
         }).lean();
 
-        if (!contributor) {
+        if (!contributor || !contributor.password) {
+            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+        }
+
+        const passwordMatches = await bcrypt.compare(password, contributor.password);
+
+        if (!passwordMatches) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
@@ -75,6 +86,6 @@ export async function POST(request) {
         return NextResponse.json({ success: true, redirect: '/contributor' });
     } catch (e) {
         console.error('[API Login] Error:', e);
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'Login failed' }, { status: 500 });
     }
 }

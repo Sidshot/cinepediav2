@@ -3,6 +3,8 @@ import dbConnect from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import { getTrendingSeries, getTrendingAnime } from '@/lib/tmdb';
 
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://cinepediav2.vercel.app').replace(/\/$/, '');
+
 /**
  * Posts the daily recommendations (1 Movie, 1 Series, 1 Anime) to the configured chat.
  * @param {string} targetChatId - Optional override for the chat ID
@@ -30,7 +32,7 @@ export async function postDailyRecommendations(targetChatId = null) {
 ${randomMovie.plot ? randomMovie.plot.substring(0, 150) + '...' : ''}
 
 📥 <b>Download</b> or 📡 <b>Stream</b> here:
-https://cineamore.vercel.app/movie/${movieId}
+${SITE_URL}/movie/${movieId}
 `;
             await sendPhoto(chatId, randomMovie.posterUrl, caption);
         }
@@ -45,7 +47,7 @@ https://cineamore.vercel.app/movie/${movieId}
 
                 const posterUrl = series.poster_path
                     ? `https://image.tmdb.org/t/p/w500${series.poster_path}`
-                    : 'https://cineamore.vercel.app/og-image.png';
+                    : `${SITE_URL}/og-image.png`;
 
                 const caption = `
 📺 <b>Series Recommendation</b>
@@ -54,7 +56,7 @@ https://cineamore.vercel.app/movie/${movieId}
 ${series.overview ? series.overview.substring(0, 150) + '...' : ''}
 
 📡 <b>Stream Now:</b>
-https://cineamore.vercel.app/series/${series.id}
+${SITE_URL}/series/${series.id}
 `;
                 await sendPhoto(chatId, posterUrl, caption);
             }
@@ -72,14 +74,14 @@ https://cineamore.vercel.app/series/${series.id}
 
                 const posterUrl = anime.poster_path
                     ? `https://image.tmdb.org/t/p/w500${anime.poster_path}`
-                    : 'https://cineamore.vercel.app/og-image.png';
+                    : `${SITE_URL}/og-image.png`;
 
                 const caption = `
 👺 <b>Anime Pick</b>
 <b>${anime.name}</b>
 
 📡 <b>Stream Now:</b>
-https://cineamore.vercel.app/anime/${anime.id}
+${SITE_URL}/anime/${anime.id}
 `;
                 await sendPhoto(chatId, posterUrl, caption);
             }

@@ -7,7 +7,8 @@
 export function getProxyUrl(url) {
     if (!url || typeof url !== 'string') return '';
     if (url.startsWith('/')) return url; // Already local
-    if (url.includes('cineamore.vercel.app')) return url; // Already self
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinepediav2.vercel.app';
+    if (url.startsWith(siteUrl)) return url; // Already self
 
     // Only proxy http/https
     if (!url.startsWith('http')) return url;

@@ -77,8 +77,8 @@ export default function GlobalStickySearch() {
     }, [router, isSeriesMode]);
 
     // Accent color based on mode
-    const accentColor = isSeriesMode ? 'orange-500' : '[var(--accent)]';
-    const accentBg = isSeriesMode ? 'orange-500' : 'yellow-500';
+    const inputFocusClass = isSeriesMode ? 'focus:ring-orange-500' : 'focus:ring-yellow-500';
+    const spinnerClass = isSeriesMode ? 'border-orange-500' : 'border-yellow-500';
 
     // Close on scroll (if search is open)
     useEffect(() => {
@@ -116,7 +116,7 @@ export default function GlobalStickySearch() {
                             onChange={(e) => setQuery(e.target.value)}
                             onFocus={() => results.length > 0 && setShowDropdown(true)}
                             placeholder={isSeriesMode ? "Search series..." : "Search movies..."}
-                            className={`w-[300px] md:w-[400px] px-4 py-2.5 pl-10 rounded-full bg-[rgba(11,15,20,0.95)] border border-white/20 text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-${accentBg} shadow-[0_10px_40px_rgba(0,0,0,0.5)]`}
+                            className={`w-[300px] md:w-[400px] px-4 py-2.5 pl-10 rounded-full bg-[rgba(11,15,20,0.95)] border border-white/20 text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 ${inputFocusClass} shadow-[0_10px_40px_rgba(0,0,0,0.5)]`}
                         />
                         <svg
                             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50"
@@ -128,7 +128,7 @@ export default function GlobalStickySearch() {
                         </svg>
                         {isSearching && (
                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                <div className={`w-4 h-4 border-2 border-${accentBg} border-t-transparent rounded-full animate-spin`}></div>
+                                <div className={`w-4 h-4 border-2 ${spinnerClass} border-t-transparent rounded-full animate-spin`}></div>
                             </div>
                         )}
                     </div>

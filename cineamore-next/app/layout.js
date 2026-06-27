@@ -14,6 +14,8 @@ import { Suspense } from "react";
 import Script from "next/script";
 import "./globals.css";
 
+const APP_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinepediav2.vercel.app';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -52,7 +54,7 @@ export const metadata = {
   openGraph: {
     title: 'CineAmore',
     description: 'The Ultimate Film Catalogue',
-    url: 'https://cineamore.vercel.app',
+    url: APP_URL,
     siteName: 'CineAmore',
     locale: 'en_US',
     type: 'website',
@@ -71,6 +73,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   // session check removed for performance (TTFB optimization)
+  const siteLocked = process.env.SITE_LOCKED === 'true';
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -90,8 +93,26 @@ export default function RootLayout({ children }) {
                     document.documentElement.setAttribute('data-theme', 'light');
                   }
                   
+                  var siteLocked = ${JSON.stringify(siteLocked)};
                   if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('/sw.js').catch(function() {});
+                    if (siteLocked) {
+                      navigator.serviceWorker.getRegistrations()
+                        .then(function(registrations) {
+                          registrations.forEach(function(registration) { registration.unregister(); });
+                        })
+                        .catch(function() {});
+                      if (window.caches) {
+                        caches.keys()
+                          .then(function(names) {
+                            names
+                              .filter(function(name) { return name.indexOf('cineamore-') === 0; })
+                              .forEach(function(name) { caches.delete(name); });
+                          })
+                          .catch(function() {});
+                      }
+                    } else {
+                      navigator.serviceWorker.register('/sw.js').catch(function() {});
+                    }
                   }
                 } catch (e) {}
               })();
@@ -99,31 +120,35 @@ export default function RootLayout({ children }) {
           }}
         />
 
-        {/* Google Analytics 4 */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-N2R9HBGZLL"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
+        {!siteLocked && (
+          <>
+            {/* Google Analytics 4 */}
+            <Script
+              src="https://www.googletagmanager.com/gtag/js?id=G-N2R9HBGZLL"
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
 
-            gtag('config', 'G-N2R9HBGZLL');
-          `}
-        </Script>
+                gtag('config', 'G-N2R9HBGZLL');
+              `}
+            </Script>
 
-        {/* Microsoft Clarity */}
-        <Script id="microsoft-clarity" strategy="afterInteractive">
-          {`
-            (function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-            })(window, document, "clarity", "script", "v4gmvfffl8");
-          `}
-        </Script>
+            {/* Microsoft Clarity */}
+            <Script id="microsoft-clarity" strategy="afterInteractive">
+              {`
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "v4gmvfffl8");
+              `}
+            </Script>
+          </>
+        )}
 
         <Header
           userMenu={

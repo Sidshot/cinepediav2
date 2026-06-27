@@ -53,7 +53,9 @@ export async function middleware(request) {
             const isGateExempt =
                 pathname === '/login' ||
                 pathname === '/api/auth/site-login' ||
+                pathname === '/manifest.json' ||
                 pathname.startsWith('/_next/') ||
+                pathname.startsWith('/icons/') ||
                 pathname.startsWith('/favicon') ||
                 pathname.endsWith('.ico') ||
                 pathname.endsWith('.png') ||

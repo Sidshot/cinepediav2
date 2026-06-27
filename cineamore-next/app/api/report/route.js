@@ -5,18 +5,16 @@ import { getRateLimit } from '@/lib/ratelimit';
 
 export async function POST(req) {
     try {
-        await dbConnect();
-        const body = await req.json();
-
-        if (!body.message) {
-            return NextResponse.json({ success: false, error: 'Message is required' }, { status: 400 });
-        }
-
-        // Rate Limit (10 requests per 10s per IP)
         const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
         const { success } = await getRateLimit().limit(ip);
         if (!success) {
             return new NextResponse('Too Many Requests', { status: 429 });
+        }
+
+        const body = await req.json();
+
+        if (!body.message) {
+            return NextResponse.json({ success: false, error: 'Message is required' }, { status: 400 });
         }
 
         // Validate Input Length
@@ -26,6 +24,8 @@ export async function POST(req) {
         if (body.email && body.email.length > 100) {
             return NextResponse.json({ success: false, error: 'Email must be under 100 characters' }, { status: 400 });
         }
+
+        await dbConnect();
 
         const report = await Report.create(body);
         return NextResponse.json({ success: true, data: report }, { status: 201 });

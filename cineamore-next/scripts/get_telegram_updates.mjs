@@ -1,27 +1,23 @@
-import https from 'https';
+const token = process.env.TELEGRAM_BOT_TOKEN;
 
-const token = '8310376679:AAEBETH_igtUgjG6DGfEgdDYnBjKLGnctsI';
+if (!token) {
+    throw new Error('TELEGRAM_BOT_TOKEN is required');
+}
+
 const url = `https://api.telegram.org/bot${token}/getUpdates`;
 
-https.get(url, (res) => {
-    let data = '';
-    res.on('data', (chunk) => {
-        data += chunk;
-    });
-    res.on('end', () => {
-        try {
-            const json = JSON.parse(data);
-            if (json.result && json.result.length > 0) {
-                // Log the Chat ID of the first message
-                console.log('CHAT_ID:', json.result[0].message.chat.id);
-                console.log('CHAT_TITLE:', json.result[0].message.chat.title);
-            } else {
-                console.log('No updates found.');
-            }
-        } catch (e) {
-            console.error('Error parsing JSON');
-        }
-    });
-}).on('error', (err) => {
-    console.error('Error:', err.message);
-});
+try {
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (json.result && json.result.length > 0) {
+        const firstMessage = json.result[0].message;
+        console.log('CHAT_ID:', firstMessage?.chat?.id || '(missing)');
+        console.log('CHAT_TITLE:', firstMessage?.chat?.title || '(missing)');
+    } else {
+        console.log('No updates found.');
+    }
+} catch (error) {
+    console.error('Error:', error.message);
+    process.exitCode = 1;
+}

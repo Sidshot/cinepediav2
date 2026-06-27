@@ -1,49 +1,56 @@
 // Script to set Telegram webhook
-// Run with: node scripts/set_telegram_webhook.mjs
+// Run with:
+// TELEGRAM_BOT_TOKEN=... TELEGRAM_WEBHOOK_SECRET=... node scripts/set_telegram_webhook.mjs
 
-const TOKEN = '8310376679:AAEBETH_igtUgjG6DGfEgdDYnBjKLGnctsI';
-const WEBHOOK_URL = 'https://cineamore.vercel.app/api/telegram';
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://cinepediav2.vercel.app').replace(/\/$/, '');
+const WEBHOOK_URL = process.env.TELEGRAM_WEBHOOK_URL || `${SITE_URL}/api/telegram`;
+const SECRET_TOKEN = process.env.TELEGRAM_WEBHOOK_SECRET;
+
+if (!TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN is required');
+}
+
+if (!SECRET_TOKEN) {
+    throw new Error('TELEGRAM_WEBHOOK_SECRET is required');
+}
+
+async function telegram(method, init = {}) {
+    const res = await fetch(`https://api.telegram.org/bot${TOKEN}/${method}`, init);
+    const data = await res.json();
+    if (!data.ok) {
+        throw new Error(data.description || `${method} failed`);
+    }
+    return data;
+}
 
 async function setWebhook() {
-    console.log('🔧 Setting Telegram Webhook...\n');
+    console.log('Setting Telegram webhook...');
 
-    // First, check current webhook status
-    const infoRes = await fetch(`https://api.telegram.org/bot${TOKEN}/getWebhookInfo`);
-    const infoData = await infoRes.json();
+    const infoData = await telegram('getWebhookInfo');
+    console.log('Current URL:', infoData.result?.url || '(not set)');
+    console.log('Pending Updates:', infoData.result?.pending_update_count || 0);
+    console.log('Last Error:', infoData.result?.last_error_message || '(none)');
 
-    console.log('📋 Current Webhook Info:');
-    console.log('   URL:', infoData.result?.url || '(not set)');
-    console.log('   Pending Updates:', infoData.result?.pending_update_count || 0);
-    console.log('   Last Error:', infoData.result?.last_error_message || '(none)');
-    console.log('');
-
-    // Set the webhook
-    const setRes = await fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
+    await telegram('setWebhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             url: WEBHOOK_URL,
+            secret_token: SECRET_TOKEN,
             allowed_updates: ['message', 'callback_query']
         })
     });
 
-    const setData = await setRes.json();
+    console.log('Webhook set successfully.');
+    console.log('New URL:', WEBHOOK_URL);
 
-    if (setData.ok) {
-        console.log('✅ Webhook set successfully!');
-        console.log('   New URL:', WEBHOOK_URL);
-    } else {
-        console.log('❌ Failed to set webhook:');
-        console.log('   Error:', setData.description);
-    }
-
-    // Verify the new webhook
-    console.log('\n📋 Verifying new webhook...');
-    const verifyRes = await fetch(`https://api.telegram.org/bot${TOKEN}/getWebhookInfo`);
-    const verifyData = await verifyRes.json();
-
-    console.log('   URL:', verifyData.result?.url || '(not set)');
-    console.log('   Pending Updates:', verifyData.result?.pending_update_count || 0);
+    const verifyData = await telegram('getWebhookInfo');
+    console.log('Verified URL:', verifyData.result?.url || '(not set)');
+    console.log('Pending Updates:', verifyData.result?.pending_update_count || 0);
 }
 
-setWebhook().catch(console.error);
+setWebhook().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+});

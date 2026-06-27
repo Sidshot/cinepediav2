@@ -5,7 +5,11 @@ import dbConnect from '@/lib/mongodb';
 import Contributor from '@/models/Contributor';
 import bcrypt from 'bcryptjs';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+function getAdminPassword() {
+    if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
+    if (process.env.NODE_ENV === 'production') return null;
+    return 'admin123';
+}
 
 export { encrypt, decrypt };
 
@@ -28,7 +32,8 @@ export async function login(formData) {
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day
 
     // ADMIN LOGIN: No username, just password
-    if (!username && password === ADMIN_PASSWORD) {
+    const adminPassword = getAdminPassword();
+    if (!username && adminPassword && password === adminPassword) {
         const session = await encrypt({
             user: 'admin',
             role: 'admin',

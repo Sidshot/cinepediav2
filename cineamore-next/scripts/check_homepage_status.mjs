@@ -1,4 +1,5 @@
-const url = 'https://cineamore.vercel.app/';
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://cinepediav2.vercel.app').replace(/\/$/, '');
+const url = `${SITE_URL}/`;
 console.log(`Checking ${url}...`);
 try {
     const res = await fetch(url);

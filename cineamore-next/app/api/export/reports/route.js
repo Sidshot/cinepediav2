@@ -10,7 +10,7 @@ export async function GET(req) {
     const sessionCookie = cookieStore.get('session')?.value;
     const session = sessionCookie ? await decrypt(sessionCookie) : null;
 
-    if (!session || !session.user) {
+    if (!session || session.role !== 'admin') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

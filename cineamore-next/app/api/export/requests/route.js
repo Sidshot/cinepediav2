@@ -10,7 +10,7 @@ export async function GET(req) {
     const sessionCookie = cookieStore.get('session')?.value;
     const session = sessionCookie ? await decrypt(sessionCookie) : null;
 
-    if (!session || !session.user) {
+    if (!session || session.role !== 'admin') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -19,12 +19,17 @@ export async function GET(req) {
         const requests = await Request.find({}).sort({ createdAt: -1 }).lean();
 
         // 2. Convert to CSV
+        const escapeCsv = (value) => {
+            const stringValue = String(value || '');
+            const safeValue = /^[=+\-@]/.test(stringValue) ? `'${stringValue}` : stringValue;
+            return `"${safeValue.replace(/"/g, '""')}"`;
+        };
+
         const csvHeader = 'Title,Status,Requested At\n';
         const csvRows = requests.map(r => {
             const date = new Date(r.createdAt).toISOString();
-            const cleanTitle = (r.title || '').replace(/,/g, ' '); // simple escape
             const status = r.resolved ? 'Resolved' : 'Pending';
-            return `${cleanTitle},${status},${date}`;
+            return [escapeCsv(r.title), escapeCsv(status), escapeCsv(date)].join(',');
         }).join('\n');
 
         const csvContent = csvHeader + csvRows;
