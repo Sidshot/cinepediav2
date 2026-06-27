@@ -73,7 +73,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   // session check removed for performance (TTFB optimization)
-  const siteLocked = process.env.SITE_LOCKED === 'true';
+  const siteLocked = process.env.SITE_LOCKED !== 'false';
 
   return (
     <html lang="en" suppressHydrationWarning>

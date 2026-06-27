@@ -46,7 +46,7 @@ export async function middleware(request) {
         // 0. 🔒 SITE GATE (Quota Protection)
         // When SITE_LOCKED=true, ENTIRE site requires authentication via site_gate cookie.
         // Credentials stored ONLY in env vars. Password NEVER in frontend code.
-        const siteLocked = process.env.SITE_LOCKED === 'true';
+        const siteLocked = process.env.SITE_LOCKED !== 'false';
 
         if (siteLocked) {
             // Allow these paths WITHOUT gate (login page + login API + static assets)

@@ -1,11 +1,12 @@
 # Task Boundary
 
-Task Type: Security / Fix (Audit Patch)
+Task Type: Security / Fix (Members-Only Lock)
 Runtime: Node | Edge | Both
 
 Critical Dependencies:
 - Next.js middleware/runtime (Critical)
 - MongoDB (Critical)
+- Site gate credentials (Critical)
 - Telegram API (Non-Critical)
 - TMDB/image hosts (Non-Critical)
 - Upstash rate limiting (Non-Critical)
@@ -13,7 +14,7 @@ Critical Dependencies:
 Failure Modes:
 - Timeout -> fail closed for auth/security; fail open only for non-critical rate-limit checks
 - Quota -> non-critical integrations degrade without blocking site security
-- Missing data -> return controlled 4xx/5xx responses without leaking internals
+- Missing data -> keep site locked and return controlled 4xx/5xx responses without leaking internals
 - Duplicate execution -> idempotent source-only hardening
 
 Data Impact:
