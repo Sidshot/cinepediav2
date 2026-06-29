@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import GlobalStickySearch from "@/components/GlobalStickySearch";
 import GlobalLoader from "@/components/GlobalLoader";
 import InstallPrompt from "@/components/InstallPrompt";
+import KoFiFloatingButton from "@/components/KoFiFloatingButton";
 import SWUpdater from "@/components/SWUpdater";
 import LayoutAnimationWrapper from "@/components/LayoutAnimationWrapper";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -146,23 +147,6 @@ export default function RootLayout({ children }) {
               `}
             </Script>
 
-            {/* Ko-fi Floating Overlay */}
-            <Script
-              src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"
-              strategy="afterInteractive"
-            />
-            <Script id="kofi-overlay-widget" strategy="afterInteractive">
-              {`
-                if (window.kofiWidgetOverlay) {
-                  window.kofiWidgetOverlay.draw('medianpoint', {
-                    'type': 'floating-chat',
-                    'floating-chat.donateButton.text': 'Support me',
-                    'floating-chat.donateButton.background-color': '#f45d22',
-                    'floating-chat.donateButton.text-color': '#fff'
-                  });
-                }
-              `}
-            </Script>
           </>
         )}
 
@@ -185,6 +169,7 @@ export default function RootLayout({ children }) {
         <GlobalLoader />
         <InstallPrompt />
         <SWUpdater />
+        <KoFiFloatingButton />
 
         <div className="min-h-screen flex flex-col">
           <div className="flex-1">

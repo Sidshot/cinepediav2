@@ -5,6 +5,8 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import KoFiButton from '@/components/KoFiButton';
 
+const RENDER_FALLBACK_URL = 'http://cineamore-ikz7.onrender.com/';
+
 export default function LoginPage() {
     return (
         <Suspense fallback={<div className="min-h-screen bg-[var(--bg)]" />}>
@@ -24,7 +26,6 @@ function LoginContent() {
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(true);
 
-    // Site Gate Login — POSTs to /api/auth/site-login
     const handleGateLogin = async (e) => {
         e.preventDefault();
         setError('');
@@ -44,7 +45,6 @@ function LoginContent() {
             const data = await res.json();
 
             if (data.success) {
-                // Redirect to home — site_gate cookie is now set (HTTP-only)
                 window.location.href = '/';
             } else {
                 setError(data.error || 'Invalid credentials');
@@ -56,7 +56,6 @@ function LoginContent() {
         }
     };
 
-    // Admin/Contributor Login — POSTs to /api/auth/login (existing)
     const handleAdminLogin = async (e) => {
         e.preventDefault();
         setError('');
@@ -84,67 +83,44 @@ function LoginContent() {
         }
     };
 
-    // SITE GATE MODE — simplified, locked-down login
     if (isGateMode) {
         return (
             <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-6 relative overflow-hidden">
-                {/* Decorative background elements matching main site */}
-                <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[var(--accent)]/20 rounded-full blur-[100px] pointer-events-none"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[var(--accent2)]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                <div className="absolute top-[-10%] left-[-10%] h-80 w-80 rounded-full bg-[var(--accent)]/15 blur-[90px] pointer-events-none" />
+                <div className="absolute bottom-[-10%] right-[-10%] h-80 w-80 rounded-full bg-[var(--accent2)]/15 blur-[90px] pointer-events-none" />
 
-                <div className="w-full max-w-lg card-gloss relative z-10">
-                    <div className="text-center mb-8">
-                        <div className="text-5xl mb-4 text-[var(--accent)]">🔒</div>
-                        <h1 className="text-3xl font-extrabold text-[var(--fg)] mb-2">CineAmore is Private</h1>
-                    </div>
-
-                    {/* Admin Message */}
-                    <div className="mb-8 p-5 bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-2xl">
-                        <p className="text-sm text-[var(--fg)] leading-relaxed mb-3">
-                            <strong>A message from the Admin:</strong>
-                            <br />
-                            A huge thank you to everyone who has donated to the cause. I sincerely apologize for the inconvenience, but I had to make the site private. The maintenance and server costs were simply getting too hard to sustain for public traffic.
-                        </p>
-                        <p className="text-sm text-[var(--muted)]">
-                            If CineAmore matters to you, please consider supporting it below. Donations directly help keep access, upkeep, and server costs sustainable.
+                <div className="relative z-10 w-full max-w-md rounded-[28px] border border-[var(--border)] bg-[var(--card-bg)]/95 p-6 shadow-2xl backdrop-blur-xl sm:p-7">
+                    <div className="mb-6 text-center">
+                        <div className="mb-3 text-3xl text-[var(--accent)]">LOCKED</div>
+                        <h1 className="text-2xl font-extrabold text-[var(--fg)]">CineAmore is private</h1>
+                        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+                            Hard to maintain and cover server costs out of pocket. If you can, please donate.
                         </p>
                     </div>
 
-                    <div className="mb-8 rounded-2xl border border-[#72a4f240] bg-[#72a4f214] p-5">
-                        <div className="flex flex-col gap-4">
-                            <div>
-                                <p className="text-sm font-bold text-[var(--fg)]">Help keep the gates open</p>
-                                <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-                                    If you use CineAmore regularly, a small Ko-fi donation goes straight toward hosting and maintenance.
-                                </p>
-                            </div>
+                    <form onSubmit={handleGateLogin} className="flex flex-col gap-4">
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Username"
+                            autoComplete="username"
+                            required
+                            className="h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 text-[var(--fg)] outline-none transition-all placeholder-[var(--muted)] focus:border-[var(--accent)]"
+                        />
+
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password"
+                            autoComplete="current-password"
+                            required
+                            className="h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 text-[var(--fg)] outline-none transition-all placeholder-[var(--muted)] focus:border-[var(--accent)]"
+                        />
+
+                        <div className="flex justify-center pt-1">
                             <KoFiButton />
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleGateLogin} className="flex flex-col gap-5">
-                        <div>
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                placeholder="Username"
-                                autoComplete="username"
-                                required
-                                className="w-full h-12 px-5 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none transition-all placeholder-[var(--muted)]"
-                            />
-                        </div>
-
-                        <div>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Password"
-                                autoComplete="current-password"
-                                required
-                                className="w-full h-12 px-5 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none transition-all placeholder-[var(--muted)]"
-                            />
                         </div>
 
                         <label className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white/5 px-4 py-3 text-sm text-[var(--fg)]">
@@ -155,15 +131,15 @@ function LoginContent() {
                                 className="h-4 w-4 rounded border-[var(--border)] bg-transparent accent-[var(--accent)]"
                             />
                             <span>
-                                Remember me on this device
+                                Remember me for 30 days
                                 <span className="block text-xs text-[var(--muted)]">
-                                    Keeps the site unlocked for 30 days unless you sign out or clear cookies.
+                                    Uses this device only.
                                 </span>
                             </span>
                         </label>
 
                         {error && (
-                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center font-medium">
+                            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm font-medium text-red-400">
                                 {error}
                             </div>
                         )}
@@ -171,22 +147,26 @@ function LoginContent() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="h-12 mt-2 bg-[var(--accent)] hover:brightness-110 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(255,192,67,0.3)] hover:shadow-[0_0_30px_rgba(255,192,67,0.5)] disabled:opacity-50"
+                            className="mt-1 h-12 rounded-xl bg-[var(--accent)] font-bold text-black transition-all shadow-[0_0_20px_rgba(255,192,67,0.3)] hover:brightness-110 hover:shadow-[0_0_30px_rgba(255,192,67,0.5)] disabled:opacity-50"
                         >
-                            {loading ? 'Verifying...' : 'Unlock Site'}
+                            {loading ? 'Verifying...' : 'Unlock'}
                         </button>
                     </form>
 
-                    {/* Contact for access */}
-                    <div className="mt-8 pt-6 border-t border-[var(--border)] text-center">
+                    <div className="mt-5 rounded-2xl border border-[#72a4f240] bg-[#72a4f214] p-4 text-center">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#a9c8ff]">
+                            Backup Link
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-[var(--fg)]">
+                            Bookmark the Render fallback. If this site goes down, check there for the new link.
+                        </p>
                         <a
-                            href="mailto:indocurry@proton.me?subject=CineAmore%20Access%20Request&body=Hi%2C%20I%20would%20like%20to%20request%20access%20to%20CineAmore.%0A%0AMy%20name%3A%20%0AReason%3A%20"
-                            className="inline-flex items-center gap-2 px-6 py-3 glossy-box text-sm hover:text-[var(--fg)] transition-all w-full justify-center"
+                            href={RENDER_FALLBACK_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#72a4f255] bg-[#72a4f226] px-4 py-3 text-sm font-bold text-[#d9e7ff] transition-all hover:bg-[#72a4f236] hover:text-white"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            Email Admin for Access
+                            cineamore-ikz7.onrender.com
                         </a>
                     </div>
                 </div>
@@ -194,21 +174,19 @@ function LoginContent() {
         );
     }
 
-    // NORMAL MODE — Admin / Contributor Login (unchanged logic)
     return (
         <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-6">
-            <div className="w-full max-w-md bg-[var(--card-bg)] p-8 rounded-3xl border border-[var(--border)] shadow-2xl backdrop-blur-xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-extrabold text-[var(--fg)] mb-2">Access Portal</h1>
-                    <p className="text-[var(--muted)] text-sm">Admin or Contributor login</p>
+            <div className="w-full max-w-md rounded-3xl border border-[var(--border)] bg-[var(--card-bg)] p-8 shadow-2xl backdrop-blur-xl">
+                <div className="mb-8 text-center">
+                    <h1 className="mb-2 text-3xl font-extrabold text-[var(--fg)]">Access Portal</h1>
+                    <p className="text-sm text-[var(--muted)]">Admin or Contributor login</p>
                 </div>
 
                 <form onSubmit={handleAdminLogin} className="flex flex-col gap-6">
-                    {/* Username */}
                     <div>
-                        <label className="block text-xs uppercase tracking-widest text-[var(--muted)] font-bold mb-2">
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
                             Username
-                            <span className="text-[10px] normal-case font-normal ml-2 opacity-70">(leave blank for Admin)</span>
+                            <span className="ml-2 text-[10px] font-normal normal-case opacity-70">(leave blank for Admin)</span>
                         </label>
                         <input
                             type="text"
@@ -216,13 +194,12 @@ function LoginContent() {
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="Contributor username..."
                             autoComplete="username"
-                            className="w-full h-12 px-4 rounded-xl bg-black/20 border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none transition-all"
+                            className="h-12 w-full rounded-xl border border-[var(--border)] bg-black/20 px-4 text-[var(--fg)] outline-none transition-all focus:border-[var(--accent)]"
                         />
                     </div>
 
-                    {/* Password */}
                     <div>
-                        <label className="block text-xs uppercase tracking-widest text-[var(--muted)] font-bold mb-2">
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
                             Password
                         </label>
                         <input
@@ -232,12 +209,12 @@ function LoginContent() {
                             placeholder="Enter password"
                             autoComplete="current-password"
                             required
-                            className="w-full h-12 px-4 rounded-xl bg-black/20 border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none transition-all"
+                            className="h-12 w-full rounded-xl border border-[var(--border)] bg-black/20 px-4 text-[var(--fg)] outline-none transition-all focus:border-[var(--accent)]"
                         />
                     </div>
 
                     {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm text-center font-medium">
+                        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm font-medium text-red-500">
                             {error}
                         </div>
                     )}
@@ -245,18 +222,17 @@ function LoginContent() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="h-12 bg-[var(--accent)] hover:brightness-110 text-[var(--bg)] font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.5)] disabled:opacity-50"
+                        className="h-12 rounded-xl bg-[var(--accent)] font-bold text-[var(--bg)] transition-all shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] hover:brightness-110 hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.5)] disabled:opacity-50"
                     >
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
 
-                    {/* Help Text */}
-                    <div className="text-center text-[10px] text-[var(--muted)] space-y-1">
+                    <div className="space-y-1 text-center text-[10px] text-[var(--muted)]">
                         <p><strong>Admin:</strong> Leave username blank, enter admin password</p>
                         <p><strong>Contributor:</strong> Enter your username and password</p>
                     </div>
 
-                    <Link href="/" className="text-center text-xs text-[var(--muted)] hover:text-[var(--fg)] transition">
+                    <Link href="/" className="text-center text-xs text-[var(--muted)] transition hover:text-[var(--fg)]">
                         Return to Library
                     </Link>
                 </form>

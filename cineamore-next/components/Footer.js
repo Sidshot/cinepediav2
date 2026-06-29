@@ -78,6 +78,23 @@ export default function Footer() {
                         </div>
                     </div>
 
+                    <div className="mt-6 rounded-2xl border border-[#72a4f240] bg-[#72a4f214] px-4 py-4 text-center">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#a9c8ff]">
+                            Backup Link
+                        </p>
+                        <p className="mt-2 text-sm text-[var(--fg)]">
+                            If CineAmore goes down, check the Render fallback for the latest working link.
+                        </p>
+                        <a
+                            href="http://cineamore-ikz7.onrender.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#72a4f255] bg-[#72a4f226] px-4 py-2 text-sm font-bold text-[#d9e7ff] transition-all hover:scale-105 hover:bg-[#72a4f236] hover:text-white"
+                        >
+                            cineamore-ikz7.onrender.com
+                        </a>
+                    </div>
+
                     {/* Collapsible Content Area */}
                     <div className={`overflow-hidden transition-all duration-500 ease-in-out ${activeTab ? 'max-h-[300px] opacity-100 mt-8' : 'max-h-0 opacity-0 mt-0'}`}>
                         <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-6 text-center md:text-left max-w-2xl mx-auto shadow-xl">
