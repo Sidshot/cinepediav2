@@ -1,7 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import KoFiButton from '@/components/KoFiButton';
 
 export default function LoginPage() {
     return (
@@ -20,6 +22,7 @@ function LoginContent() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(searchParams.get('error') || '');
     const [loading, setLoading] = useState(false);
+    const [rememberMe, setRememberMe] = useState(true);
 
     // Site Gate Login — POSTs to /api/auth/site-login
     const handleGateLogin = async (e) => {
@@ -31,7 +34,11 @@ function LoginContent() {
             const res = await fetch('/api/auth/site-login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username.trim(), password })
+                body: JSON.stringify({
+                    username: username.trim(),
+                    password,
+                    rememberMe
+                })
             });
 
             const data = await res.json();
@@ -99,8 +106,20 @@ function LoginContent() {
                             A huge thank you to everyone who has donated to the cause. I sincerely apologize for the inconvenience, but I had to make the site private. The maintenance and server costs were simply getting too hard to sustain for public traffic.
                         </p>
                         <p className="text-sm text-[var(--muted)]">
-                            If you need access, please drop me an email below.
+                            If CineAmore matters to you, please consider supporting it below. Donations directly help keep access, upkeep, and server costs sustainable.
                         </p>
+                    </div>
+
+                    <div className="mb-8 rounded-2xl border border-[#72a4f240] bg-[#72a4f214] p-5">
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <p className="text-sm font-bold text-[var(--fg)]">Help keep the gates open</p>
+                                <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                                    If you use CineAmore regularly, a small Ko-fi donation goes straight toward hosting and maintenance.
+                                </p>
+                            </div>
+                            <KoFiButton />
+                        </div>
                     </div>
 
                     <form onSubmit={handleGateLogin} className="flex flex-col gap-5">
@@ -127,6 +146,21 @@ function LoginContent() {
                                 className="w-full h-12 px-5 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] focus:border-[var(--accent)] outline-none transition-all placeholder-[var(--muted)]"
                             />
                         </div>
+
+                        <label className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white/5 px-4 py-3 text-sm text-[var(--fg)]">
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="h-4 w-4 rounded border-[var(--border)] bg-transparent accent-[var(--accent)]"
+                            />
+                            <span>
+                                Remember me on this device
+                                <span className="block text-xs text-[var(--muted)]">
+                                    Keeps the site unlocked for 30 days unless you sign out or clear cookies.
+                                </span>
+                            </span>
+                        </label>
 
                         {error && (
                             <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center font-medium">
@@ -222,9 +256,9 @@ function LoginContent() {
                         <p><strong>Contributor:</strong> Enter your username and password</p>
                     </div>
 
-                    <a href="/" className="text-center text-xs text-[var(--muted)] hover:text-[var(--fg)] transition">
-                        ← Return to Library
-                    </a>
+                    <Link href="/" className="text-center text-xs text-[var(--muted)] hover:text-[var(--fg)] transition">
+                        Return to Library
+                    </Link>
                 </form>
             </div>
         </main>

@@ -1,21 +1,18 @@
 # Task Boundary
 
-Task Type: Security / Fix (Members-Only Lock)
-Runtime: Node | Edge | Both
+Task Type: Feature / Fix (Private Gate Donation + Remember Me)
+Runtime: Both
 
 Critical Dependencies:
-- Next.js middleware/runtime (Critical)
-- MongoDB (Critical)
-- Site gate credentials (Critical)
-- Telegram API (Non-Critical)
-- TMDB/image hosts (Non-Critical)
-- Upstash rate limiting (Non-Critical)
+- Next.js layout and login page rendering (Critical)
+- Site gate auth API and middleware token validation (Critical)
+- Ko-fi widget CDN (Non-Critical)
 
 Failure Modes:
-- Timeout -> fail closed for auth/security; fail open only for non-critical rate-limit checks
-- Quota -> non-critical integrations degrade without blocking site security
-- Missing data -> keep site locked and return controlled 4xx/5xx responses without leaking internals
-- Duplicate execution -> idempotent source-only hardening
+- Timeout -> Ko-fi widgets fail open to a normal support link; gate login still works
+- Quota -> no app quota impact beyond optional third-party widget loads
+- Missing data -> login page renders and authenticates even if Ko-fi scripts never load
+- Duplicate execution -> guarded widget initialization prevents duplicate footer or overlay mounts; token expiry is explicit per session type
 
 Data Impact:
 - Read / Write source code only; no production data mutation
@@ -26,8 +23,8 @@ Performance Impact:
 - Queries bounded: YES
 
 Security Impact:
-- Raw links exposed: NO
-- Signed tokens used: YES
+- Raw links exposed: YES (public Ko-fi donation URL only)
+- Signed tokens used: N/A
 
 INVARIANTS_READ: YES
 CHECKLIST_COMPLETE: YES

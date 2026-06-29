@@ -3,12 +3,10 @@ import UserMenu from "@/components/UserMenu";
 import Footer from "@/components/Footer";
 import GlobalStickySearch from "@/components/GlobalStickySearch";
 import GlobalLoader from "@/components/GlobalLoader";
-import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
 import InstallPrompt from "@/components/InstallPrompt";
 import SWUpdater from "@/components/SWUpdater";
 import LayoutAnimationWrapper from "@/components/LayoutAnimationWrapper";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
 import { Suspense } from "react";
 import Script from "next/script";
@@ -147,6 +145,24 @@ export default function RootLayout({ children }) {
                 })(window, document, "clarity", "script", "v4gmvfffl8");
               `}
             </Script>
+
+            {/* Ko-fi Floating Overlay */}
+            <Script
+              src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"
+              strategy="afterInteractive"
+            />
+            <Script id="kofi-overlay-widget" strategy="afterInteractive">
+              {`
+                if (window.kofiWidgetOverlay) {
+                  window.kofiWidgetOverlay.draw('medianpoint', {
+                    'type': 'floating-chat',
+                    'floating-chat.donateButton.text': 'Support me',
+                    'floating-chat.donateButton.background-color': '#f45d22',
+                    'floating-chat.donateButton.text-color': '#fff'
+                  });
+                }
+              `}
+            </Script>
           </>
         )}
 
@@ -169,9 +185,6 @@ export default function RootLayout({ children }) {
         <GlobalLoader />
         <InstallPrompt />
         <SWUpdater />
-
-        {/* BuyMeACoffee Floating Widget - Appears on ALL pages */}
-        <BuyMeCoffeeWidget />
 
         <div className="min-h-screen flex flex-col">
           <div className="flex-1">

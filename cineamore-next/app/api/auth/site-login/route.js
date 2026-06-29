@@ -11,7 +11,7 @@ import { cookies } from 'next/headers';
  */
 export async function POST(request) {
     try {
-        const { username, password } = await request.json();
+        const { username, password, rememberMe } = await request.json();
 
         if (!username || !password) {
             return NextResponse.json({ error: 'Credentials required' }, { status: 400 });
@@ -33,22 +33,36 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
-        // Create signed JWT — 7 day expiry for site gate
-        const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        // Session is browser-only by default. "Remember me" extends access on this device.
+        const expires = rememberMe
+            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            : null;
         const token = await encrypt({
             type: 'site_gate',
             user: username.trim().toLowerCase(),
-            expires: expires.toISOString()
+            rememberMe: Boolean(rememberMe),
+            expires: expires ? expires.toISOString() : null
+        }, {
+            expiresAt: expires || new Date(Date.now() + 24 * 60 * 60 * 1000)
         });
 
         const cookieStore = await cookies();
         cookieStore.set('site_gate', token, {
-            expires,
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/'
         });
+
+        if (expires) {
+            cookieStore.set('site_gate', token, {
+                expires,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/'
+            });
+        }
 
         return NextResponse.json({ success: true });
     } catch (e) {

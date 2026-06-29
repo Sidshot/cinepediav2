@@ -24,12 +24,19 @@ if (!secretKey) {
 const finalKey = secretKey || 'dev-secret-key-do-not-use-in-prod';
 const key = new TextEncoder().encode(finalKey);
 
-export async function encrypt(payload) {
-    return await new SignJWT(payload)
+export async function encrypt(payload, options = {}) {
+    const { expiresAt, expiresIn = '24h' } = options;
+    const jwt = new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime('24h')
-        .sign(key);
+        .setIssuedAt();
+
+    if (expiresAt) {
+        jwt.setExpirationTime(Math.floor(new Date(expiresAt).getTime() / 1000));
+    } else {
+        jwt.setExpirationTime(expiresIn);
+    }
+
+    return await jwt.sign(key);
 }
 
 export async function decrypt(token) {

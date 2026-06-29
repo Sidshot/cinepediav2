@@ -5,8 +5,6 @@ import GenreRow from '@/components/GenreRow';
 import staticData from '@/lib/movies.json';
 import Hero from '@/components/Hero';
 import ActionFABs from '@/components/ActionFABs';
-import OptimizedPoster from '@/components/OptimizedPoster';
-import HomepageBanner from '@/components/HomepageBanner';
 import Link from 'next/link';
 import TrendingRow from '@/components/TrendingRow';
 import {
@@ -198,9 +196,6 @@ async function Home({ searchParams }) {
 
   return (
     <main className="min-h-screen p-4 sm:p-8 pb-32 max-w-[1900px] mx-auto">
-      {/* Homepage Support Banner - Shows on every visit, reappears after 24 hours */}
-      <HomepageBanner />
-
       {isOffline && (
         <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-200 text-center font-bold flex items-center justify-center gap-2">
           <span>⚠️</span>
